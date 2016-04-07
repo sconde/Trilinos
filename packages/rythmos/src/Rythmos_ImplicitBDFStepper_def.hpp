@@ -565,6 +565,10 @@ void ImplicitBDFStepper<Scalar>::getPoints(
   typedef Teuchos::ScalarTraits<Scalar> ST;
   typedef typename ST::magnitudeType mScalarMag;
 
+  std::cout << "(SIDAFA? -- Rythmos_ImplicitBDFStepper_def.hpp ) " << std::endl;
+  std::cout << "(SIDAFA ---accuracy_vec = " << accuracy_vec << std::endl;
+  std::cout << "(SIDAFA ---time_vec.size() = " << time_vec.size() << std::endl;
+
   TEUCHOS_ASSERT(haveInitialCondition_);
   // Only do this if we're being called pre-initialization to get the IC.
   if ( (numberOfSteps_ == -1) &&
@@ -600,6 +604,8 @@ void ImplicitBDFStepper<Scalar>::getPoints(
       xdot_vec->push_back(xdot_temp);
     if (accuracy_vec)
       accuracy_vec->push_back(accuracy);
+
+   std::cout << "(SIDAFA_ACCURACY) accuracy = " << accuracy << std::endl;
   }
   if ( as<int>(this->getVerbLevel()) >= as<int>(Teuchos::VERB_HIGH) ) {
     RCP<Teuchos::FancyOStream> out = this->getOStream();
@@ -899,6 +905,8 @@ void ImplicitBDFStepper<Scalar>::interpolateSolution_(
     gam = (delt + psi_[j-1])/psi_[j];
     Thyra::Vp_StV(ptr(x_ptr),c,*xHistory_[j]);
     Thyra::Vp_StV(ptr(xdot_ptr),d,*xHistory_[j]);
+    std::cout << "(SIDAFA: interpolateSolution_ ) d = " << d << std::endl;
+    std::cout << "(SIDAFA: interpolateSolution_ ) c = " << c << std::endl;
   }
 
   // Set approximate accuracy

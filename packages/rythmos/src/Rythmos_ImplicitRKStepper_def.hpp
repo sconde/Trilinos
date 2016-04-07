@@ -651,6 +651,10 @@ void ImplicitRKStepper<Scalar>::getPoints(
   using Teuchos::constOptInArg;
   using Teuchos::null;
   TEUCHOS_ASSERT(haveInitialCondition_);
+  
+  std::cout << "(SIDAFA -- Rythmos_ImplicitRKStepper_def.hpp ) " << std::endl;
+
+ 
   defaultGetPoints<Scalar>(
     timeRange_.lower(), constOptInArg(*x_old_),
     Ptr<const VectorBase<Scalar> >(null), // Sun

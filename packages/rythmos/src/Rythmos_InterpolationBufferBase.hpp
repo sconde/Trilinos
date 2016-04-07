@@ -277,9 +277,15 @@ RCP<const Thyra::VectorBase<Scalar> >
 get_xdot( const InterpolationBufferBase<Scalar> &interpBuffer, const Scalar &t )
 {
   using Teuchos::implicit_cast;
+  std::cout << "(SIDAFA1 -- Rythmos_InterpolationBufferBase.hpp ) :" ;
+  std::cout << interpBuffer << std::endl;
+
   Array<Scalar> time_vec;
   time_vec.push_back(t);
   Array<RCP<const Thyra::VectorBase<Scalar> > > xdot_vec;
+
+  //std::cout << "(SIDAFA1 -- Rythmos_InterpolationBufferBase.hpp ) : calling stepper.getPoint method" << std::endl;
+
   interpBuffer.getPoints(time_vec,0,&xdot_vec,0);
   TEUCHOS_ASSERT( 1 == implicit_cast<int>(xdot_vec.size()) );
   return xdot_vec[0];
