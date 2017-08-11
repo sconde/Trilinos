@@ -122,6 +122,8 @@ public:
       const Teuchos::RCP<Teuchos::ParameterList> &appParams,
       const Teuchos::RCP<Thyra::ModelEvaluator<Scalar> > &model);
 
+  Teuchos::RCP<const Tempus::IntegratorBasic<Scalar> > getTempusIntegrator() const;
+
   /** \name Overridden from Thyra::ModelEvaluatorBase. */
   //@{
   /** \brief . */

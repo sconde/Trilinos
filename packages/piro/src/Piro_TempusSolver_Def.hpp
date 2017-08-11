@@ -377,6 +377,21 @@ Piro::TempusSolver<Scalar>::TempusSolver(
   }
 }
 
+
+#ifdef ALBANY_BUILD
+template <typename Scalar, typename LocalOrdinal, typename GlobalOrdinal, typename Node>
+Teuchos::RCP<const Tempus::IntegratorBasic<Scalar> >
+Piro::TempusSolver<Scalar, LocalOrdinal, GlobalOrdinal, Node>::getTempusIntegrator() const
+#else
+template <typename Scalar>
+Teuchos::RCP<const Tempus::IntegratorBasic<Scalar> >
+Piro::TempusSolver<Scalar>::getTempusIntegrator() const
+#endif
+{
+  return fwdStateIntegrator;
+}
+
+
 #ifdef ALBANY_BUILD
 template <typename Scalar, typename LocalOrdinal, typename GlobalOrdinal, typename Node>
 Teuchos::RCP<const Thyra::VectorSpaceBase<Scalar> >
