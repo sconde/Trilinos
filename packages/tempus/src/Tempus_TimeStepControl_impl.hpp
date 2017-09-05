@@ -471,6 +471,9 @@ TimeStepControl<Scalar>::getValidParameters() const
     "Maximum number of Stepper failures");
   pl->set<int>   ("Maximum Number of Consecutive Stepper Failures", 5,
     "Maximum number of consecutive Stepper failures");
+  pl->set<int>   ("Number of Time Steps", -1,
+          "Gives the number of fixed time steps. The actual step size gets computed\n"
+          "on the fly given the size of the time domain.");
 
   return pl;
 }
