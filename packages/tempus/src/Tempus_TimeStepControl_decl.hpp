@@ -88,7 +88,17 @@ public:
     virtual Scalar getMinTimeStep() const
       { return tscPL_->get<double>("Minimum Time Step"); }
     virtual Scalar getInitTimeStep() const
-      { return tscPL_->get<double>("Initial Time Step"); }
+      { 
+          const int numTimeStep = tscPL_->get<int>("Number of Time Steps");
+          if (numTimeStep > 0)
+          {
+              const double initTime = tscPL_->get<double>("Initial Time");
+              const double finalTime = tscPL_->get<double>("Final Time");
+              const double initTimeStep = tscPL_->get<double>("Initial Time Step");
+              return (finalTime - initTime)/numTimeStep;
+          }
+          return tscPL_->get<double>("Initial Time Step"); 
+      }
     virtual Scalar getMaxTimeStep() const
       { return tscPL_->get<double>("Maximum Time Step"); }
     virtual int getInitIndex() const
@@ -116,6 +126,8 @@ public:
     virtual int getMaxConsecFailures() const
       { return tscPL_->
                get<int>("Maximum Number of Consecutive Stepper Failures"); }
+    virtual int getNumTimeSteps() const
+      {return tscPL_->get<int>("Number of Time Steps"); }
   //@}
 
   /// \name Set ParameterList values
@@ -155,6 +167,9 @@ public:
     virtual void setMaxConsecFailures(int MaxConsecFailures)
       { tscPL_->set<int>
         ("Maximum Number of Consecutive Stepper Failures", MaxConsecFailures); }
+    virtual void setNumTimeSteps(int numTimeSteps)
+      { tscPL_->set<int>("Number of Time Steps", numTimeSteps);}
+
   //@}
 
 private:
