@@ -23,8 +23,12 @@ class IntegratorObserverComposite
 {
 public:
 
-  /// Default constructor
-  IntegratorObserverComposite();
+  /// Constructor
+  IntegratorObserverComposite() {};
+
+  IntegratorObserverComposite(
+    const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory,
+    const Teuchos::RCP<TimeStepControl<Scalar> >& timeStepControl);
 
   /// Destructor
   virtual ~IntegratorObserverComposite();
