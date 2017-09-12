@@ -24,7 +24,7 @@ class IntegratorObserverComposite
 public:
 
   /// Constructor
-  IntegratorObserverComposite() {};
+  IntegratorObserverComposite();
 
   IntegratorObserverComposite(
     const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory,
