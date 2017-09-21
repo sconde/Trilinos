@@ -161,7 +161,7 @@ public:
       const Thyra::ModelEvaluatorBase::OutArgs<Scalar> & out) const;
   //@}
 
-private:
+//private:
   /// Default constructor - not allowed
   WrapperModelEvaluatorPairPartIMEX_Basic(){}
 
