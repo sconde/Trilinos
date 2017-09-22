@@ -103,6 +103,8 @@ public:
   //@}
 
   //@{ \name Accessors
+    virtual void setNumExplicitOnlyBlocks(int numExp)
+    {numExplicitOnlyBlocks_ = numExp;}
     virtual void setExplicitModel(
       const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > & model )
     { explicitModel_ = model; }

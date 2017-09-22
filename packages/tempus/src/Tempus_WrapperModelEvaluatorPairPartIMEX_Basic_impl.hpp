@@ -24,10 +24,20 @@ WrapperModelEvaluatorPairPartIMEX_Basic(
   : timeDer_(Teuchos::null), numExplicitOnlyBlocks_(numExplicitOnlyBlocks),
     parameterIndex_(parameterIndex), useImplicitModel_(false)
 {
+    std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(constructor)" << std::endl;
+    //asm("int $3");
   setExplicitModel(explicitModel);
+    std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(setExplicitModel)" << std::endl;
+    //asm("int $3");
   setImplicitModel(implicitModel);
+    std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(setImplicitModel)" << std::endl;
+    //asm("int $3");
   setParameterIndex();
+    std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(setParameterIndex)" << std::endl;
+    //asm("int $3");
   initialize();
+    std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(initialize)" << std::endl;
+    //asm("int $3");
 }
 
 template <typename Scalar>
@@ -133,11 +143,19 @@ setImplicitModel(
   const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > & model )
 {
   implicitModel_ = model;
+
+  int np_i = implicitModel_->Np();
+    std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(setImplicitModel)" << std::endl;
+    //asm("int $3");
+    /*
   TEUCHOS_TEST_FOR_EXCEPTION( implicitModel_->Np() < 1, std::logic_error,
     "Error - WrapperModelEvaluatorPairPartIMEX_Basic::setParameterIndex()\n"
     "  Implicit model requires at least one parameter for partitioned\n"
     "  IMEX-RK to pass in the explicit-only vector."
     "  implicitModel_->Np() = " << implicitModel_->Np() << "\n");
+    std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(setImplicitModel)" << std::endl;
+    asm("int $3");
+    */
 }
 
 template <typename Scalar>
@@ -211,6 +229,8 @@ setParameterIndex(int parameterIndex)
       }
     }
   }
+  std::cout << "SIDAFA:setParameterIndex" << std::endl;
+  //asm("int $3");
 
   TEUCHOS_TEST_FOR_EXCEPTION( 0 > parameterIndex_ or
                                   parameterIndex_ >= implicitModel_->Np(),
@@ -219,6 +239,8 @@ setParameterIndex(int parameterIndex)
     "  Invalid parameter index = " << parameterIndex_ << "\n"
     "  Should be in the interval [0, Np) = [0, "<<implicitModel_->Np()<<")\n");
 
+  std::cout << "SIDAFA:setParameterIndex" << std::endl;
+  //asm("int $3");
   return;
 }
 
