@@ -20,9 +20,9 @@ WrapperModelEvaluatorPairPartIMEX_Basic<Scalar>::
 WrapperModelEvaluatorPairPartIMEX_Basic(
   const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& explicitModel,
   const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& implicitModel,
-  int numExplicitOnlyBlocks, int parameterIndex)
+  int numExplicitOnlyBlocks, int parameterIndex, bool isInitialize)
   : timeDer_(Teuchos::null), numExplicitOnlyBlocks_(numExplicitOnlyBlocks),
-    parameterIndex_(parameterIndex), useImplicitModel_(false)
+    parameterIndex_(parameterIndex), useImplicitModel_(false), isInitialize_(isInitialize)
 {
     std::cout << "SIDAFA: WrapperModelEvaluatorPairPartIMEX_Basic(constructor)" << std::endl;
     //asm("int $3");
@@ -48,7 +48,7 @@ initialize()
   using Teuchos::RCP;
 
   useImplicitModel_ = true;
-  wrapperImplicitInArgs_  = this->createInArgs();
+  wrapperImplicitInArgs_  = this->createInArgs(); 
   wrapperImplicitOutArgs_ = this->createOutArgs();
   useImplicitModel_ = false;
 
@@ -111,6 +111,7 @@ Teuchos::RCP<const Thyra::VectorSpaceBase<Scalar> >
 WrapperModelEvaluatorPairPartIMEX_Basic<Scalar>::
 get_x_space() const
 {
+    //asm("int $3");
   if (useImplicitModel_ == true) return implicitModel_->get_x_space();
 
   return explicitModel_->get_x_space();
@@ -232,13 +233,14 @@ setParameterIndex(int parameterIndex)
   std::cout << "SIDAFA:setParameterIndex" << std::endl;
   //asm("int $3");
 
+  /*
   TEUCHOS_TEST_FOR_EXCEPTION( 0 > parameterIndex_ or
                                   parameterIndex_ >= implicitModel_->Np(),
     std::logic_error,
     "Error - WrapperModelEvaluatorPairPartIMEX_Basic::setParameterIndex()\n"
     "  Invalid parameter index = " << parameterIndex_ << "\n"
     "  Should be in the interval [0, Np) = [0, "<<implicitModel_->Np()<<")\n");
-
+*/
   std::cout << "SIDAFA:setParameterIndex" << std::endl;
   //asm("int $3");
   return;
@@ -262,6 +264,8 @@ getNominalValues() const
 {
   typedef Thyra::ModelEvaluatorBase MEB;
   MEB::InArgsSetup<Scalar> inArgs = this->createInArgs();
+  //inArgs.set_Np(explicitModel_->Np());
+    inArgs.set_Np(1);
   return inArgs;
 }
 
@@ -270,15 +274,22 @@ Thyra::ModelEvaluatorBase::InArgs<Scalar>
 WrapperModelEvaluatorPairPartIMEX_Basic<Scalar>::
 createInArgs() const
 {
+    const int np_e = explicitModel_->Np();
+    std::cout << "SIDAFA: np_e = " << np_e << std::endl;
+    //asm("int $3");
   typedef Thyra::ModelEvaluatorBase MEB;
   if (useImplicitModel_ == true) {
     MEB::InArgsSetup<Scalar> inArgs(implicitModel_->getNominalValues());
     inArgs.setModelEvalDescription(this->description());
+    //inArgs.set_Np(explicitModel_->Np());
+    inArgs.set_Np(1);
     return inArgs;
   }
 
   MEB::InArgsSetup<Scalar> inArgs(explicitModel_->getNominalValues());
   inArgs.setModelEvalDescription(this->description());
+  //inArgs.set_Np(explicitModel_->Np());
+  inArgs.set_Np(1);
   return inArgs;
 }
 

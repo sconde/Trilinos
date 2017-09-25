@@ -43,7 +43,7 @@ public:
   WrapperModelEvaluatorPairPartIMEX_Basic(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& explicitModel,
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& implicitModel,
-    int numExplicitOnlyBlocks = 0, int parameterIndex = -1);
+    int numExplicitOnlyBlocks = 0, int parameterIndex = -1, bool initialize = false);
 
   /// Destructor
   virtual ~WrapperModelEvaluatorPairPartIMEX_Basic(){}
@@ -104,16 +104,18 @@ public:
 
   //@{ \name Accessors
     virtual void setNumExplicitOnlyBlocks(int numExp)
-    {numExplicitOnlyBlocks_ = numExp;}
+    {numExplicitOnlyBlocks_ = numExp; }
     virtual void setExplicitModel(
       const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > & model )
     { explicitModel_ = model; }
     virtual void setImplicitModel(
       const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > & model );
     virtual Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >
-      getExplicitModel() const { return explicitModel_; }
+      getExplicitModel() const {  return explicitModel_; }
     virtual Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >
       getImplicitModel() const { return implicitModel_; }
+    virtual int getNumExplicitOnlyBlocks() const {
+        return numExplicitOnlyBlocks_; }
 
     /// Extract IMEX vector from a full solution vector
     virtual Teuchos::RCP<Thyra::VectorBase<Scalar> > getIMEXVector(
@@ -179,6 +181,7 @@ protected:
   int numExplicitOnlyBlocks_;
   int parameterIndex_;    //< implicit parameter index for explicit-only vector
   bool useImplicitModel_; //< if true, use implicitModel_ else explicitModel_
+  bool isInitialize_;
 };
 
 } // namespace Tempus

@@ -26,6 +26,8 @@ IntegratorBasic<Scalar>::IntegratorBasic(
       integratorStatus_(WORKING), isInitialized_(false)
 {
   this->setTempusParameterList(inputPL);
+  std::cout << "SIDAFA: attempting to set the model" << std::endl;
+  //asm("int $3");
   this->setStepper(model);
   this->initialize();
 }
