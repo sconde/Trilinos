@@ -9,6 +9,6 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
   )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(Test_EmbeddedPaper_CopyFiles
-  DEST_FILES Tempus_EmbeddedPaper_VdP.xml
+    DEST_FILES Tempus_EmbeddedPaper_VdP.xml numerical_vdp.bash Tempus_EmbeddedPaper_VdP_numericalTests.xml
   EXEDEPS EmbeddedPaper
   )

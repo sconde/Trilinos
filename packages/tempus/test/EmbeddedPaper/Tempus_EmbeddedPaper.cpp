@@ -49,7 +49,7 @@ TEUCHOS_UNIT_TEST(EmbeddedPaper, VdP)
   tolRange.push_back(1e-5);
   tolRange.push_back(1e-6);
   tolRange.push_back(1e-7);
-  for (int n=0; n<tolRange.size();n++) {
+  for (std::size_t n=0; n<tolRange.size();n++) {
   //for(auto tol : tolRange){
   
   
@@ -59,16 +59,10 @@ TEUCHOS_UNIT_TEST(EmbeddedPaper, VdP)
     RCP<ParameterList> pList =
       getParametersFromXmlFile("Tempus_EmbeddedPaper_VdP.xml");
 
-    //std::ofstream ftmp("PL.txt");
-    //pList->print(ftmp);
-    //ftmp.close();
-
     // Setup the SinCosModel
     RCP<ParameterList> vdpm_pl = sublist(pList, "VanDerPolModel", true);
      RCP<VanDerPolModel<double> > model =
         Teuchos::rcp(new VanDerPolModel<double>(vdpm_pl));
-
-    //dt /= 2;
 
     // Setup the Integrator and reset absolute/relative tolerance
     RCP<ParameterList> pl = sublist(pList, "Tempus", true);
@@ -94,8 +88,10 @@ TEUCHOS_UNIT_TEST(EmbeddedPaper, VdP)
     //order = integrator->getStepper()->getOrder();
 
      // Integrate to timeMax
-     bool integratorStatus = integrator->advanceTime();
-     TEST_ASSERT(integratorStatus);
+    std::cout << "\nSIDAFA: integration started..." << std::endl;
+    bool integratorStatus = integrator->advanceTime();
+    TEST_ASSERT(integratorStatus);
+    std::cout << "\nSIDAFA: integration done!" << std::endl;
 
      // Test if at 'Final Time'
      double time = integrator->getTime();
@@ -138,10 +134,7 @@ TEUCHOS_UNIT_TEST(EmbeddedPaper, VdP)
       ftmp.close();
     }
 */
-
-
-    const double absTol = pl->sublist("Demo Integrator").
-       sublist("Time Step Control").get<double>("Maximum Absolute Error");
+     // get data
     const int nAccpt = integrator->getSolutionHistory()->
        getCurrentState()->getIndex();
     const int nFail = integrator->getSolutionHistory()->
@@ -157,7 +150,7 @@ TEUCHOS_UNIT_TEST(EmbeddedPaper, VdP)
   }
 
   std::cout << "Work-Precision Info:\n" << std::endl;
-  for (int n=0; n<tolRange.size();n++) {
+  for (std::size_t n=0; n<tolRange.size();n++) {
     // test for number of steps
     //TEST_EQUALITY(nAccpt, refIstep);
     std::cout << std::setw(4) << n << "   "
