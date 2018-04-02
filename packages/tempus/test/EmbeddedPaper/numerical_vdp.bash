@@ -1,7 +1,7 @@
 #!/bin/bash
 # Purpose:
 
-order=2
+order=4
 
 if [ $order -eq 2 ]; then
     Method_array=(SSPERK22Best SSPERK42Best SSPERK32Best SSPERK22-b1 SSPERK22-b2 SSPERK42-b1 SSPERK42-b2 SSPERK62-b1 SSPERK62-b2 ceschino24 rkf23 rkf23b fehlberg12 fehlberg12b)
@@ -23,7 +23,8 @@ echo 'N = ' $numEl
 for ((i = 0 ; i < ${numEl} ; i++)); do
 
     mtd_name=${Method_array[$i]}
-    log_file="$mtd_name.log"
+    log_file="$resultPath/$mtd_name.log"
+    final_log_file="$resultPath/$mtd_name-final.log"
     echo 'Running job (' ${i} ') :' $mtd_name
     echo 'logFile: ' $log_file
 
@@ -31,6 +32,16 @@ for ((i = 0 ; i < ${numEl} ; i++)); do
     sed "s/${CONST_STRING}/${mtd_name}/g" $inputXml > Tempus_EmbeddedPaper_VdP.xml
 
     # now run and output the log
-    ./Tempus_EmbeddedPaper.exe > resultPath/$log_file
+    ./Tempus_EmbeddedPaper.exe > $log_file
 
+    # grep the final work-precison info
+    grep -h -A 7 "Work-Precision Info:" $log_file | tee $final_log_file
+
+    # pre-process the log files
+    #cd $resultPath
+    #awk -v RS="Step       Time         dt  Abs Error  Rel Error  Order  nFail  dCompTime" -v fl="$mtd_name" -v RT='NR > 1 {print RS $0 > fl"-"(NR-1)".log"}' $log_file
+    #awk -v RS="SIDAFA: integration started..." -v fl="$mtd_name" -v RT="Time integration complete." 'NR > 1 {print /RS/,/RT/ > fl"-"(NR-1)".log"}' $log_file
+
+    #cd ..
 done
+
