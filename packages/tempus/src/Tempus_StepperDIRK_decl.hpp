@@ -13,7 +13,7 @@
 #include "Tempus_RKButcherTableau.hpp"
 #include "Tempus_StepperImplicit.hpp"
 #include "Tempus_WrapperModelEvaluator.hpp"
-#include "Tempus_StepperDIRKObserver.hpp"
+#include "Tempus_StepperRKObserverComposite.hpp"
 
 
 namespace Tempus {
@@ -95,6 +95,9 @@ public:
 
     virtual Teuchos::RCP<const RKButcherTableau<Scalar> > getTableau()
     { return tableau_; }
+
+    virtual Teuchos::RCP<StepperObserver<Scalar> > getObserver() const
+    { return this->stepperObserver_; }
 
     /// Initialize during construction and after changing input parameters.
     virtual void initialize();
@@ -191,7 +194,7 @@ protected:
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               stageX_;
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               xTilde_;
 
-  Teuchos::RCP<StepperDIRKObserver<Scalar> >             stepperDIRKObserver_;
+  Teuchos::RCP<StepperRKObserverComposite<Scalar> >        stepperObserver_;
 
   // For Embedded RK
   bool useEmbedded_;
