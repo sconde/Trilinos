@@ -138,7 +138,6 @@ void StepperIMEX_RK_Partition<Scalar>::setTableaus(
     order_ = 1;
 
   } else if (stepperType == "Partitioned IMEX RK SSP2") {
-    typedef Teuchos::ScalarTraits<Scalar> ST;
     // Explicit Tableau
     this->setExplicitTableau("RK Explicit Trapezoidal");
 
@@ -146,9 +145,7 @@ void StepperIMEX_RK_Partition<Scalar>::setTableaus(
     Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
     pl->set<std::string>("Stepper Type", "SDIRK 2 Stage 3rd order");
     pl->set("Solver Name", "");
-    const Scalar one = ST::one();
-    Scalar gamma = one - one/ST::squareroot(2*one);
-    pl->set<double>("gamma",gamma);
+    pl->set<std::string>("Gamma Type", "2nd Order L-stable");
     this->setImplicitTableau(pl);
 
     description_ = stepperType;

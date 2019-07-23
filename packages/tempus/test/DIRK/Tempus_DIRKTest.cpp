@@ -50,10 +50,10 @@ using Tempus::SolutionState;
 TEUCHOS_UNIT_TEST(DIRK, ParameterList)
 {
   std::vector<std::string> RKMethods;
+  RKMethods.push_back("General DIRK");
   RKMethods.push_back("RK Backward Euler");
   RKMethods.push_back("IRK 1 Stage Theta Method");
   RKMethods.push_back("RK Implicit Midpoint");
-  RKMethods.push_back("SDIRK 1 Stage 1st order");
   RKMethods.push_back("SDIRK 2 Stage 2nd order");
   RKMethods.push_back("SDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage 3rd order");
@@ -111,14 +111,21 @@ TEUCHOS_UNIT_TEST(DIRK, ParameterList)
       tempusPL->sublist("Default Stepper").set<bool>("Zero Initial Guess", 0);
       tempusPL->sublist("Default Stepper").remove("Default Solver");
       tempusPL->sublist("Default Stepper").set("Default Solver", *solverPL);
-      tempusPL->sublist("Default Stepper").set("3rd Order A-stable", true);
-      tempusPL->sublist("Default Stepper").set("2nd Order L-stable", false);
       tempusPL->sublist("Default Stepper")
-           .set<double>("gamma", 0.7886751345948128);
+           .set<std::string>("Gamma Type", "3rd Order A-stable");
     } else if (RKMethods[m] == "RK Crank-Nicolson") {
       // Match default Stepper Type
       tempusPL->sublist("Default Stepper")
                    .set("Stepper Type", "RK Trapezoidal Rule");
+    } else if (RKMethods[m] == "General DIRK") {
+      // Add the default tableau.
+      Teuchos::RCP<Teuchos::ParameterList> tableauPL = Teuchos::parameterList();
+      tableauPL->set<std::string>("A", " 2.92893218813452e-01 0.00000000000000e+00;  7.07106781186548e-01 2.92893218813452e-01");
+      tableauPL->set<std::string>("b", " 7.07106781186548e-01 2.92893218813452e-01");
+      tableauPL->set<std::string>("c", " 2.92893218813452e-01 1.00000000000000e+00");
+      tableauPL->set<int>("order", 2);
+      tableauPL->set<std::string>("bstar", "");
+      tempusPL->sublist("Default Stepper").set("Tableau", *tableauPL);
     }
 
 
@@ -269,10 +276,10 @@ TEUCHOS_UNIT_TEST(DIRK, ConstructingFromDefaults)
 TEUCHOS_UNIT_TEST(DIRK, SinCos)
 {
   std::vector<std::string> RKMethods;
+  RKMethods.push_back("General DIRK");
   RKMethods.push_back("RK Backward Euler");
   RKMethods.push_back("IRK 1 Stage Theta Method");
   RKMethods.push_back("RK Implicit Midpoint");
-  RKMethods.push_back("SDIRK 1 Stage 1st order");
   RKMethods.push_back("SDIRK 2 Stage 2nd order");
   RKMethods.push_back("SDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage 3rd order");
@@ -285,10 +292,10 @@ TEUCHOS_UNIT_TEST(DIRK, SinCos)
   RKMethods.push_back("RK Crank-Nicolson");
 
   std::vector<double> RKMethodErrors;
+  RKMethodErrors.push_back(2.52738e-05);
   RKMethodErrors.push_back(0.0124201);
   RKMethodErrors.push_back(5.20785e-05);
   RKMethodErrors.push_back(5.20785e-05);
-  RKMethodErrors.push_back(0.0124201);
   RKMethodErrors.push_back(2.52738e-05);
   RKMethodErrors.push_back(1.40223e-06);
   RKMethodErrors.push_back(2.17004e-07);
@@ -335,9 +342,8 @@ TEUCHOS_UNIT_TEST(DIRK, SinCos)
       } else if (RKMethods[m] == "SDIRK 2 Stage 2nd order") {
         pl->sublist("Default Stepper").set("gamma", 0.2928932188134524);
       } else if (RKMethods[m] == "SDIRK 2 Stage 3rd order") {
-        pl->sublist("Default Stepper").set("3rd Order A-stable", true);
-        pl->sublist("Default Stepper").set("2nd Order L-stable", false);
-        pl->sublist("Default Stepper").set("gamma", 0.7886751345948128);
+        pl->sublist("Default Stepper")
+           .set<std::string>("Gamma Type", "3rd Order A-stable");
       }
 
       dt /= 2;

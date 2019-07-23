@@ -46,10 +46,10 @@ void test_sincos_fsa(const std::string& method_name,
                      Teuchos::FancyOStream &out, bool &success)
 {
   std::vector<std::string> RKMethods;
+  RKMethods.push_back("General DIRK");
   RKMethods.push_back("RK Backward Euler");
   RKMethods.push_back("IRK 1 Stage Theta Method");
   RKMethods.push_back("RK Implicit Midpoint");
-  RKMethods.push_back("SDIRK 1 Stage 1st order");
   RKMethods.push_back("SDIRK 2 Stage 2nd order");
   RKMethods.push_back("SDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage 3rd order");
@@ -70,10 +70,10 @@ void test_sincos_fsa(const std::string& method_name,
 
   std::vector<double> RKMethodErrors;
   if (use_combined_method) {
+    RKMethodErrors.push_back(0.000144507);
     RKMethodErrors.push_back(0.0428449);
     RKMethodErrors.push_back(0.000297933);
     RKMethodErrors.push_back(0.000297933);
-    RKMethodErrors.push_back(0.0428449);
     RKMethodErrors.push_back(0.000144507);
     RKMethodErrors.push_back(8.65434e-06);
     RKMethodErrors.push_back(1.3468e-06);
@@ -86,10 +86,10 @@ void test_sincos_fsa(const std::string& method_name,
     RKMethodErrors.push_back(0.000297933);
   }
   else {
+    RKMethodErrors.push_back(0.000125232);
     RKMethodErrors.push_back(0.0428449);
     RKMethodErrors.push_back(0.000221049);
     RKMethodErrors.push_back(0.000221049);
-    RKMethodErrors.push_back(0.0428449);
     RKMethodErrors.push_back(0.000125232);
     RKMethodErrors.push_back(4.79475e-06);
     RKMethodErrors.push_back(9.63899e-07);
@@ -139,11 +139,10 @@ void test_sincos_fsa(const std::string& method_name,
       RCP<ParameterList> pl = sublist(pList, "Tempus", true);
       pl->sublist("Default Stepper").set("Stepper Type", RKMethods[m]);
       if (RKMethods[m] == "SDIRK 2 Stage 2nd order") {
-        pl->sublist("Default Stepper").set("gamma", 0.2928932190);
+        pl->sublist("Default Stepper").set("gamma", 0.2928932188134524);
       } else if (RKMethods[m] == "SDIRK 2 Stage 3rd order") {
-        pl->sublist("Default Stepper").set("3rd Order A-stable", true);
-        pl->sublist("Default Stepper").set("2nd Order L-stable", false);
-        pl->sublist("Default Stepper").set("gamma", 0.7886751347);
+        pl->sublist("Default Stepper")
+           .set<std::string>("Gamma Type", "3rd Order A-stable");
       }
 
       dt /= 2;

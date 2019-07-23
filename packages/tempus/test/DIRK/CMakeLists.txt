@@ -37,13 +37,6 @@ TRIBITS_ADD_TEST(
 
 TRIBITS_ADD_TEST(
   DIRK_Combined_FSA
-  NAME "DIRK_Combined_FSA_SDIRK_1_Stage_1st_Order"
-  ARGS "--method=\"SDIRK 1 Stage 1st order\""
-  NUM_MPI_PROCS 1
-  )
-
-TRIBITS_ADD_TEST(
-  DIRK_Combined_FSA
   NAME "DIRK_Combined_FSA_SDIRK_2_Stage_2nd_Order"
   ARGS "--method=\"SDIRK 2 Stage 2nd order\""
   NUM_MPI_PROCS 1
@@ -136,13 +129,6 @@ TRIBITS_ADD_TEST(
   DIRK_Staggered_FSA
   NAME "DIRK_Staggered_FSA_RK_Implicit_Midpoint"
   ARGS "--method=\"RK Implicit Midpoint\""
-  NUM_MPI_PROCS 1
-  )
-
-TRIBITS_ADD_TEST(
-  DIRK_Staggered_FSA
-  NAME "DIRK_Staggered_FSA_SDIRK_1_Stage_1st_Order"
-  ARGS "--method=\"SDIRK 1 Stage 1st order\""
   NUM_MPI_PROCS 1
   )
 

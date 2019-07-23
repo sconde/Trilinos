@@ -103,13 +103,15 @@ private:
     else if (stepperType == "Merson 4(5) Pair")                                   tableau = rcp(new ExplicitMerson45_RKBT<Scalar>());
 
     // DIRK
-    else if (stepperType == "General DIRK")            tableau = rcp(new GeneralDIRK_RKBT<Scalar>());
-    else if (stepperType == "SDIRK 1 Stage 1st order") tableau = rcp(new SDIRK1Stage1stOrder_RKBT<Scalar>());
-    else if (stepperType == "SDIRK 2 Stage 2nd order") tableau = rcp(new SDIRK2Stage2ndOrder_RKBT<Scalar>());
-    else if (stepperType == "SDIRK 2 Stage 3rd order") tableau = rcp(new SDIRK2Stage3rdOrder_RKBT<Scalar>());
-    else if (stepperType == "SDIRK 3 Stage 4th order") tableau = rcp(new SDIRK3Stage4thOrder_RKBT<Scalar>());
-    else if (stepperType == "SDIRK 5 Stage 4th order") tableau = rcp(new SDIRK5Stage4thOrder_RKBT<Scalar>());
-    else if (stepperType == "SDIRK 5 Stage 5th order") tableau = rcp(new SDIRK5Stage5thOrder_RKBT<Scalar>());
+    else if (stepperType == "General DIRK")             tableau = rcp(new GeneralDIRK_RKBT<Scalar>());
+    else if (stepperType == "RK Backward Euler")        tableau = rcp(new BackwardEuler_RKBT<Scalar>());
+    else if (stepperType == "IRK 1 Stage Theta Method") tableau = rcp(new IRK1StageTheta_RKBT<Scalar>());
+    else if (stepperType == "RK Implicit Midpoint")     tableau = rcp(new ImplicitMidpoint_RKBT<Scalar>());
+    else if (stepperType == "SDIRK 2 Stage 2nd order")  tableau = rcp(new SDIRK2Stage2ndOrder_RKBT<Scalar>());
+    else if (stepperType == "SDIRK 2 Stage 3rd order")  tableau = rcp(new SDIRK2Stage3rdOrder_RKBT<Scalar>());
+    else if (stepperType == "SDIRK 3 Stage 4th order")  tableau = rcp(new SDIRK3Stage4thOrder_RKBT<Scalar>());
+    else if (stepperType == "SDIRK 5 Stage 4th order")  tableau = rcp(new SDIRK5Stage4thOrder_RKBT<Scalar>());
+    else if (stepperType == "SDIRK 5 Stage 5th order")  tableau = rcp(new SDIRK5Stage5thOrder_RKBT<Scalar>());
     else if (stepperType == "SDIRK 2(1) Pair")         tableau = rcp(new SDIRK21_RKBT<Scalar>());
 
     // EDIRK
@@ -119,9 +121,6 @@ private:
     else if (stepperType == "EDIRK 2 Stage Theta Method") tableau = rcp(new EDIRK2StageTheta_RKBT<Scalar>());
 
     // IRK
-    else if (stepperType == "RK Backward Euler")                                    tableau = rcp(new BackwardEuler_RKBT<Scalar>());
-    else if (stepperType == "IRK 1 Stage Theta Method")                             tableau = rcp(new IRK1StageTheta_RKBT<Scalar>());
-    else if (stepperType == "RK Implicit Midpoint")                                 tableau = rcp(new ImplicitMidpoint_RKBT<Scalar>());
     else if (stepperType == "RK Implicit 2 Stage 4th order Gauss")                  tableau = rcp(new Implicit2Stage4thOrderGauss_RKBT<Scalar>());
     else if (stepperType == "RK Implicit 3 Stage 6th order Gauss")                  tableau = rcp(new Implicit3Stage6thOrderGauss_RKBT<Scalar>());
     else if (stepperType == "RK Implicit 2 Stage 4th Order Hammer & Hollingsworth") tableau = rcp(new Implicit2Stage4thOrderHammerHollingsworth_RKBT<Scalar>());
