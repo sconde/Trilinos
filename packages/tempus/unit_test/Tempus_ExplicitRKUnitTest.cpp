@@ -56,8 +56,6 @@ TEUCHOS_UNIT_TEST(ExplicitRKUnitTest, setTableau)
   auto model = rcp(new Tempus_Test::SinCosModel<double>(scm_pl));
 
   std::vector<std::string> RKMethods;
-  RKMethods.push_back("Bogacki-Shampine 3(2) Pair");
-  RKMethods.push_back("Merson 4(5) Pair");
   RKMethods.push_back("General ERK");
   RKMethods.push_back("RK Forward Euler");
   RKMethods.push_back("RK Explicit 4 Stage");
@@ -70,6 +68,8 @@ TEUCHOS_UNIT_TEST(ExplicitRKUnitTest, setTableau)
   RKMethods.push_back("RK Explicit Midpoint");
   RKMethods.push_back("RK Explicit Trapezoidal");
   RKMethods.push_back("Heuns Method");
+  RKMethods.push_back("Bogacki-Shampine 3(2) Pair");
+  RKMethods.push_back("Merson 4(5) Pair");
 
   std::vector<std::string> resetMethod;
   resetMethod.push_back("stepperType");

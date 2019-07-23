@@ -224,9 +224,10 @@ class RKButcherTableau :
       this->set_isDIRK();
 
       // Consistency check on b
-      Scalar sumb = Scalar(0.0);
+      typedef Teuchos::ScalarTraits<Scalar> ST;
+      Scalar sumb = ST::zero();
       for (size_t i = 0; i < this->numStages(); i++) sumb += b_(i);
-      TEUCHOS_TEST_FOR_EXCEPTION( std::abs(Scalar(1.0)-sumb) > 1.0e-08,
+      TEUCHOS_TEST_FOR_EXCEPTION( std::abs(ST::one()-sumb) > 1.0e-08,
           std::runtime_error,
           "Error - Butcher Tableau b fails to satisfy Sum(b_i) = 1.\n"
           << "          Sum(b_i) = " << sumb << "\n");
@@ -238,7 +239,7 @@ class RKButcherTableau :
              (stepperType == "RK Implicit 1 Stage 1st order Radau left" ) ||
              (stepperType == "RK Implicit 2 Stage 2nd order Lobatto B"  )) ) {
         for (size_t i = 0; i < this->numStages(); i++) {
-          Scalar sumai = Scalar(0.0);
+          Scalar sumai = ST::zero();
           for (size_t j = 0; j < this->numStages(); j++) sumai += A_(i,j);
           bool failed = false;
           if (std::abs(sumai) > 1.0e-08)
