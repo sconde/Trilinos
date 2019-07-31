@@ -10,6 +10,7 @@
 #define Tempus_RKButcherTableauFactory_hpp
 
 #include "Tempus_RKButcherTableau.hpp"
+#include "Tempus_StepperRKButcherTableau.hpp"
 
 namespace Tempus {
 
@@ -112,7 +113,7 @@ private:
     else if (stepperType == "SDIRK 3 Stage 4th order")  tableau = rcp(new SDIRK3Stage4thOrder_RKBT<Scalar>());
     else if (stepperType == "SDIRK 5 Stage 4th order")  tableau = rcp(new SDIRK5Stage4thOrder_RKBT<Scalar>());
     else if (stepperType == "SDIRK 5 Stage 5th order")  tableau = rcp(new SDIRK5Stage5thOrder_RKBT<Scalar>());
-    else if (stepperType == "SDIRK 2(1) Pair")         tableau = rcp(new SDIRK21_RKBT<Scalar>());
+    else if (stepperType == "SDIRK 2(1) Pair")          tableau = rcp(new SDIRK21_RKBT<Scalar>());
 
     // EDIRK
     else if (stepperType == "EDIRK 2 Stage 3rd order")    tableau = rcp(new EDIRK2Stage3rdOrder_RKBT<Scalar>());
@@ -143,7 +144,7 @@ private:
     else if (stepperType == "RK Implicit 4 Stage 6th order Lobatto C")              tableau = rcp(new Implicit4Stage6thOrderLobattoC_RKBT<Scalar>());
     else {
       TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
-        "Unknown 'Stepper Type' = " << stepperType);
+        "Unknown 'Stepper Type' = '" << stepperType << "'\n");
     }
 
     tableau->setParameterList(pl);

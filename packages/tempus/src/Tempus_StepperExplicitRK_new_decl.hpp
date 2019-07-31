@@ -6,8 +6,8 @@
 // ****************************************************************************
 // @HEADER
 
-#ifndef Tempus_StepperExplicitRK_decl_hpp
-#define Tempus_StepperExplicitRK_decl_hpp
+#ifndef Tempus_StepperExplicitRK_new_decl_hpp
+#define Tempus_StepperExplicitRK_new_decl_hpp
 
 #include "Tempus_config.hpp"
 #include "Tempus_StepperExplicit.hpp"
@@ -89,33 +89,10 @@ namespace Tempus {
  *   \f]
  */
 template<class Scalar>
-class StepperExplicitRK : virtual public Tempus::StepperExplicit<Scalar>
+class StepperExplicitRK_new : virtual public Tempus::StepperExplicit<Scalar>
 {
+
 public:
-
-  /** \brief Default constructor.
-   *
-   *  - Constructs with a default ParameterList.
-   *  - Can reset ParameterList with setParameterList().
-   *  - Requires subsequent setModel() and initialize() calls before calling
-   *    takeStep().
-  */
-  StepperExplicitRK(std::string stepperType = "RK Explicit 4 Stage");
-
-  /// Constructor to specialize Stepper parameters.
-  StepperExplicitRK(
-    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    Teuchos::RCP<Teuchos::ParameterList> pList);
-
-  /// Constructor to use default Stepper parameters.
-  StepperExplicitRK(
-    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    std::string stepperType = "RK Explicit 4 Stage");
-
-  /// Constructor for StepperFactory.
-  StepperExplicitRK(
-    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    std::string stepperType, Teuchos::RCP<Teuchos::ParameterList> pList);
 
   /// \name Basic stepper methods
   //@{
@@ -123,15 +100,20 @@ public:
       Teuchos::RCP<StepperObserver<Scalar> > obs = Teuchos::null);
 
     /// Set Stepper to the default settings for stepperType.
-    virtual void setTableau(std::string stepperType = "RK Explicit 4 Stage");
-
-    virtual void setTableauPL(Teuchos::RCP<Teuchos::ParameterList> pList);
+    virtual void setTableau() = 0;
 
     virtual void setTableau(
-      Teuchos::RCP<RKButcherTableau<Scalar> > ERK_ButcherTableau);
+      const Teuchos::SerialDenseMatrix<int,Scalar>& A,
+      const Teuchos::SerialDenseVector<int,Scalar>& b,
+      const Teuchos::SerialDenseVector<int,Scalar>& c,
+      const int order,
+      const int orderMin,
+      const int orderMax,
+      const Teuchos::SerialDenseVector<int,Scalar>&
+        bstar = Teuchos::SerialDenseVector<int,Scalar>()) = 0;
 
     virtual Teuchos::RCP<const RKButcherTableau<Scalar> > getTableau()
-    { return ERK_ButcherTableau_; }
+    { return tableau_; }
 
     /// Initialize during construction and after changing input parameters.
     virtual void initialize();
@@ -144,14 +126,11 @@ public:
     virtual void takeStep(
       const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory);
 
-    virtual std::string getStepperType() const
-     { return this->stepperPL_->template get<std::string>("Stepper Type"); }
-
     /// Get a default (initial) StepperState
     virtual Teuchos::RCP<Tempus::StepperState<Scalar> > getDefaultStepperState();
-    virtual Scalar getOrder() const {return ERK_ButcherTableau_->order();}
-    virtual Scalar getOrderMin() const {return ERK_ButcherTableau_->orderMin();}
-    virtual Scalar getOrderMax() const {return ERK_ButcherTableau_->orderMax();}
+    virtual Scalar getOrder() const {return tableau_->order();}
+    virtual Scalar getOrderMin() const {return tableau_->orderMin();}
+    virtual Scalar getOrderMax() const {return tableau_->orderMax();}
     virtual Scalar getInitTimeStep(
         const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory) const;
 
@@ -167,7 +146,8 @@ public:
     virtual OrderODE getOrderODE()   const {return FIRST_ORDER_ODE;}
 
     void getValidParametersBasicRK(Teuchos::RCP<Teuchos::ParameterList> pl) const;
-    virtual std::string getDescription() const { return "StepperExplicitRK";}
+    virtual std::string getDescription() const
+    { return tableau_->getDescription();}
 
   //@}
 
@@ -198,7 +178,7 @@ public:
 
 protected:
 
-  Teuchos::RCP<RKButcherTableau<Scalar> >                ERK_ButcherTableau_;
+  Teuchos::RCP<RKButcherTableau<Scalar> >                tableau_;
 
   std::vector<Teuchos::RCP<Thyra::VectorBase<Scalar> > > stageXDot_;
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               stageX_;
@@ -217,4 +197,4 @@ protected:
 
 } // namespace Tempus
 
-#endif // Tempus_StepperExplicitRK_decl_hpp
+#endif // Tempus_StepperExplicitRK_new_decl_hpp

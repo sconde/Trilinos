@@ -140,9 +140,11 @@ class RKButcherTableau :
       return pl;
     }
 
+    std::string getDescription() const { return longDescription_; }
+
     /* \brief Redefined from Teuchos::Describable */
     //@{
-      virtual std::string description() const = 0;
+      virtual std::string description() const { return description_; }
 
       virtual void describe( Teuchos::FancyOStream &out,
                              const Teuchos::EVerbosityLevel verbLevel) const
@@ -165,35 +167,24 @@ class RKButcherTableau :
       }
     //@}
 
-  protected:
-    virtual std::string getDescription() const = 0;
-
-    void set_isImplicit() {
-      isImplicit_ = false;
-      for (size_t i = 0; i < this->numStages(); i++)
-        for (size_t j = i; j < this->numStages(); j++)
-          if (A_(i,j) != 0.0) isImplicit_ = true;
-    }
-    /// DIRK is defined as if a_ij = 0 for j>i and a_ii != 0 for at least one i.
-    void set_isDIRK() {
-      isDIRK_ = true;
-      bool nonZero = false;
-      for (size_t i = 0; i < this->numStages(); i++) {
-        if (A_(i,i) != 0.0) nonZero = true;
-        for (size_t j = i+1; j < this->numStages(); j++)
-          if (A_(i,j) != 0.0) isDIRK_ = false;
-      }
-      if (nonZero == false) isDIRK_ = false;
-    }
-
-    virtual void setAbc(
+    virtual void setTableau(
+      std::string description,
+      std::string longDescription,
       const Teuchos::SerialDenseMatrix<int,Scalar>& A,
       const Teuchos::SerialDenseVector<int,Scalar>& b,
       const Teuchos::SerialDenseVector<int,Scalar>& c,
       const int order,
+      const int orderMin,
+      const int orderMax,
       const Teuchos::SerialDenseVector<int,Scalar>&
         bstar = Teuchos::SerialDenseVector<int,Scalar>())
-    { setAbc(A,b,c,order,order,order,bstar); }
+    {
+      description_ = description;
+      longDescription_ = longDescription;
+      setAbc(A,b,c,order,orderMin,orderMin,bstar);
+    }
+
+  protected:
 
     virtual void setAbc(
       const Teuchos::SerialDenseMatrix<int,Scalar>& A,
@@ -261,6 +252,24 @@ class RKButcherTableau :
       bstar_ = bstar;
     }
 
+    void set_isImplicit() {
+      isImplicit_ = false;
+      for (size_t i = 0; i < this->numStages(); i++)
+        for (size_t j = i; j < this->numStages(); j++)
+          if (A_(i,j) != 0.0) isImplicit_ = true;
+    }
+    /// DIRK is defined as if a_ij = 0 for j>i and a_ii != 0 for at least one i.
+    void set_isDIRK() {
+      isDIRK_ = true;
+      bool nonZero = false;
+      for (size_t i = 0; i < this->numStages(); i++) {
+        if (A_(i,i) != 0.0) nonZero = true;
+        for (size_t j = i+1; j < this->numStages(); j++)
+          if (A_(i,j) != 0.0) isDIRK_ = false;
+      }
+      if (nonZero == false) isDIRK_ = false;
+    }
+
     void mergeParameterList(const Teuchos::RCP<Teuchos::ParameterList> & pList)
     {
       using Teuchos::rcp_const_cast;
@@ -282,6 +291,9 @@ class RKButcherTableau :
 
     Teuchos::RCP<Teuchos::ParameterList>   RK_stepperPL_;
 
+    std::string description_;
+    std::string longDescription_;
+
     Teuchos::SerialDenseMatrix<int,Scalar> A_;
     Teuchos::SerialDenseVector<int,Scalar> b_;
     Teuchos::SerialDenseVector<int,Scalar> c_;
@@ -290,8 +302,7 @@ class RKButcherTableau :
     int orderMax_;
     bool isImplicit_;
     bool isDIRK_;
-
-    bool isEmbedded_ = false;
+    bool isEmbedded_;
     Teuchos::SerialDenseVector<int,Scalar> bstar_;
 };
 
@@ -301,27 +312,25 @@ template<class Scalar>
 class General_RKButcherTableau :
   virtual public RKButcherTableau<Scalar>
 {
-
 public:
 
-  void set_A(const Teuchos::SerialDenseMatrix<int,Scalar>& A) { this->A_ = A; }
-  void set_b(const Teuchos::SerialDenseVector<int,Scalar>& b) { this->b_ = b; }
-  void set_c(const Teuchos::SerialDenseVector<int,Scalar>& c) { this->c_ = c; }
-  void set_bstar(const Teuchos::SerialDenseVector<int,Scalar>& bstar)
-    { this->bstar_ = bstar; }
-  void set_order(const int& order) { this->order_ = order; }
-  void set_orderMin(const int& order) { this->orderMin_ = order; }
-  void set_orderMax(const int& order) { this->orderMax_ = order; }
+  General_RKButcherTableau(
+    std::string description,
+    std::string longDescription,
+    const Teuchos::SerialDenseMatrix<int,Scalar>& A,
+    const Teuchos::SerialDenseVector<int,Scalar>& b,
+    const Teuchos::SerialDenseVector<int,Scalar>& c,
+    const int order,
+    const int orderMin,
+    const int orderMax,
+    const Teuchos::SerialDenseVector<int,Scalar>&
+      bstar = Teuchos::SerialDenseVector<int,Scalar>())
+  {
+    this->setTableau(description, longDescription,
+                     A,b,c,order,orderMin,orderMax,bstar);
+  }
 
-  void set_Abc( const Teuchos::SerialDenseMatrix<int,Scalar>& A,
-                const Teuchos::SerialDenseVector<int,Scalar>& b,
-                const Teuchos::SerialDenseVector<int,Scalar>& c,
-                const int order = 1,
-                const Teuchos::SerialDenseVector<int,Scalar>& bstar =
-                  Teuchos::SerialDenseVector<int,Scalar>())
-  { this->setAbc(A,b,c,order,order,order,bstar); }
-
-protected:
+  General_RKButcherTableau(){}
 
   void parseGeneralPL(Teuchos::RCP<Teuchos::ParameterList> const& pList)
   {
@@ -459,7 +468,7 @@ protected:
       if (i != numStages-1) Apl << "; ";
       bpl << " " << b(i);
       cpl << " " << c(i);
-      if (this->isEmbedded_) bstarpl << " " << bstar(i);
+      if (bstar.length() > 0) bstarpl << " " << bstar(i);
     }
 
     Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
@@ -468,7 +477,8 @@ protected:
     pl->set<std::string>("b", bpl.str());
     pl->set<std::string>("c", cpl.str());
     pl->set<int>("order", order);
-    pl->set<std::string>("bstar", bstarpl.str());
+    if (bstar.length() > 0) pl->set<std::string>("bstar", bstarpl.str());
+    else pl->set<std::string>("bstar", "");
 
     return pl;
   }
@@ -639,7 +649,7 @@ class BackwardEuler_RKBT :
 
     int order = 1;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -706,7 +716,7 @@ class ForwardEuler_RKBT :
     Teuchos::SerialDenseVector<int,Scalar> c(1);
     int order = 1;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -788,9 +798,10 @@ class Explicit4Stage4thOrder_RKBT :
 
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
+
 
 
 // ----------------------------------------------------------------------------
@@ -883,7 +894,7 @@ class ExplicitBogackiShampine32_RKBT :
     bstar(3) = as<Scalar>(1*one/(8*one));
     int order = 3;
 
-    this->setAbc(A,b,c,order,bstar);
+    this->setAbc(A,b,c,order,order,order,bstar);
   }
 };
 
@@ -991,7 +1002,7 @@ class ExplicitMerson45_RKBT :
     bstar(4) = as<Scalar>(1*one/(5*one));
     int order = 4;
 
-    this->setAbc(A,b,c,order,bstar);
+    this->setAbc(A,b,c,order,order,order,bstar);
   }
 };
 
@@ -1077,7 +1088,7 @@ class Explicit3_8Rule_RKBT :
 
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1163,7 +1174,7 @@ class Explicit4Stage3rdOrderRunge_RKBT :
 
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1251,7 +1262,7 @@ class Explicit5Stage3rdOrderKandG_RKBT :
 
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1327,7 +1338,7 @@ class Explicit3Stage3rdOrder_RKBT :
 
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1422,7 +1433,7 @@ class Explicit3Stage3rdOrderTVD_RKBT :
 
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1506,7 +1517,7 @@ class Explicit3Stage3rdOrderHeun_RKBT :
 
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1583,7 +1594,7 @@ class ExplicitMidpoint_RKBT :
 
     int order = 2;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1672,7 +1683,7 @@ class ExplicitTrapezoidal_RKBT :
 
     int order = 2;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -1716,6 +1727,21 @@ class GeneralDIRK_RKBT :
   GeneralDIRK_RKBT()
   {
     this->setParameterList(Teuchos::null);
+  }
+
+  GeneralDIRK_RKBT(
+    const Teuchos::SerialDenseMatrix<int,Scalar>& A,
+    const Teuchos::SerialDenseVector<int,Scalar>& b,
+    const Teuchos::SerialDenseVector<int,Scalar>& c,
+    const int order = 1,
+    const Teuchos::SerialDenseVector<int,Scalar>& bstar =
+      Teuchos::SerialDenseVector<int,Scalar>())
+  {
+    this->setAbc(A,b,c,order,order,order,bstar);
+
+    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
+    pl = this->AbcToPL(this->A_,this->b_,this->c_,this->order_,this->bstar_);
+    this->RK_stepperPL_->set("Tableau", *pl);
   }
 
   virtual std::string description() const { return "General DIRK"; }
@@ -1821,6 +1847,43 @@ class SDIRK2Stage2ndOrder_RKBT :
     this->setParameterList(Teuchos::null);
   }
 
+  SDIRK2Stage2ndOrder_RKBT(Scalar gamma)
+  {
+    setGamma(gamma);
+  }
+
+  void setGamma(Scalar gamma)
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    gamma_default_ = Teuchos::as<Scalar>((2*one-ST::squareroot(2*one))/(2*one));
+
+    RKButcherTableau<Scalar>::setParameterList(Teuchos::null);
+    this->RK_stepperPL_->template set<double>("gamma", gamma);
+    gamma_ = gamma;
+
+    int NumStages = 2;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) =                              gamma; A(0,1) = zero;
+    A(1,0) = Teuchos::as<Scalar>( one - gamma ); A(1,1) = gamma;
+
+    // Fill b:
+    b(0) = Teuchos::as<Scalar>( one - gamma ); b(1) = gamma;
+
+    // Fill c:
+    c(0) = gamma; c(1) = one;
+
+    int order = 1;
+    if ( std::abs((gamma-gamma_default_)/gamma) < 1.0e-08 ) order = 2;
+
+    this->setAbc(A,b,c,order,1,2);
+  }
+
   virtual std::string description() const { return "SDIRK 2 Stage 2nd order"; }
 
   std::string getDescription() const
@@ -1888,6 +1951,7 @@ class SDIRK2Stage2ndOrder_RKBT :
 
   private:
     Scalar gamma_default_;
+    Scalar gamma_;
 };
 
 
@@ -1926,6 +1990,55 @@ class SDIRK2Stage3rdOrder_RKBT :
   SDIRK2Stage3rdOrder_RKBT()
   {
     this->setParameterList(Teuchos::null);
+  }
+
+  SDIRK2Stage3rdOrder_RKBT(std::string gammaType,
+                           Scalar gamma = 0.7886751345948128)
+  {
+    TEUCHOS_TEST_FOR_EXCEPTION(
+      !(gammaType == "3rd Order A-stable" or
+        gammaType == "2nd Order L-stable" or
+        gammaType == "gamma"), std::logic_error,
+      "gammaType needs to be '3rd Order A-stable', '2nd Order L-stable' or 'gamma'.");
+
+    RKButcherTableau<Scalar>::setParameterList(Teuchos::null);
+    Teuchos::RCP<Teuchos::ParameterList> pl = this->RK_stepperPL_;
+
+    pl->set<std::string>("Gamma Type", gammaType);
+    gamma_ = gamma;
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    using Teuchos::as;
+    int NumStages = 2;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+
+    int order = 0;
+    if (gammaType == "3rd Order A-stable") {
+      order = 3;
+      gamma_ = as<Scalar>((3*one+ST::squareroot(3*one))/(6*one));
+    } else if (gammaType == "2nd Order L-stable") {
+      order = 2;
+      gamma_ = as<Scalar>( (2*one - ST::squareroot(2*one))/(2*one) );
+    } else if (gammaType == "gamma") {
+      order = 2;
+      gamma_ = pl->get<double>("gamma",
+        as<Scalar>((3*one+ST::squareroot(3*one))/(6*one)));
+    }
+
+    // Fill A:
+    A(0,0) =                     gamma_; A(0,1) = zero;
+    A(1,0) = as<Scalar>(one - 2*gamma_); A(1,1) = gamma_;
+
+    // Fill b:
+    b(0) = as<Scalar>( one/(2*one) ); b(1) = as<Scalar>( one/(2*one) );
+
+    // Fill c:
+    c(0) = gamma_; c(1) = as<Scalar>( one - gamma_ );
+
+    this->setAbc(A,b,c,order,2,3);
   }
 
   virtual std::string description() const { return "SDIRK 2 Stage 3rd order"; }
@@ -2013,6 +2126,7 @@ class SDIRK2Stage3rdOrder_RKBT :
 
   private:
     Scalar gamma_default_;
+    Scalar gamma_;
 };
 
 
@@ -2087,7 +2201,7 @@ class EDIRK2Stage3rdOrder_RKBT :
     c(0) = zero; c(1) = as<Scalar>( 2*one/(3*one) );
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -2167,7 +2281,7 @@ class Implicit3Stage6thOrderKuntzmannButcher_RKBT :
     c(2) = as<Scalar>( one/(2*one)+ST::squareroot(15*one)/(10*one) );
     int order = 6;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -2268,7 +2382,7 @@ class Implicit4Stage8thOrderKuntzmannButcher_RKBT :
     c(3) = onehalf + w2;
     int order = 8;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -2332,7 +2446,7 @@ class Implicit2Stage4thOrderHammerHollingsworth_RKBT :
     c(1) = as<Scalar>( onehalf + ST::squareroot(3*one)/(6*one) );
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 };
 
@@ -2349,6 +2463,36 @@ class IRK1StageTheta_RKBT :
     theta_default_ = ST::one()/(2*ST::one());
 
     this->setParameterList(Teuchos::null);
+  }
+
+  IRK1StageTheta_RKBT(Scalar theta)
+  {
+    setTheta(theta);
+  }
+
+  void setTheta(Scalar theta)
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    theta_default_ = ST::one()/(2*ST::one());
+
+    RKButcherTableau<Scalar>::setParameterList(Teuchos::null);
+    Teuchos::RCP<Teuchos::ParameterList> pl = this->RK_stepperPL_;
+    pl->set<double>("theta",theta);
+    theta_ = theta;
+
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    int NumStages = 1;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+    A(0,0) = theta;
+    b(0) = ST::one();
+    c(0) = theta;
+
+    int order = 1;
+    if ( std::abs((theta-theta_default_)/theta) < 1.0e-08 ) order = 2;
+
+    this->setAbc(A, b, c, order, 1, 2);
   }
 
   virtual std::string description() const {return "IRK 1 Stage Theta Method";}
@@ -2408,6 +2552,7 @@ class IRK1StageTheta_RKBT :
 
   private:
     Scalar theta_default_;
+    Scalar theta_;
 };
 
 
@@ -2423,6 +2568,51 @@ class EDIRK2StageTheta_RKBT :
     theta_default_ = ST::one()/(2*ST::one());
 
     this->setParameterList(Teuchos::null);
+  }
+
+  EDIRK2StageTheta_RKBT(Scalar theta)
+  {
+    setTheta(theta);
+  }
+
+  void setTheta(Scalar theta)
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    theta_default_ = ST::one()/(2*ST::one());
+
+    RKButcherTableau<Scalar>::setParameterList(Teuchos::null);
+    Teuchos::RCP<Teuchos::ParameterList> pl = this->RK_stepperPL_;
+    pl->set<double>("theta", theta);
+    theta_ = theta;
+
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    TEUCHOS_TEST_FOR_EXCEPTION(
+      theta == zero, std::logic_error,
+      "'theta' can not be zero, as it makes this IRK stepper explicit.");
+
+    int NumStages = 2;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) =                               zero; A(0,1) =  zero;
+    A(1,0) = Teuchos::as<Scalar>( one - theta ); A(1,1) = theta;
+
+    // Fill b:
+    b(0) = Teuchos::as<Scalar>( one - theta );
+    b(1) = theta;
+
+    // Fill c:
+    c(0) = zero;
+    c(1) = one;
+
+    int order = 1;
+    if ( std::abs((theta-theta_default_)/theta) < 1.0e-08 ) order = 2;
+
+    this->setAbc(A, b, c, order, 1, 2);
   }
 
   virtual std::string description() const {return "EDIRK 2 Stage Theta Method";}
@@ -2497,6 +2687,7 @@ class EDIRK2StageTheta_RKBT :
 
   private:
     Scalar theta_default_;
+    Scalar theta_;
 };
 
 
@@ -2572,7 +2763,7 @@ class TrapezoidalRule_RKBT :
 
     int order = 2;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -2643,7 +2834,7 @@ class ImplicitMidpoint_RKBT :
 
     int order = 2;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -2715,7 +2906,7 @@ class Implicit2Stage4thOrderGauss_RKBT :
     c(1) = onehalf+alpha;
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -2803,7 +2994,7 @@ class Implicit3Stage6thOrderGauss_RKBT :
     c(2) = as<Scalar>(one/(2*one))+sqrt15over10;
     int order = 6;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -2863,7 +3054,7 @@ class Implicit1Stage1stOrderRadauA_RKBT :
     c(0) = zero;
     int order = 1;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -2936,7 +3127,7 @@ class Implicit2Stage3rdOrderRadauA_RKBT :
     c(1) = as<Scalar>(2*one/(3*one));
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3017,7 +3208,7 @@ class Implicit3Stage5thOrderRadauA_RKBT :
     c(2) = as<Scalar>( (6*one+ST::squareroot(6*one))/(10*one) );
     int order = 5;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3076,7 +3267,7 @@ class Implicit1Stage1stOrderRadauB_RKBT :
     c(0) = one;
     int order = 1;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3148,7 +3339,7 @@ class Implicit2Stage3rdOrderRadauB_RKBT :
     c(1) = one;
     int order = 3;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3235,7 +3426,7 @@ class Implicit3Stage5thOrderRadauB_RKBT :
     c(2) = one;
     int order = 5;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3308,7 +3499,7 @@ class Implicit2Stage2ndOrderLobattoA_RKBT :
     c(1) = one;
     int order = 2;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3389,7 +3580,7 @@ class Implicit3Stage4thOrderLobattoA_RKBT :
     c(2) = one;
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3493,7 +3684,7 @@ class Implicit4Stage6thOrderLobattoA_RKBT :
     c(3) = one;
     int order = 6;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3566,7 +3757,7 @@ class Implicit2Stage2ndOrderLobattoB_RKBT :
     c(1) = one;
     int order = 2;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3647,7 +3838,7 @@ class Implicit3Stage4thOrderLobattoB_RKBT :
     c(2) = one;
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3738,7 +3929,7 @@ class Implicit4Stage6thOrderLobattoB_RKBT :
     c(3) = one;
     int order = 6;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3818,7 +4009,7 @@ class Implicit2Stage2ndOrderLobattoC_RKBT :
     c(1) = one;
     int order = 2;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3899,7 +4090,7 @@ class Implicit3Stage4thOrderLobattoC_RKBT :
     c(2) = one;
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -3990,7 +4181,7 @@ class Implicit4Stage6thOrderLobattoC_RKBT :
     c(3) = one;
     int order = 6;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -4128,7 +4319,7 @@ class SDIRK5Stage5thOrder_RKBT :
 
     int order = 5;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -4247,7 +4438,7 @@ class SDIRK5Stage4thOrder_RKBT :
 
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -4284,7 +4475,7 @@ class SDIRK3Stage4thOrder_RKBT :
                 << "Stiff and Differential-Algebraic Problems,\n"
                 << "2nd Revised Edition\n"
                 << "E. Hairer and G. Wanner\n"
-                << "pg100 \n"
+                << "p. 100 \n"
                 << "gamma = (1/sqrt(3))*cos(pi/18)+1/2\n"
                 << "delta = 1/(6*(2*gamma-1)^2)\n"
                 << "c = [ gamma      1/2        1-gamma ]'\n"
@@ -4336,7 +4527,7 @@ class SDIRK3Stage4thOrder_RKBT :
 
     int order = 4;
 
-    this->setAbc(A,b,c,order);
+    this->setAbc(A,b,c,order,order,order);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>
@@ -4424,7 +4615,7 @@ class SDIRK21_RKBT :
     bstar(1) = zero;
     int order = 2;
 
-    this->setAbc(A,b,c,order,bstar);
+    this->setAbc(A,b,c,order,order,order,bstar);
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>

@@ -337,6 +337,14 @@ void StepperNewmarkExplicitAForm<Scalar>::setParameterList(
   }
   this->stepperPL_->validateParametersAndSetDefaults(*this->getValidParameters());
 
+  this->setStepperType(this->description());
+  this->setUseFSAL(this->stepperPL_->template get<bool>(
+    "Use FSAL", this->getUseFSALDefault()));
+  this->setICConsistency( this->stepperPL_->template get<std::string>(
+    "Initial Condition Consistency", this->getICConsistencyDefault()));
+  this->setICConsistencyCheck( this->stepperPL_->template get<bool>(
+    "Initial Condition Consistency Check", this->getICConsistencyCheckDefault()));
+
   std::string stepperType =
     this->stepperPL_->template get<std::string>("Stepper Type");
   TEUCHOS_TEST_FOR_EXCEPTION( stepperType != "Newmark Explicit a-Form",
@@ -351,7 +359,6 @@ void StepperNewmarkExplicitAForm<Scalar>::setParameterList(
     std::logic_error,
     "Error in 'Newmark Explicit a-Form' stepper: invalid value of Gamma = "
      << gamma_ << ".  Please select 0 <= Gamma <= 1. \n");
-
 }
 
 

@@ -18,6 +18,7 @@
 #include "Tempus_StepperNewmarkExplicitAForm.hpp"
 #include "Tempus_StepperHHTAlpha.hpp"
 #include "Tempus_StepperExplicitRK.hpp"
+#include "Tempus_StepperRKButcherTableau.hpp"
 #include "Tempus_StepperDIRK.hpp"
 #include "Tempus_StepperIMEX_RK.hpp"
 #include "Tempus_StepperIMEX_RK_Partition.hpp"
@@ -76,7 +77,184 @@ public:
     return this->createStepper(models, stepperType, stepperPL);
   }
 
+
+  // ---------------------------------------------------------------------------
+
+  void setStepperValuesFromPL(
+    Teuchos::RCP<Stepper<Scalar> > stepper,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepperType =
+      stepperPL->get<std::string>("Stepper Type", stepper->description());
+    TEUCHOS_TEST_FOR_EXCEPTION(
+      stepperType != stepper->description() ,std::runtime_error,
+      "  ParameterList 'Stepper Type' (='" + stepperType +"')\n"
+      "  does not match type for stepper Stepper (='"
+      + stepper->description() + "').");
+
+    stepper->setUseFSAL(
+      stepperPL->get<bool>("Use FSAL", stepper->getUseFSALDefault()));
+
+    stepper->setICConsistency(
+      stepperPL->get<std::string>("Initial Condition Consistency",
+                                  stepper->getICConsistencyDefault()));
+
+    stepper->setICConsistencyCheck(
+      stepperPL->get<bool>("Initial Condition Consistency Check",
+                           stepper->getICConsistencyCheckDefault()));
+  }
+
+
+  void setGeneralTableauFromPL(
+    Teuchos::RCP<StepperGeneralERK<Scalar> > stepper,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    using Teuchos::as;
+    using Teuchos::RCP;
+    using Teuchos::rcp_const_cast;
+    using Teuchos::ParameterList;
+
+    RCP<ParameterList> tableauPL = sublist(stepperPL,"Tableau",true);
+    std::size_t numStages = 0;
+    int order = tableauPL->get<int>("order");
+    Teuchos::SerialDenseMatrix<int,Scalar> A;
+    Teuchos::SerialDenseVector<int,Scalar> b;
+    Teuchos::SerialDenseVector<int,Scalar> c;
+    Teuchos::SerialDenseVector<int,Scalar> bstar;
+
+    // read in the A matrix
+    {
+      std::vector<std::string> A_row_tokens;
+      Tempus::StringTokenizer(A_row_tokens, tableauPL->get<std::string>("A"),
+                              ";",true);
+
+      // this is the only place where numStages is set
+      numStages = A_row_tokens.size();
+
+      // allocate the matrix
+      A.shape(as<int>(numStages),as<int>(numStages));
+
+      // fill the rows
+      for(std::size_t row=0;row<numStages;row++) {
+        // parse the row (tokenize on space)
+        std::vector<std::string> tokens;
+        Tempus::StringTokenizer(tokens,A_row_tokens[row]," ",true);
+
+        std::vector<double> values;
+        Tempus::TokensToDoubles(values,tokens);
+
+        TEUCHOS_TEST_FOR_EXCEPTION(values.size()!=numStages,std::runtime_error,
+          "Error parsing A matrix, wrong number of stages in row "
+          << row << "\n" + stepper->description());
+
+        for(std::size_t col=0;col<numStages;col++)
+          A(row,col) = values[col];
+      }
+    }
+
+    // size b and c vectors
+    b.size(as<int>(numStages));
+    c.size(as<int>(numStages));
+
+    // read in the b vector
+    {
+      std::vector<std::string> tokens;
+      Tempus::StringTokenizer(tokens,tableauPL->get<std::string>("b")," ",true);
+      std::vector<double> values;
+      Tempus::TokensToDoubles(values,tokens);
+
+      TEUCHOS_TEST_FOR_EXCEPTION(values.size()!=numStages,std::runtime_error,
+        "Error parsing b vector, wrong number of stages.\n"
+        + stepper->description());
+
+      for(std::size_t i=0;i<numStages;i++)
+        b(i) = values[i];
+    }
+
+    // read in the c vector
+    {
+      std::vector<std::string> tokens;
+      Tempus::StringTokenizer(tokens,tableauPL->get<std::string>("c")," ",true);
+      std::vector<double> values;
+      Tempus::TokensToDoubles(values,tokens);
+
+      TEUCHOS_TEST_FOR_EXCEPTION(values.size()!=numStages,std::runtime_error,
+        "Error parsing c vector, wrong number of stages.\n"
+        + stepper->description());
+
+      for(std::size_t i=0;i<numStages;i++)
+        c(i) = values[i];
+    }
+
+    if (tableauPL->isParameter("bstar") and
+        tableauPL->get<std::string>("bstar") != "") {
+      bstar.size(as<int>(numStages));
+      // read in the bstar vector
+      {
+        std::vector<std::string> tokens;
+        Tempus::StringTokenizer(
+          tokens, tableauPL->get<std::string>("bstar"), " ", true);
+        std::vector<double> values;
+        Tempus::TokensToDoubles(values,tokens);
+
+        TEUCHOS_TEST_FOR_EXCEPTION(values.size()!=numStages,std::runtime_error,
+          "Error parsing bstar vector, wrong number of stages.\n"
+          "      Number of RK stages    = " << numStages << "\n"
+          "      Number of bstar values = " << values.size() << "\n"
+          + stepper->description());
+
+        for(std::size_t i=0;i<numStages;i++)
+          bstar(i) = values[i];
+      }
+        stepper->setTableau(A,b,c,order,order,order,bstar);
+    } else {
+        stepper->setTableau(A,b,c,order,order,order);
+    }
+  }
+
+
+  Teuchos::RCP<StepperGeneralERK<Scalar> > createStepperGeneralERK(
+      const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+      Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    Teuchos::RCP<StepperGeneralERK<Scalar> > stepper =
+      Teuchos::rcp(new StepperGeneralERK<Scalar>());
+
+    std::cout << "  a -  createStepperGeneralERK" << std::endl;
+    std::cout << " stepper = " << stepper << std::endl;
+
+    if (stepperPL != Teuchos::null) {
+
+      stepperPL->validateParametersAndSetDefaults(
+                                              *stepper->getValidParameters());
+
+      setStepperValuesFromPL(stepper, stepperPL);
+
+      stepper->setUseEmbedded(
+        stepperPL->get<bool>("Use Embedded",stepper->getUseEmbeddedDefault()));
+
+      setGeneralTableauFromPL(stepper, stepperPL);
+      TEUCHOS_TEST_FOR_EXCEPTION(stepper->isImplicit() == true,std::logic_error,
+        "Error - General ERK received an implicit Butcher Tableau!\n");
+    }
+
+    std::cout << "  b -  createStepperGeneralERK" << std::endl;
+    std::cout << " stepper = " << stepper << std::endl;
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      stepper->initialize();
+    }
+    std::cout << "  c -  createStepperGeneralERK" << std::endl;
+    std::cout << " stepper = " << stepper << std::endl;
+
+    return stepper;
+  }
+
+  // ---------------------------------------------------------------------------
+
 private:
+
   /// Very simple factory method
   Teuchos::RCP<Stepper<Scalar> > createStepper(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
@@ -100,6 +278,8 @@ private:
       return rcp(new StepperNewmarkExplicitAForm<Scalar>(model, stepperPL));
     else if (stepperType == "HHT-Alpha")
       return rcp(new StepperHHTAlpha<Scalar>(model, stepperPL));
+    else if (stepperType == "General ERK" )
+      return createStepperGeneralERK(model, stepperPL);
     else if (
       stepperType == "RK Forward Euler" ||
       stepperType == "RK Explicit 4 Stage" ||
@@ -112,8 +292,7 @@ private:
       stepperType == "RK Explicit Midpoint" ||
       stepperType == "RK Explicit Trapezoidal" || stepperType == "Heuns Method" ||
       stepperType == "Bogacki-Shampine 3(2) Pair" ||
-      stepperType == "Merson 4(5) Pair" ||
-      stepperType == "General ERK" )
+      stepperType == "Merson 4(5) Pair")
       return rcp(new StepperExplicitRK<Scalar>(model, stepperType, stepperPL));
     else if (
       stepperType == "RK Backward Euler" ||

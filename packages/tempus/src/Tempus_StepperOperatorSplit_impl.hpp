@@ -200,8 +200,8 @@ void StepperOperatorSplit<Scalar>::createSubSteppers(
     if (useFSAL) {
       Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
       Teuchos::OSTab ostab(out,1,"StepperOperatorSplit::createSubSteppers()");
-      *out << "Warning -- subStepper = "
-           << subStepper->getStepperType() << " has \n"
+      *out << "Warning -- subStepper = '"
+           << subStepper->description() << "' has \n"
            << "  subStepper->getUseFSAL() = " << useFSAL << ".\n"
            << "  subSteppers usually can not use the FSAL priniciple with\n"
            << "  operator splitting.  Proceeding with it set to true.\n"

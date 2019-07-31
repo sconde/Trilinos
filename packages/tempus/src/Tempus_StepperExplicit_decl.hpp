@@ -67,37 +67,6 @@ public:
     virtual bool isOneStepMethod()    const {return true;}
     virtual bool isMultiStepMethod()  const {return !isOneStepMethod();}
 
-    virtual bool getEmbedded() const
-      { return stepperPL_->get<bool>("Use Embedded", false); }
-
-    virtual void setUseFSAL(bool a) {stepperPL_->set<bool>("Use FSAL", a);}
-    virtual bool getUseFSAL() const
-      {
-        bool defaultUseFSAL =
-          this->getValidParameters()->template get<bool>("Use FSAL");
-        return stepperPL_->get<bool>("Use FSAL", defaultUseFSAL);
-      }
-
-    virtual void setICConsistency(std::string s)
-      {stepperPL_->set<std::string>("Initial Condition Consistency", s);}
-    virtual std::string getICConsistency() const
-      {
-        std::string defaultICConsistency = this->getValidParameters()->
-          template get<std::string>("Initial Condition Consistency");
-        return stepperPL_->get<std::string>("Initial Condition Consistency",
-                                            defaultICConsistency);
-      }
-
-    virtual void setICConsistencyCheck(bool c)
-      {stepperPL_->set<bool>("Initial Condition Consistency Check", c);}
-    virtual bool getICConsistencyCheck() const
-      {
-        bool defaultICConsistencyCheck = this->getValidParameters()->
-          template get<bool>("Initial Condition Consistency Check");
-        return stepperPL_->get<bool>("Initial Condition Consistency Check",
-                                     defaultICConsistencyCheck);
-      }
-
     /// Set x for Stepper storage.
     virtual void setStepperX(Teuchos::RCP<Thyra::VectorBase<Scalar> > x)
       { stepperX_ = x; }

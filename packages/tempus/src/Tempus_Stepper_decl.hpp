@@ -111,8 +111,6 @@ public:
     virtual void setInitialGuess(
       Teuchos::RCP<const Thyra::VectorBase<Scalar> > initial_guess = Teuchos::null) = 0;
 
-    virtual std::string getStepperType() const = 0;
-
     virtual Teuchos::RCP<Tempus::StepperState<Scalar> >
       getDefaultStepperState() = 0;
     virtual Scalar getOrder() const = 0;
@@ -128,16 +126,22 @@ public:
     virtual bool isOneStepMethod() const = 0;
     virtual bool isMultiStepMethod() const = 0;
 
+    virtual void setStepperType(std::string s) { stepperType_ = s;}
+    virtual std::string getStepperType() const { return stepperType_; }
+
+    virtual void setUseFSAL(bool a) { useFSAL_ = a; }
+    virtual bool getUseFSAL() const { return useFSAL_; }
+    virtual bool getUseFSALDefault() const { return false; }
+
+    virtual void setICConsistency(std::string s) { ICConsistency_ = s;}
+    virtual std::string getICConsistency() const { return ICConsistency_; }
+    virtual std::string getICConsistencyDefault() const { return "None"; }
+
+    virtual void setICConsistencyCheck(bool c) {ICConsistencyCheck_ = c;}
+    virtual bool getICConsistencyCheck() const { return ICConsistencyCheck_; }
+    virtual bool getICConsistencyCheckDefault() const { return false; }
+
     virtual OrderODE getOrderODE() const = 0;
-
-    virtual void setUseFSAL(bool a) = 0;
-    virtual bool getUseFSAL() const = 0;
-
-    virtual void setICConsistency(std::string s) = 0;
-    virtual std::string getICConsistency() const = 0;
-
-    virtual void setICConsistencyCheck(bool c) = 0;
-    virtual bool getICConsistencyCheck() const = 0;
 
     /// Warn that Stepper is being constructed without a ModelEvaluator.
     virtual void modelWarning() const;
@@ -149,6 +153,12 @@ public:
     virtual void createSubSteppers(
       std::vector<Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > > /* models */){}
   //@}
+
+private:
+  std::string stepperType_;    //< Name of stepper type
+  bool useFSAL_;               //< Use First-Step-As-Last (FSAL) principle
+  std::string ICConsistency_;  //< Type of consistency to apply to ICs.
+  bool ICConsistencyCheck_;    //< Check if the initial condition is consistent
 };
 
 
@@ -325,6 +335,7 @@ public:
   /// Returns the default solver ParameterList for implicit Steppers.
   Teuchos::RCP<Teuchos::ParameterList> defaultSolverParameters();
 //@}
+
 
 } // namespace Tempus
 #endif // Tempus_Stepper_decl_hpp
