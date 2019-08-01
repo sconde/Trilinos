@@ -105,7 +105,7 @@ template<class Scalar>
 void StepperExplicitRK_new<Scalar>::getValidParametersBasicRK(
   Teuchos::RCP<Teuchos::ParameterList> pl) const
 {
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<bool>("Use Embedded", false,
     "'Whether to use Embedded Stepper (if available) or not\n"
     "  'true' - Stepper will compute embedded solution and is adaptive.\n"
@@ -328,7 +328,7 @@ Teuchos::RCP<Tempus::StepperState<Scalar> > StepperExplicitRK_new<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
 }
 
@@ -336,7 +336,7 @@ getDefaultStepperState()
 template<class Scalar>
 std::string StepperExplicitRK_new<Scalar>::description() const
 {
-  return(tableau_->description());
+  return(this->getStepperType());
 }
 
 
@@ -345,7 +345,7 @@ void StepperExplicitRK_new<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "appModel_ = " << this->appModel_->description() << std::endl;
 }
 

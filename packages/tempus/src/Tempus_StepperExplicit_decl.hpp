@@ -52,9 +52,6 @@ public:
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const
       { return Teuchos::null; }
 
-    virtual std::string getStepperType() const
-     { return stepperPL_->get<std::string>("Stepper Type"); }
-
     /// Pass initial guess to Newton solver (only relevant for implicit solvers)
     //  thus a no-op for explicit steppers.
     virtual void setInitialGuess(

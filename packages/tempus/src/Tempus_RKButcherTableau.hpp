@@ -167,22 +167,6 @@ class RKButcherTableau :
       }
     //@}
 
-    virtual void setTableau(
-      std::string description,
-      std::string longDescription,
-      const Teuchos::SerialDenseMatrix<int,Scalar>& A,
-      const Teuchos::SerialDenseVector<int,Scalar>& b,
-      const Teuchos::SerialDenseVector<int,Scalar>& c,
-      const int order,
-      const int orderMin,
-      const int orderMax,
-      const Teuchos::SerialDenseVector<int,Scalar>&
-        bstar = Teuchos::SerialDenseVector<int,Scalar>())
-    {
-      description_ = description;
-      longDescription_ = longDescription;
-      setAbc(A,b,c,order,orderMin,orderMin,bstar);
-    }
 
   protected:
 
@@ -326,8 +310,9 @@ public:
     const Teuchos::SerialDenseVector<int,Scalar>&
       bstar = Teuchos::SerialDenseVector<int,Scalar>())
   {
-    this->setTableau(description, longDescription,
-                     A,b,c,order,orderMin,orderMax,bstar);
+    this->description_ = description;
+    this->longDescription_ = longDescription;
+    this->setAbc(A,b,c,order,orderMin,orderMin,bstar);
   }
 
   General_RKButcherTableau(){}
