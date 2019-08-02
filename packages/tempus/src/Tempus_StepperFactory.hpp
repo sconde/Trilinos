@@ -220,9 +220,6 @@ public:
     Teuchos::RCP<StepperGeneralERK<Scalar> > stepper =
       Teuchos::rcp(new StepperGeneralERK<Scalar>());
 
-    std::cout << "  a -  createStepperGeneralERK" << std::endl;
-    std::cout << " stepper = " << stepper << std::endl;
-
     if (stepperPL != Teuchos::null) {
 
       stepperPL->validateParametersAndSetDefaults(
@@ -238,15 +235,10 @@ public:
         "Error - General ERK received an implicit Butcher Tableau!\n");
     }
 
-    std::cout << "  b -  createStepperGeneralERK" << std::endl;
-    std::cout << " stepper = " << stepper << std::endl;
-
     if (model != Teuchos::null) {
       stepper->setModel(model);
       stepper->initialize();
     }
-    std::cout << "  c -  createStepperGeneralERK" << std::endl;
-    std::cout << " stepper = " << stepper << std::endl;
 
     return stepper;
   }

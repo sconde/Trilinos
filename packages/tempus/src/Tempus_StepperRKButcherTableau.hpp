@@ -67,6 +67,7 @@ class StepperGeneralERK :
 public:
   StepperGeneralERK()
   {
+    this->setStepperType(        this->description());
     this->setUseFSAL(            this->getUseFSALDefault());
     this->setICConsistency(      this->getICConsistencyDefault());
     this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -91,6 +92,7 @@ public:
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType(        this->description());
     this->setUseFSAL(            useFSAL);
     this->setICConsistency(      ICConsistency);
     this->setICConsistencyCheck( ICConsistencyCheck);
