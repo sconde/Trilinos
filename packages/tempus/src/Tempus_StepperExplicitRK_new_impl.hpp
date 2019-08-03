@@ -17,6 +17,51 @@
 
 namespace Tempus {
 
+
+template<class Scalar>
+void StepperExplicitRK_new<Scalar>::setupDefault()
+{
+  this->setStepperType(        this->description());
+  this->setUseFSAL(            this->getUseFSALDefault());
+  this->setICConsistency(      this->getICConsistencyDefault());
+  this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
+  this->setUseEmbedded(        this->getUseEmbeddedDefault());
+
+  this->stepperObserver_ =
+    Teuchos::rcp(new StepperObserverComposite<Scalar>);
+  this->stepperExplicitRKObserver_ =
+    Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
+}
+
+
+template<class Scalar>
+void StepperExplicitRK_new<Scalar>::setup(
+  const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+  const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+  bool useFSAL,
+  std::string ICConsistency,
+  bool ICConsistencyCheck,
+  bool useEmbedded)
+{
+  this->setStepperType(        this->description());
+  this->setUseFSAL(            useFSAL);
+  this->setICConsistency(      ICConsistency);
+  this->setICConsistencyCheck( ICConsistencyCheck);
+  this->setUseEmbedded(        useEmbedded);
+
+  this->stepperObserver_ =
+    Teuchos::rcp(new StepperObserverComposite<Scalar>);
+  this->stepperExplicitRKObserver_ =
+    Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
+  this->setObserver(obs);
+
+  if (appModel != Teuchos::null) {
+    this->setModel(appModel);
+    this->initialize();
+  }
+}
+
+
 template<class Scalar>
 Scalar StepperExplicitRK_new<Scalar>::getInitTimeStep(
   const Teuchos::RCP<SolutionHistory<Scalar> >& sh) const
@@ -118,36 +163,18 @@ template<class Scalar>
 void StepperExplicitRK_new<Scalar>::setObserver(
   Teuchos::RCP<StepperObserver<Scalar> > obs)
 {
-
-  if (stepperObserver_ == Teuchos::null) {
-    stepperObserver_ = Teuchos::rcp(new StepperObserverComposite<Scalar>);
-  }
-
-  if (obs == Teuchos::null) {
-      auto stepperExplicitRKObserver =
-        Teuchos::rcp(new StepperExplicitRKObserver<Scalar>());
-      if (stepperExplicitRKObserver_  == Teuchos::null) {
-        stepperExplicitRKObserver_ =
-          Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
-      }
-      stepperExplicitRKObserver_->addObserver(stepperExplicitRKObserver);
-      stepperObserver_->addObserver(
-        Teuchos::rcp_dynamic_cast<StepperObserver<Scalar> >
-	(stepperExplicitRKObserver, true));
-  } else {
+  if (obs != Teuchos::null ) {
     stepperObserver_->addObserver(obs);
-    if (Teuchos::rcp_dynamic_cast<StepperExplicitRKObserver<Scalar> >
-      (obs) != Teuchos::null) {
-        if (stepperExplicitRKObserver_  == Teuchos::null) {
-          stepperExplicitRKObserver_ =
-            Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
-        }
-        stepperExplicitRKObserver_->addObserver(
-        Teuchos::rcp_dynamic_cast<StepperExplicitRKObserver<Scalar> >
-        (obs));
+    stepperExplicitRKObserver_->addObserver(
+      Teuchos::rcp_dynamic_cast<StepperExplicitRKObserver<Scalar> > (obs,true));
+  } else {
+    if (stepperExplicitRKObserver_->empty()) {
+      auto ERKObs = Teuchos::rcp(new StepperExplicitRKObserver<Scalar>());
+      stepperExplicitRKObserver_->addObserver(ERKObs);
+      stepperObserver_->addObserver(
+        Teuchos::rcp_dynamic_cast<StepperObserver<Scalar> > (ERKObs, true));
     }
   }
-
 }
 
 
@@ -155,15 +182,18 @@ template<class Scalar>
 void StepperExplicitRK_new<Scalar>::initialize()
 {
   TEUCHOS_TEST_FOR_EXCEPTION( tableau_ == Teuchos::null, std::logic_error,
-    "Error - Need to set the Butcher Tableau, setTableau(), before calling "
+    "Error - Need to set the tableau, before calling "
     "StepperExplicitRK_new::initialize()\n");
 
   TEUCHOS_TEST_FOR_EXCEPTION( this->appModel_==Teuchos::null, std::logic_error,
     "Error - Need to set the model, setModel(), before calling "
     "StepperExplicitRK_new::initialize()\n");
 
-  this->setTableau();
   this->setObserver();
+
+  TEUCHOS_TEST_FOR_EXCEPTION( this->stepperObserver_->empty() ||
+    this->stepperExplicitRKObserver_->empty(), std::logic_error,
+    "Error - Composite Observer is empty!\n");
 
   // Initialize the stage vectors
   int numStages = tableau_->numStages();
@@ -248,7 +278,7 @@ void StepperExplicitRK_new<Scalar>::takeStep(
         }
         const Scalar ts = time + c(i)*dt;
 
-        if (!Teuchos::is_null(stepperExplicitRKObserver_))
+//////  if (!Teuchos::is_null(stepperExplicitRKObserver_))
 //////    stepperExplicitRKObserver_->observeBeforeExplicit(solutionHistory,
 //////                                                      *this);
         // Evaluate xDot = f(x,t).
@@ -363,13 +393,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperExplicitRK_new<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  if (tableau_ == Teuchos::null) {
-    auto tableau = createRKButcherTableau<Scalar>("RK Explicit 4 Stage");
-    pl->setParameters( *(tableau->getValidParameters()));
-  } else {
-    pl->setParameters( *(tableau_->getValidParameters()));
-  }
-
+  this->getValidParametersBasicRK(pl);
   return pl;
 }
 

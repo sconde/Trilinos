@@ -55,6 +55,22 @@ class RKButcherTableau :
   virtual public Teuchos::VerboseObject<RKButcherTableau<Scalar> >
 {
   public:
+
+    RKButcherTableau(){}
+
+    RKButcherTableau(
+      const Teuchos::SerialDenseMatrix<int,Scalar>& A,
+      const Teuchos::SerialDenseVector<int,Scalar>& b,
+      const Teuchos::SerialDenseVector<int,Scalar>& c,
+      const int order,
+      const int orderMin,
+      const int orderMax,
+      const Teuchos::SerialDenseVector<int,Scalar>&
+        bstar = Teuchos::SerialDenseVector<int,Scalar>())
+    {
+      this->setAbc(A,b,c,order,orderMin,orderMin,bstar);
+    }
+
     /** \brief Return the number of stages */
     virtual std::size_t numStages() const { return A_.numRows(); }
     /** \brief Return the matrix coefficients */
@@ -297,23 +313,6 @@ class General_RKButcherTableau :
   virtual public RKButcherTableau<Scalar>
 {
 public:
-
-  General_RKButcherTableau(
-    std::string description,
-    std::string longDescription,
-    const Teuchos::SerialDenseMatrix<int,Scalar>& A,
-    const Teuchos::SerialDenseVector<int,Scalar>& b,
-    const Teuchos::SerialDenseVector<int,Scalar>& c,
-    const int order,
-    const int orderMin,
-    const int orderMax,
-    const Teuchos::SerialDenseVector<int,Scalar>&
-      bstar = Teuchos::SerialDenseVector<int,Scalar>())
-  {
-    this->description_ = description;
-    this->longDescription_ = longDescription;
-    this->setAbc(A,b,c,order,orderMin,orderMin,bstar);
-  }
 
   General_RKButcherTableau(){}
 

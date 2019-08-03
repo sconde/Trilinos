@@ -99,19 +99,6 @@ public:
     virtual void setObserver(
       Teuchos::RCP<StepperObserver<Scalar> > obs = Teuchos::null);
 
-    /// Set Stepper to the default settings for stepperType.
-    virtual void setTableau() = 0;
-
-    virtual void setTableau(
-      const Teuchos::SerialDenseMatrix<int,Scalar>& A,
-      const Teuchos::SerialDenseVector<int,Scalar>& b,
-      const Teuchos::SerialDenseVector<int,Scalar>& c,
-      const int order,
-      const int orderMin,
-      const int orderMax,
-      const Teuchos::SerialDenseVector<int,Scalar>&
-        bstar = Teuchos::SerialDenseVector<int,Scalar>()) = 0;
-
     virtual Teuchos::RCP<const RKButcherTableau<Scalar> > getTableau()
     { return tableau_; }
 
@@ -157,7 +144,6 @@ public:
     Teuchos::RCP<Teuchos::ParameterList> getNonconstParameterList();
     Teuchos::RCP<Teuchos::ParameterList> unsetParameterList();
     Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
-    Teuchos::RCP<Teuchos::ParameterList> getDefaultParameters() const;
   //@}
 
   /// \name Overridden from Teuchos::Describable
@@ -177,6 +163,21 @@ public:
 
 
 protected:
+
+  /// Default setup for constructor.
+  virtual void setupDefault();
+
+  /// Setup for constructor.
+  virtual void setup(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded);
+
+  virtual void setupTableau() = 0;
+
 
   Teuchos::RCP<RKButcherTableau<Scalar> >                tableau_;
 

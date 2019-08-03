@@ -61,56 +61,39 @@ namespace Tempus {
  *  \f]
  */
 template<class Scalar>
-class StepperGeneralERK :
-  virtual public Tempus::StepperExplicitRK_new<Scalar>
+class StepperERK_General :
+  virtual public StepperExplicitRK_new<Scalar>
 {
 public:
-  StepperGeneralERK()
+  StepperERK_General()
   {
-    this->setStepperType(        this->description());
-    this->setUseFSAL(            this->getUseFSALDefault());
-    this->setICConsistency(      this->getICConsistencyDefault());
-    this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
-
-    this->setTableau();
-    this->setUseEmbedded(this->getUseEmbeddedDefault());
-
-    this->modelWarning();
+    this->setupDefault();
+    this->setupTableau();
   }
 
-  StepperGeneralERK(
+  StepperERK_General(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded,
     const Teuchos::SerialDenseMatrix<int,Scalar>& A,
     const Teuchos::SerialDenseVector<int,Scalar>& b,
     const Teuchos::SerialDenseVector<int,Scalar>& c,
     const int order,
     const int orderMin,
     const int orderMax,
-    const Teuchos::SerialDenseVector<int,Scalar>& bstar,
-    bool useFSAL,
-    std::string ICConsistency,
-    bool ICConsistencyCheck,
-    bool useEmbedded)
+    const Teuchos::SerialDenseVector<int,Scalar>& bstar)
   {
-    this->setStepperType(        this->description());
-    this->setUseFSAL(            useFSAL);
-    this->setICConsistency(      ICConsistency);
-    this->setICConsistencyCheck( ICConsistencyCheck);
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
 
     this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
-    this->setUseEmbedded(useEmbedded);
 
     TEUCHOS_TEST_FOR_EXCEPTION(
       this->tableau_->isImplicit() == true, std::logic_error,
       "Error - General ERK received an implicit Butcher Tableau!\n");
-
-    if (appModel == Teuchos::null) {
-      this->modelWarning();
-    }
-    else {
-      this->setModel(appModel);
-      this->initialize();
-    }
   }
 
   virtual std::string description() const { return "General ERK"; }
@@ -138,14 +121,15 @@ public:
     return Description.str();
   }
 
-  void setTableau()
+  void setupTableau()
   {
     if (this->tableau_ == Teuchos::null) {
       // Set tableau to the default if null, otherwise keep current tableau.
-      this->tableau_ = rcp(new General_RKButcherTableau<Scalar>());
       auto t = rcp(new Explicit4Stage4thOrder_RKBT<Scalar>());
-      this->setTableau(t->A(),t->b(),t->c(),
-                       t->order(),t->orderMin(),t->orderMax(),t->bstar());
+      this->tableau_ = rcp(new RKButcherTableau<Scalar>(
+                                 t->A(),t->b(),t->c(),
+                                 t->order(),t->orderMin(),t->orderMax(),
+                                 t->bstar()));
     }
   }
 
@@ -158,9 +142,8 @@ public:
                   const Teuchos::SerialDenseVector<int,Scalar>&
                     bstar = Teuchos::SerialDenseVector<int,Scalar>())
   {
-    this->tableau_ = rcp(new General_RKButcherTableau<Scalar>(
-                                   this->description(), this->getDescription(),
-                                   A,b,c,order,orderMin,orderMax,bstar));
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(
+                               A,b,c,order,orderMin,orderMax,bstar));
   }
 
   virtual std::string getDefaultICConsistency() const { return "Consistent"; }
@@ -205,13 +188,25 @@ public:
 // *  \f]
 // */
 //template<class Scalar>
-//class BackwardEuler_RKBT :
-//  virtual public RKButcherTableau<Scalar>
+//class StepperERK_BackwardEuler :
+//  virtual public StepperExplicitRK_new<Scalar>
 //{
 //  public:
-//  BackwardEuler_RKBT()
+//  StepperERK_BackwardEuler()
 //  {
-//    this->setParameterList(Teuchos::null);
+//    this->setupDefault();
+//  }
+//
+//  StepperERK_BackwardEuler(
+//    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+//    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+//    bool useFSAL,
+//    std::string ICConsistency,
+//    bool ICConsistencyCheck,
+//    bool useEmbedded)
+//  {
+//    this->setup(appModel, obs, useFSAL, ICConsistency,
+//                ICConsistencyCheck, useEmbedded);
 //  }
 //
 //  std::string description() const { return "RK Backward Euler"; }
@@ -226,1066 +221,1211 @@ public:
 //    return Description.str();
 //  }
 //
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    int NumStages = 1;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) = ST::one();
-//
-//    // Fill b:
-//    b(0) = ST::one();
-//
-//    // Fill c:
-//    c(0) = ST::one();
-//
-//    int order = 1;
-//
-//    this->setAbc(A,b,c,order);
-//  }
+//  virtual bool getDefaultICConsistencyCheck() const { return false; }
 //
 //  Teuchos::RCP<const Teuchos::ParameterList>
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
-//    pl->set<bool>("Initial Condition Consistency Check", false);
-//
+//    this->getValidParametersBasicRK(pl);
+//    pl->set<bool>("Initial Condition Consistency Check",
+//                  this->getDefaultICConsistencyCheck());
 //    return pl;
 //  }
 //};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief Forward Euler Runge-Kutta Butcher Tableau
-// *
-// *  The tableau for Forward Euler (order=1) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|c} 0 & 0 \\ \hline
-// *                       & 1 \end{array}
-// *  \f]
-// */
-//template<class Scalar>
-//class ForwardEuler_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  ForwardEuler_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const { return "RK Forward Euler"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "c = [ 0 ]'\n"
-//                << "A = [ 0 ]\n"
-//                << "b = [ 1 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(1,1);
-//    Teuchos::SerialDenseVector<int,Scalar> b(1);
-//    b(0) = ST::one();
-//    Teuchos::SerialDenseVector<int,Scalar> c(1);
-//    int order = 1;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief Runge-Kutta 4th order Butcher Tableau
-// *
-// *  The tableau for RK4 (order=4) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
-// *                        1/2 & 1/2 &  0  &     &    \\
-// *                        1/2 &  0  & 1/2 &  0  &    \\
-// *                         1  &  0  &  0  &  1  &  0 \\ \hline
-// *                            & 1/6 & 1/3 & 1/3 & 1/6 \end{array}
-// *  \f]
-// */
-//template<class Scalar>
-//class Explicit4Stage4thOrder_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  Explicit4Stage4thOrder_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const { return "RK Explicit 4 Stage"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "\"The\" Runge-Kutta Method (explicit):\n"
-//                << "Solving Ordinary Differential Equations I:\n"
-//                << "Nonstiff Problems, 2nd Revised Edition\n"
-//                << "E. Hairer, S.P. Norsett, G. Wanner\n"
-//                << "Table 1.2, pg 138\n"
-//                << "c = [  0  1/2 1/2  1  ]'\n"
-//                << "A = [  0              ] \n"
-//                << "    [ 1/2  0          ]\n"
-//                << "    [  0  1/2  0      ]\n"
-//                << "    [  0   0   1   0  ]\n"
-//                << "b = [ 1/6 1/3 1/3 1/6 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    const Scalar onehalf = one/(2*one);
-//    const Scalar onesixth = one/(6*one);
-//    const Scalar onethird = one/(3*one);
-//
-//    int NumStages = 4;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) =    zero; A(0,1) =    zero; A(0,2) = zero; A(0,3) = zero;
-//    A(1,0) = onehalf; A(1,1) =    zero; A(1,2) = zero; A(1,3) = zero;
-//    A(2,0) =    zero; A(2,1) = onehalf; A(2,2) = zero; A(2,3) = zero;
-//    A(3,0) =    zero; A(3,1) =    zero; A(3,2) =  one; A(3,3) = zero;
-//
-//    // Fill b:
-//    b(0) = onesixth; b(1) = onethird; b(2) = onethird; b(3) = onesixth;
-//
-//    // fill c:
-//    c(0) = zero; c(1) = onehalf; c(2) = onehalf; c(3) = one;
-//
-//    int order = 4;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief Explicit RK Bogacki-Shampine Butcher Tableau
-// *
-// *  The tableau (order=3(2)) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T \\ \hline
-// *      & \hat{b}^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cccc}  0  & 0    &     &     & \\
-// *                        1/2 & 1/2  & 0   &     & \\
-// *                        3/4 & 0    & 3/4 & 0   & \\
-// *                         1  & 2/9  & 1/3 & 4/9 & 0 \\ \hline
-// *                            & 2/9  & 1/3 & 4/9 & 0 \\
-// *                            & 7/24 & 1/4 & 1/3 & 1/8 \end{array}
-// *  \f]
-// *  Reference:  P. Bogacki and L.F. Shampine.
-// *              A 3(2) pair of Runge–Kutta formulas.
-// *              Applied Mathematics Letters, 2(4):321 – 325, 1989.
-// */
-//template<class Scalar>
-//class ExplicitBogackiShampine32_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  ExplicitBogackiShampine32_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const {return "Bogacki-Shampine 3(2) Pair";}
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "P. Bogacki and L.F. Shampine.\n"
-//                << "A 3(2) pair of Runge–Kutta formulas.\n"
-//                << "Applied Mathematics Letters, 2(4):321 – 325, 1989.\n"
-//                << "c =     [ 0     1/2  3/4   1  ]'\n"
-//                << "A =     [ 0                   ]\n"
-//                << "        [ 1/2    0            ]\n"
-//                << "        [  0    3/4   0       ]\n"
-//                << "        [ 2/9   1/3  4/9   0  ]\n"
-//                << "b     = [ 2/9   1/3  4/9   0  ]'\n"
-//                << "bstar = [ 7/24  1/4  1/3  1/8 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    using Teuchos::as;
-//    int NumStages = 4;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> bstar(NumStages);
-//
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    const Scalar onehalf = one/(2*one);
-//    const Scalar onethird = one/(3*one);
-//    const Scalar threefourths = (3*one)/(4*one);
-//    const Scalar twoninths = (2*one)/(9*one);
-//    const Scalar fourninths = (4*one)/(9*one);
-//
-//    // Fill A:
-//    A(0,0) =     zero; A(0,1) =        zero; A(0,2) =      zero; A(0,3) = zero;
-//    A(1,0) =  onehalf; A(1,1) =        zero; A(1,2) =      zero; A(1,3) = zero;
-//    A(2,0) =     zero; A(2,1) =threefourths; A(2,2) =      zero; A(2,3) = zero;
-//    A(3,0) =twoninths; A(3,1) =    onethird; A(3,2) =fourninths; A(3,3) = zero;
-//
-//    // Fill b:
-//    b(0) = A(3,0); b(1) = A(3,1); b(2) = A(3,2); b(3) = A(3,3);
-//
-//    // Fill c:
-//    c(0) = zero; c(1) = onehalf; c(2) = threefourths; c(3) = one;
-//
-//    // Fill bstar
-//    bstar(0) = as<Scalar>(7*one/(24*one));
-//    bstar(1) = as<Scalar>(1*one/(4*one));
-//    bstar(2) = as<Scalar>(1*one/(3*one));
-//    bstar(3) = as<Scalar>(1*one/(8*one));
-//    int order = 3;
-//
-//    this->setAbc(A,b,c,order,bstar);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief Explicit RK Merson Butcher Tableau
-// *
-// *  The tableau (order=4(5)) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T \\ \hline
-// *      & \hat{b}^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|ccccc}  0 & 0    &     &      &     & \\
-// *                        1/3 & 1/3  & 0   &      &     & \\
-// *                        1/3 & 1/6  & 1/6 & 0    &     & \\
-// *                        1/2 & 1/8  & 0   & 3/8  &     & \\
-// *                         1  & 1/2  & 0   & -3/2 & 2   & \\ \hline
-// *                            & 1/6  & 0   & 0    & 2/3 & 1/6 \\
-// *                            & 1/10 & 0   & 3/10 & 2/5 & 1/5 \end{array}
-// *  \f]
-// *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
-// *              "Solving Ordinary Differential Equations I:
-// *              Nonstiff Problems", 2nd Revised Edition,
-// *              Table 4.1, pg 167.
-// *
-// */
-//template<class Scalar>
-//class ExplicitMerson45_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  ExplicitMerson45_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const { return "Merson 4(5) Pair"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Solving Ordinary Differential Equations I:\n"
-//                << "Nonstiff Problems, 2nd Revised Edition\n"
-//                << "E. Hairer, S.P. Norsett, G. Wanner\n"
-//                << "Table 4.1, pg 167\n"
-//                << "c =     [  0    1/3  1/3  1/2   1  ]'\n"
-//                << "A =     [  0                       ]\n"
-//                << "        [ 1/3    0                 ]\n"
-//                << "        [ 1/6   1/6   0            ]\n"
-//                << "        [ 1/8    0   3/8   0       ]\n"
-//                << "        [ 1/2    0  -3/2   2    0  ]\n"
-//                << "b     = [ 1/6    0    0   2/3  1/6 ]'\n"
-//                << "bstar = [ 1/10   0  3/10  2/5  1/5 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    using Teuchos::as;
-//    int NumStages = 5;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages, true);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages, true);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages, true);
-//    Teuchos::SerialDenseVector<int,Scalar> bstar(NumStages, true);
-//
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//
-//    // Fill A:
-//    A(1,0) = as<Scalar>(one/(3*one));;
-//
-//    A(2,0) = as<Scalar>(one/(6*one));;
-//    A(2,1) = as<Scalar>(one/(6*one));;
-//
-//    A(3,0) = as<Scalar>(one/(8*one));;
-//    A(3,2) = as<Scalar>(3*one/(8*one));;
-//
-//    A(4,0) = as<Scalar>(one/(2*one));;
-//    A(4,2) = as<Scalar>(-3*one/(2*one));;
-//    A(4,3) = 2*one;
-//
-//    // Fill b:
-//    b(0) = as<Scalar>(one/(6*one));
-//    b(3) = as<Scalar>(2*one/(3*one));
-//    b(4) = as<Scalar>(one/(6*one));
-//
-//    // Fill c:
-//    c(0) = zero;
-//    c(1) = as<Scalar>(1*one/(3*one));
-//    c(2) = as<Scalar>(1*one/(3*one));
-//    c(3) = as<Scalar>(1*one/(2*one));
-//    c(4) = one;
-//
-//    // Fill bstar
-//    bstar(0) = as<Scalar>(1*one/(10*one));
-//    bstar(2) = as<Scalar>(3*one/(10*one));
-//    bstar(3) = as<Scalar>(2*one/(5*one));
-//    bstar(4) = as<Scalar>(1*one/(5*one));
-//    int order = 4;
-//
-//    this->setAbc(A,b,c,order,bstar);
-//  }
-//};
-//
-//// ----------------------------------------------------------------------------
-///** \brief Explicit RK 3/8th Rule Butcher Tableau
-// *
-// *  The tableau (order=4) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
-// *                        1/3 & 1/3 &  0  &     &    \\
-// *                        2/3 &-1/3 &  1  &  0  &    \\
-// *                         1  &  1  & -1  &  1  &  0 \\ \hline
-// *                            & 1/8 & 3/8 & 3/8 & 1/8 \end{array}
-// *  \f]
-// *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
-// *              "Solving Ordinary Differential Equations I:
-// *              Nonstiff Problems", 2nd Revised Edition,
-// *              Table 1.2, pg 138.
-// */
-//template<class Scalar>
-//class Explicit3_8Rule_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  Explicit3_8Rule_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const { return "RK Explicit 3/8 Rule"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Solving Ordinary Differential Equations I:\n"
-//                << "Nonstiff Problems, 2nd Revised Edition\n"
-//                << "E. Hairer, S.P. Norsett, G. Wanner\n"
-//                << "Table 1.2, pg 138\n"
-//                << "c = [  0  1/3 2/3  1  ]'\n"
-//                << "A = [  0              ]\n"
-//                << "    [ 1/3  0          ]\n"
-//                << "    [-1/3  1   0      ]\n"
-//                << "    [  1  -1   1   0  ]\n"
-//                << "b = [ 1/8 3/8 3/8 1/8 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    using Teuchos::as;
-//    int NumStages = 4;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    const Scalar onethird     = as<Scalar>(one/(3*one));
-//    const Scalar twothirds    = as<Scalar>(2*one/(3*one));
-//    const Scalar oneeighth    = as<Scalar>(one/(8*one));
-//    const Scalar threeeighths = as<Scalar>(3*one/(8*one));
-//
-//    // Fill A:
-//    A(0,0) =      zero; A(0,1) = zero; A(0,2) = zero; A(0,3) = zero;
-//    A(1,0) =  onethird; A(1,1) = zero; A(1,2) = zero; A(1,3) = zero;
-//    A(2,0) = -onethird; A(2,1) =  one; A(2,2) = zero; A(2,3) = zero;
-//    A(3,0) =       one; A(3,1) = -one; A(3,2) =  one; A(3,3) = zero;
-//
-//    // Fill b:
-//    b(0) =oneeighth; b(1) =threeeighths; b(2) =threeeighths; b(3) =oneeighth;
-//
-//    // Fill c:
-//    c(0) = zero; c(1) = onethird; c(2) = twothirds; c(3) = one;
-//
-//    int order = 4;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief RK Explicit 4 Stage 3rd order by Runge
-// *
-// *  The tableau (order=3) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
-// *                        1/2 & 1/2 &  0  &     &    \\
-// *                         1  &  0  &  1  &  0  &    \\
-// *                         1  &  0  &  0  &  1  &  0 \\ \hline
-// *                            & 1/6 & 2/3 &  0  & 1/6 \end{array}
-// *  \f]
-// *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
-// *              "Solving Ordinary Differential Equations I:
-// *              Nonstiff Problems", 2nd Revised Edition,
-// *              Table 1.1, pg 135.
-// */
-//template<class Scalar>
-//class Explicit4Stage3rdOrderRunge_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  Explicit4Stage3rdOrderRunge_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const
-//    { return "RK Explicit 4 Stage 3rd order by Runge"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Solving Ordinary Differential Equations I:\n"
-//                << "Nonstiff Problems, 2nd Revised Edition\n"
-//                << "E. Hairer, S.P. Norsett, G. Wanner\n"
-//                << "Table 1.1, pg 135\n"
-//                << "c = [  0  1/2  1   1  ]'\n"
-//                << "A = [  0              ]\n"
-//                << "    [ 1/2  0          ]\n"
-//                << "    [  0   1   0      ]\n"
-//                << "    [  0   0   1   0  ]\n"
-//                << "b = [ 1/6 2/3  0  1/6 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    int NumStages = 4;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    const Scalar one = ST::one();
-//    const Scalar onehalf = one/(2*one);
-//    const Scalar onesixth = one/(6*one);
-//    const Scalar twothirds = 2*one/(3*one);
-//    const Scalar zero = ST::zero();
-//
-//    // Fill A:
-//    A(0,0) =    zero; A(0,1) = zero; A(0,2) = zero; A(0,3) = zero;
-//    A(1,0) = onehalf; A(1,1) = zero; A(1,2) = zero; A(1,3) = zero;
-//    A(2,0) =    zero; A(2,1) =  one; A(2,2) = zero; A(2,3) = zero;
-//    A(3,0) =    zero; A(3,1) = zero; A(3,2) =  one; A(3,3) = zero;
-//
-//    // Fill b:
-//    b(0) = onesixth; b(1) = twothirds; b(2) = zero; b(3) = onesixth;
-//
-//    // Fill c:
-//    c(0) = zero; c(1) = onehalf; c(2) = one; c(3) = one;
-//
-//    int order = 3;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief RK Explicit 5 Stage 3rd order by Kinnmark and Gray
-// *
-// *  The tableau (order=3) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|ccccc}  0  &  0  &     &     &     &    \\
-// *                         1/5 & 1/5 &  0  &     &     &    \\
-// *                         1/5 &  0  & 1/5 &  0  &     &    \\
-// *                         1/3 &  0  &  0  & 1/3 &  0  &    \\
-// *                         2/3 &  0  &  0  &  0  & 2/3 &  0 \\ \hline
-// *                             & 1/4 &  0  &  0  &  0  & 3/4 \end{array}
-// *  \f]
-// *  Reference:  Modified by P. Ullrich.  From the prim_advance_mod.F90
-// *              routine in the HOMME atmosphere model code.
-// */
-//template<class Scalar>
-//class Explicit5Stage3rdOrderKandG_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  Explicit5Stage3rdOrderKandG_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const
-//    { return "RK Explicit 5 Stage 3rd order by Kinnmark and Gray"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Kinnmark & Gray 5 stage, 3rd order scheme \n"
-//                << "Modified by P. Ullrich.  From the prim_advance_mod.F90 \n"
-//                << "routine in the HOMME atmosphere model code.\n"
-//                << "c = [  0  1/5  1/5  1/3  2/3  ]'\n"
-//                << "A = [  0                      ]\n"
-//                << "    [ 1/5  0                  ]\n"
-//                << "    [  0  1/5   0             ]\n"
-//                << "    [  0   0   1/3   0        ]\n"
-//                << "    [  0   0    0   2/3   0   ]\n"
-//                << "b = [ 1/4  0    0    0   3/4  ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    int NumStages = 5;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    const Scalar one = ST::one();
-//    const Scalar onefifth = one/(5*one);
-//    const Scalar onefourth = one/(4*one);
-//    const Scalar onethird = one/(3*one);
-//    const Scalar twothirds = 2*one/(3*one);
-//    const Scalar threefourths = 3*one/(4*one);
-//    const Scalar zero = ST::zero();
-//
-//    // Fill A:
-//    A(0,0) =     zero; A(0,1) =     zero; A(0,2) =     zero; A(0,3) =      zero; A(0,4) = zero;
-//    A(1,0) = onefifth; A(1,1) =     zero; A(1,2) =     zero; A(1,3) =      zero; A(1,4) = zero;
-//    A(2,0) =     zero; A(2,1) = onefifth; A(2,2) =     zero; A(2,3) =      zero; A(2,4) = zero;
-//    A(3,0) =     zero; A(3,1) =     zero; A(3,2) = onethird; A(3,3) =      zero; A(3,4) = zero;
-//    A(4,0) =     zero; A(4,1) =     zero; A(4,2) =     zero; A(4,3) = twothirds; A(4,4) = zero;
-//
-//    // Fill b:
-//    b(0) =onefourth; b(1) =zero; b(2) =zero; b(3) =zero; b(4) =threefourths;
-//
-//    // Fill c:
-//    c(0) =zero; c(1) =onefifth; c(2) =onefifth; c(3) =onethird; c(4) =twothirds;
-//
-//    int order = 3;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief RK Explicit 3 Stage 3rd order
-// *
-// *  The tableau (order=3) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|ccc}  0  &  0  &     &     \\
-// *                       1/2 & 1/2 &  0  &     \\
-// *                        1  & -1  &  2  &  0  \\ \hline
-// *                           & 1/6 & 4/6 & 1/6  \end{array}
-// *  \f]
-// */
-//template<class Scalar>
-//class Explicit3Stage3rdOrder_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  Explicit3Stage3rdOrder_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const
-//    { return "RK Explicit 3 Stage 3rd order"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "c = [  0  1/2  1  ]'\n"
-//                << "A = [  0          ]\n"
-//                << "    [ 1/2  0      ]\n"
-//                << "    [ -1   2   0  ]\n"
-//                << "b = [ 1/6 4/6 1/6 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    const Scalar two = Teuchos::as<Scalar>(2*one);
-//    const Scalar zero = ST::zero();
-//    const Scalar onehalf = one/(2*one);
-//    const Scalar onesixth = one/(6*one);
-//    const Scalar foursixth = 4*one/(6*one);
-//
-//    int NumStages = 3;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) =    zero; A(0,1) = zero; A(0,2) = zero;
-//    A(1,0) = onehalf; A(1,1) = zero; A(1,2) = zero;
-//    A(2,0) =    -one; A(2,1) =  two; A(2,2) = zero;
-//
-//    // Fill b:
-//    b(0) = onesixth; b(1) = foursixth; b(2) = onesixth;
-//
-//    // fill c:
-//    c(0) = zero; c(1) = onehalf; c(2) = one;
-//
-//    int order = 3;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief RK Explicit 3 Stage 3rd order TVD
-// *
-// *  The tableau (order=3) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|ccc}  0  &  0  &     &     \\
-// *                        1  &  1  &  0  &     \\
-// *                       1/2 & 1/4 & 1/4 &  0  \\ \hline
-// *                           & 1/6 & 1/6 & 4/6  \end{array}
-// *  \f]
-// *  Reference: Sigal Gottlieb and Chi-Wang Shu,
-// *             'Total Variation Diminishing Runge-Kutta Schemes',
-// *             Mathematics of Computation,
-// *             Volume 67, Number 221, January 1998, pp. 73-85.
-// *
-// *  This is also written in the following set of updates.
-//    \verbatim
-//      u1 = u^n + dt L(u^n)
-//      u2 = 3 u^n/4 + u1/4 + dt L(u1)/4
-//      u^(n+1) = u^n/3 + 2 u2/2 + 2 dt L(u2)/3
-//    \endverbatim
-// */
-//template<class Scalar>
-//class Explicit3Stage3rdOrderTVD_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  Explicit3Stage3rdOrderTVD_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const
-//    { return "RK Explicit 3 Stage 3rd order TVD"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                  << "Sigal Gottlieb and Chi-Wang Shu\n"
-//                  << "`Total Variation Diminishing Runge-Kutta Schemes'\n"
-//                  << "Mathematics of Computation\n"
-//                  << "Volume 67, Number 221, January 1998, pp. 73-85\n"
-//                  << "c = [  0   1  1/2 ]'\n"
-//                  << "A = [  0          ]\n"
-//                  << "    [  1   0      ]\n"
-//                  << "    [ 1/4 1/4  0  ]\n"
-//                  << "b = [ 1/6 1/6 4/6 ]'\n"
-//                  << "This is also written in the following set of updates.\n"
-//                  << "u1 = u^n + dt L(u^n)\n"
-//                  << "u2 = 3 u^n/4 + u1/4 + dt L(u1)/4\n"
-//                  << "u^(n+1) = u^n/3 + 2 u2/2 + 2 dt L(u2)/3";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    const Scalar onehalf = one/(2*one);
-//    const Scalar onefourth = one/(4*one);
-//    const Scalar onesixth = one/(6*one);
-//    const Scalar foursixth = 4*one/(6*one);
-//
-//    int NumStages = 3;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) =      zero; A(0,1) =      zero; A(0,2) = zero;
-//    A(1,0) =       one; A(1,1) =      zero; A(1,2) = zero;
-//    A(2,0) = onefourth; A(2,1) = onefourth; A(2,2) = zero;
-//
-//    // Fill b:
-//    b(0) = onesixth; b(1) = onesixth; b(2) = foursixth;
-//
-//    // fill c:
-//    c(0) = zero; c(1) = one; c(2) = onehalf;
-//
-//    int order = 3;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief RK Explicit 3 Stage 3rd order by Heun
-// *
-// *  The tableau (order=3) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|ccc}  0  &  0  &     &     \\
-// *                       1/3 & 1/3 &  0  &     \\
-// *                       2/3 &  0  & 2/3 &  0  \\ \hline
-// *                           & 1/4 &  0  & 3/4  \end{array}
-// *  \f]
-// *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
-// *              "Solving Ordinary Differential Equations I:
-// *              Nonstiff Problems", 2nd Revised Edition,
-// *              Table 1.1, pg 135.
-// */
-//template<class Scalar>
-//class Explicit3Stage3rdOrderHeun_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  Explicit3Stage3rdOrderHeun_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const
-//    { return "RK Explicit 3 Stage 3rd order by Heun"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Solving Ordinary Differential Equations I:\n"
-//                << "Nonstiff Problems, 2nd Revised Edition\n"
-//                << "E. Hairer, S.P. Norsett, G. Wanner\n"
-//                << "Table 1.1, pg 135\n"
-//                << "c = [  0  1/3 2/3 ]'\n"
-//                << "A = [  0          ] \n"
-//                << "    [ 1/3  0      ]\n"
-//                << "    [  0  2/3  0  ]\n"
-//                << "b = [ 1/4  0  3/4 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    const Scalar onethird = one/(3*one);
-//    const Scalar twothirds = 2*one/(3*one);
-//    const Scalar onefourth = one/(4*one);
-//    const Scalar threefourths = 3*one/(4*one);
-//
-//    int NumStages = 3;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) =     zero; A(0,1) =      zero; A(0,2) = zero;
-//    A(1,0) = onethird; A(1,1) =      zero; A(1,2) = zero;
-//    A(2,0) =     zero; A(2,1) = twothirds; A(2,2) = zero;
-//
-//    // Fill b:
-//    b(0) = onefourth; b(1) = zero; b(2) = threefourths;
-//
-//    // fill c:
-//    c(0) = zero; c(1) = onethird; c(2) = twothirds;
-//
-//    int order = 3;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief RK Explicit Midpoint
-// *
-// *  The tableau (order=2) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cc}  0  &  0  &     \\
-// *                      1/2 & 1/2 &  0  \\ \hline
-// *                          &  0  &  1   \end{array}
-// *  \f]
-// *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
-// *              "Solving Ordinary Differential Equations I:
-// *              Nonstiff Problems", 2nd Revised Edition,
-// *              Table 1.1, pg 135.
-// */
-//template<class Scalar>
-//class ExplicitMidpoint_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  ExplicitMidpoint_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const { return "RK Explicit Midpoint"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Solving Ordinary Differential Equations I:\n"
-//                << "Nonstiff Problems, 2nd Revised Edition\n"
-//                << "E. Hairer, S.P. Norsett, G. Wanner\n"
-//                << "Table 1.1, pg 135\n"
-//                << "c = [  0  1/2 ]'\n"
-//                << "A = [  0      ]\n"
-//                << "    [ 1/2  0  ]\n"
-//                << "b = [  0   1  ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    const Scalar onehalf = one/(2*one);
-//
-//    int NumStages = 2;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) =    zero; A(0,1) = zero;
-//    A(1,0) = onehalf; A(1,1) = zero;
-//
-//    // Fill b:
-//    b(0) = zero; b(1) = one;
-//
-//    // fill c:
-//    c(0) = zero; c(1) = onehalf;
-//
-//    int order = 2;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief RK Explicit Trapezoidal
-// *
-// *  The tableau (order=2) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cc}  0  &  0  &     \\
-// *                       1  &  1  &  0  \\ \hline
-// *                          & 1/2 & 1/2  \end{array}
-// *  \f]
-// */
-//template<class Scalar>
-//class ExplicitTrapezoidal_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  ExplicitTrapezoidal_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  virtual std::string description() const
-//  {
-//    std::string stepperType = "RK Explicit Trapezoidal";
-//    Teuchos::RCP<const Teuchos::ParameterList> pl = this->getParameterList();
-//    if (pl != Teuchos::null) {
-//      if (pl->isParameter("Stepper Type"))
-//        stepperType = pl->get<std::string>("Stepper Type");
-//    }
-//
-//    TEUCHOS_TEST_FOR_EXCEPTION(
-//      !( stepperType == "RK Explicit Trapezoidal" or
-//         stepperType == "Heuns Method")
-//      ,std::logic_error,
-//      "  ParameterList 'Stepper Type' (='" + stepperType + "')\n"
-//      "  does not match any name for this Stepper:\n"
-//      "    'RK Explicit Trapezoidal'\n"
-//      "    'Heuns Method'");
-//
-//    return stepperType;
-//  }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Also known as Heun's Method\n"
-//                << "c = [  0   1  ]'\n"
-//                << "A = [  0      ]\n"
-//                << "    [  1   0  ]\n"
-//                << "b = [ 1/2 1/2 ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//   typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    const Scalar onehalf = one/(2*one);
-//
-//    int NumStages = 2;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) = zero; A(0,1) = zero;
-//    A(1,0) =  one; A(1,1) = zero;
-//
-//    // Fill b:
-//    b(0) = onehalf; b(1) = onehalf;
-//
-//    // fill c:
-//    c(0) = zero; c(1) = one;
-//
-//    int order = 2;
-//
-//    this->setAbc(A,b,c,order);
-//  }
-//};
-//
-//
+
+
+// ----------------------------------------------------------------------------
+/** \brief Forward Euler Runge-Kutta Butcher Tableau
+ *
+ *  The tableau for Forward Euler (order=1) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|c} 0 & 0 \\ \hline
+ *                       & 1 \end{array}
+ *  \f]
+ */
+template<class Scalar>
+class StepperERK_ForwardEuler :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_ForwardEuler()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_ForwardEuler(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const { return "RK Forward Euler"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "c = [ 0 ]'\n"
+                << "A = [ 0 ]\n"
+                << "b = [ 1 ]'";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(1,1);
+    Teuchos::SerialDenseVector<int,Scalar> b(1);
+    Teuchos::SerialDenseVector<int,Scalar> c(1);
+    A(0,0) = ST::zero();
+    b(0) = ST::one();
+    c(0) = ST::zero();
+    int order = 1;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief Runge-Kutta 4th order Butcher Tableau
+ *
+ *  The tableau for RK4 (order=4) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
+ *                        1/2 & 1/2 &  0  &     &    \\
+ *                        1/2 &  0  & 1/2 &  0  &    \\
+ *                         1  &  0  &  0  &  1  &  0 \\ \hline
+ *                            & 1/6 & 1/3 & 1/3 & 1/6 \end{array}
+ *  \f]
+ */
+template<class Scalar>
+class StepperERK_4Stage4thOrder :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_4Stage4thOrder()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_4Stage4thOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const { return "RK Explicit 4 Stage"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "\"The\" Runge-Kutta Method (explicit):\n"
+                << "Solving Ordinary Differential Equations I:\n"
+                << "Nonstiff Problems, 2nd Revised Edition\n"
+                << "E. Hairer, S.P. Norsett, G. Wanner\n"
+                << "Table 1.2, pg 138\n"
+                << "c = [  0  1/2 1/2  1  ]'\n"
+                << "A = [  0              ] \n"
+                << "    [ 1/2  0          ]\n"
+                << "    [  0  1/2  0      ]\n"
+                << "    [  0   0   1   0  ]\n"
+                << "b = [ 1/6 1/3 1/3 1/6 ]'";
+    return Description.str();
+  }
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    const Scalar onehalf = one/(2*one);
+    const Scalar onesixth = one/(6*one);
+    const Scalar onethird = one/(3*one);
+
+    int NumStages = 4;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) =    zero; A(0,1) =    zero; A(0,2) = zero; A(0,3) = zero;
+    A(1,0) = onehalf; A(1,1) =    zero; A(1,2) = zero; A(1,3) = zero;
+    A(2,0) =    zero; A(2,1) = onehalf; A(2,2) = zero; A(2,3) = zero;
+    A(3,0) =    zero; A(3,1) =    zero; A(3,2) =  one; A(3,3) = zero;
+
+    // Fill b:
+    b(0) = onesixth; b(1) = onethird; b(2) = onethird; b(3) = onesixth;
+
+    // fill c:
+    c(0) = zero; c(1) = onehalf; c(2) = onehalf; c(3) = one;
+
+    int order = 4;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief Explicit RK Bogacki-Shampine Butcher Tableau
+ *
+ *  The tableau (order=3(2)) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T \\ \hline
+ *      & \hat{b}^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cccc}  0  & 0    &     &     & \\
+ *                        1/2 & 1/2  & 0   &     & \\
+ *                        3/4 & 0    & 3/4 & 0   & \\
+ *                         1  & 2/9  & 1/3 & 4/9 & 0 \\ \hline
+ *                            & 2/9  & 1/3 & 4/9 & 0 \\
+ *                            & 7/24 & 1/4 & 1/3 & 1/8 \end{array}
+ *  \f]
+ *  Reference:  P. Bogacki and L.F. Shampine.
+ *              A 3(2) pair of Runge–Kutta formulas.
+ *              Applied Mathematics Letters, 2(4):321 – 325, 1989.
+ */
+template<class Scalar>
+class StepperERK_BogackiShampine32 :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_BogackiShampine32()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_BogackiShampine32(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const {return "Bogacki-Shampine 3(2) Pair";}
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "P. Bogacki and L.F. Shampine.\n"
+                << "A 3(2) pair of Runge–Kutta formulas.\n"
+                << "Applied Mathematics Letters, 2(4):321 – 325, 1989.\n"
+                << "c =     [ 0     1/2  3/4   1  ]'\n"
+                << "A =     [ 0                   ]\n"
+                << "        [ 1/2    0            ]\n"
+                << "        [  0    3/4   0       ]\n"
+                << "        [ 2/9   1/3  4/9   0  ]\n"
+                << "b     = [ 2/9   1/3  4/9   0  ]'\n"
+                << "bstar = [ 7/24  1/4  1/3  1/8 ]'";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    using Teuchos::as;
+    int NumStages = 4;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> bstar(NumStages);
+
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    const Scalar onehalf = one/(2*one);
+    const Scalar onethird = one/(3*one);
+    const Scalar threefourths = (3*one)/(4*one);
+    const Scalar twoninths = (2*one)/(9*one);
+    const Scalar fourninths = (4*one)/(9*one);
+
+    // Fill A:
+    A(0,0) =     zero; A(0,1) =        zero; A(0,2) =      zero; A(0,3) = zero;
+    A(1,0) =  onehalf; A(1,1) =        zero; A(1,2) =      zero; A(1,3) = zero;
+    A(2,0) =     zero; A(2,1) =threefourths; A(2,2) =      zero; A(2,3) = zero;
+    A(3,0) =twoninths; A(3,1) =    onethird; A(3,2) =fourninths; A(3,3) = zero;
+
+    // Fill b:
+    b(0) = A(3,0); b(1) = A(3,1); b(2) = A(3,2); b(3) = A(3,3);
+
+    // Fill c:
+    c(0) = zero; c(1) = onehalf; c(2) = threefourths; c(3) = one;
+
+    // Fill bstar
+    bstar(0) = as<Scalar>(7*one/(24*one));
+    bstar(1) = as<Scalar>(1*one/(4*one));
+    bstar(2) = as<Scalar>(1*one/(3*one));
+    bstar(3) = as<Scalar>(1*one/(8*one));
+    int order = 3;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order,bstar));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief Explicit RK Merson Butcher Tableau
+ *
+ *  The tableau (order=4(5)) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T \\ \hline
+ *      & \hat{b}^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|ccccc}  0 & 0    &     &      &     & \\
+ *                        1/3 & 1/3  & 0   &      &     & \\
+ *                        1/3 & 1/6  & 1/6 & 0    &     & \\
+ *                        1/2 & 1/8  & 0   & 3/8  &     & \\
+ *                         1  & 1/2  & 0   & -3/2 & 2   & \\ \hline
+ *                            & 1/6  & 0   & 0    & 2/3 & 1/6 \\
+ *                            & 1/10 & 0   & 3/10 & 2/5 & 1/5 \end{array}
+ *  \f]
+ *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
+ *              "Solving Ordinary Differential Equations I:
+ *              Nonstiff Problems", 2nd Revised Edition,
+ *              Table 4.1, pg 167.
+ *
+ */
+template<class Scalar>
+class StepperERK_Merson45 :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_Merson45()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_Merson45(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const { return "Merson 4(5) Pair"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Solving Ordinary Differential Equations I:\n"
+                << "Nonstiff Problems, 2nd Revised Edition\n"
+                << "E. Hairer, S.P. Norsett, G. Wanner\n"
+                << "Table 4.1, pg 167\n"
+                << "c =     [  0    1/3  1/3  1/2   1  ]'\n"
+                << "A =     [  0                       ]\n"
+                << "        [ 1/3    0                 ]\n"
+                << "        [ 1/6   1/6   0            ]\n"
+                << "        [ 1/8    0   3/8   0       ]\n"
+                << "        [ 1/2    0  -3/2   2    0  ]\n"
+                << "b     = [ 1/6    0    0   2/3  1/6 ]'\n"
+                << "bstar = [ 1/10   0  3/10  2/5  1/5 ]'";
+    return Description.str();
+  }
+
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    using Teuchos::as;
+    int NumStages = 5;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages, true);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages, true);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages, true);
+    Teuchos::SerialDenseVector<int,Scalar> bstar(NumStages, true);
+
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+
+    // Fill A:
+    A(1,0) = as<Scalar>(one/(3*one));;
+
+    A(2,0) = as<Scalar>(one/(6*one));;
+    A(2,1) = as<Scalar>(one/(6*one));;
+
+    A(3,0) = as<Scalar>(one/(8*one));;
+    A(3,2) = as<Scalar>(3*one/(8*one));;
+
+    A(4,0) = as<Scalar>(one/(2*one));;
+    A(4,2) = as<Scalar>(-3*one/(2*one));;
+    A(4,3) = 2*one;
+
+    // Fill b:
+    b(0) = as<Scalar>(one/(6*one));
+    b(3) = as<Scalar>(2*one/(3*one));
+    b(4) = as<Scalar>(one/(6*one));
+
+    // Fill c:
+    c(0) = zero;
+    c(1) = as<Scalar>(1*one/(3*one));
+    c(2) = as<Scalar>(1*one/(3*one));
+    c(3) = as<Scalar>(1*one/(2*one));
+    c(4) = one;
+
+    // Fill bstar
+    bstar(0) = as<Scalar>(1*one/(10*one));
+    bstar(2) = as<Scalar>(3*one/(10*one));
+    bstar(3) = as<Scalar>(2*one/(5*one));
+    bstar(4) = as<Scalar>(1*one/(5*one));
+    int order = 4;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order,bstar));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief Explicit RK 3/8th Rule Butcher Tableau
+ *
+ *  The tableau (order=4) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
+ *                        1/3 & 1/3 &  0  &     &    \\
+ *                        2/3 &-1/3 &  1  &  0  &    \\
+ *                         1  &  1  & -1  &  1  &  0 \\ \hline
+ *                            & 1/8 & 3/8 & 3/8 & 1/8 \end{array}
+ *  \f]
+ *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
+ *              "Solving Ordinary Differential Equations I:
+ *              Nonstiff Problems", 2nd Revised Edition,
+ *              Table 1.2, pg 138.
+ */
+template<class Scalar>
+class StepperERK_3_8Rule :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+public:
+
+  StepperERK_3_8Rule()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_3_8Rule(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const { return "RK Explicit 3/8 Rule"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Solving Ordinary Differential Equations I:\n"
+                << "Nonstiff Problems, 2nd Revised Edition\n"
+                << "E. Hairer, S.P. Norsett, G. Wanner\n"
+                << "Table 1.2, pg 138\n"
+                << "c = [  0  1/3 2/3  1  ]'\n"
+                << "A = [  0              ]\n"
+                << "    [ 1/3  0          ]\n"
+                << "    [-1/3  1   0      ]\n"
+                << "    [  1  -1   1   0  ]\n"
+                << "b = [ 1/8 3/8 3/8 1/8 ]'";
+    return Description.str();
+  }
+
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    using Teuchos::as;
+    int NumStages = 4;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    const Scalar onethird     = as<Scalar>(one/(3*one));
+    const Scalar twothirds    = as<Scalar>(2*one/(3*one));
+    const Scalar oneeighth    = as<Scalar>(one/(8*one));
+    const Scalar threeeighths = as<Scalar>(3*one/(8*one));
+
+    // Fill A:
+    A(0,0) =      zero; A(0,1) = zero; A(0,2) = zero; A(0,3) = zero;
+    A(1,0) =  onethird; A(1,1) = zero; A(1,2) = zero; A(1,3) = zero;
+    A(2,0) = -onethird; A(2,1) =  one; A(2,2) = zero; A(2,3) = zero;
+    A(3,0) =       one; A(3,1) = -one; A(3,2) =  one; A(3,3) = zero;
+
+    // Fill b:
+    b(0) =oneeighth; b(1) =threeeighths; b(2) =threeeighths; b(3) =oneeighth;
+
+    // Fill c:
+    c(0) = zero; c(1) = onethird; c(2) = twothirds; c(3) = one;
+
+    int order = 4;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief RK Explicit 4 Stage 3rd order by Runge
+ *
+ *  The tableau (order=3) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
+ *                        1/2 & 1/2 &  0  &     &    \\
+ *                         1  &  0  &  1  &  0  &    \\
+ *                         1  &  0  &  0  &  1  &  0 \\ \hline
+ *                            & 1/6 & 2/3 &  0  & 1/6 \end{array}
+ *  \f]
+ *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
+ *              "Solving Ordinary Differential Equations I:
+ *              Nonstiff Problems", 2nd Revised Edition,
+ *              Table 1.1, pg 135.
+ */
+template<class Scalar>
+class StepperERK_4Stage3rdOrderRunge :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_4Stage3rdOrderRunge()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_4Stage3rdOrderRunge(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const
+    { return "RK Explicit 4 Stage 3rd order by Runge"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Solving Ordinary Differential Equations I:\n"
+                << "Nonstiff Problems, 2nd Revised Edition\n"
+                << "E. Hairer, S.P. Norsett, G. Wanner\n"
+                << "Table 1.1, pg 135\n"
+                << "c = [  0  1/2  1   1  ]'\n"
+                << "A = [  0              ]\n"
+                << "    [ 1/2  0          ]\n"
+                << "    [  0   1   0      ]\n"
+                << "    [  0   0   1   0  ]\n"
+                << "b = [ 1/6 2/3  0  1/6 ]'";
+    return Description.str();
+  }
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    int NumStages = 4;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    const Scalar one = ST::one();
+    const Scalar onehalf = one/(2*one);
+    const Scalar onesixth = one/(6*one);
+    const Scalar twothirds = 2*one/(3*one);
+    const Scalar zero = ST::zero();
+
+    // Fill A:
+    A(0,0) =    zero; A(0,1) = zero; A(0,2) = zero; A(0,3) = zero;
+    A(1,0) = onehalf; A(1,1) = zero; A(1,2) = zero; A(1,3) = zero;
+    A(2,0) =    zero; A(2,1) =  one; A(2,2) = zero; A(2,3) = zero;
+    A(3,0) =    zero; A(3,1) = zero; A(3,2) =  one; A(3,3) = zero;
+
+    // Fill b:
+    b(0) = onesixth; b(1) = twothirds; b(2) = zero; b(3) = onesixth;
+
+    // Fill c:
+    c(0) = zero; c(1) = onehalf; c(2) = one; c(3) = one;
+
+    int order = 3;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief RK Explicit 5 Stage 3rd order by Kinnmark and Gray
+ *
+ *  The tableau (order=3) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|ccccc}  0  &  0  &     &     &     &    \\
+ *                         1/5 & 1/5 &  0  &     &     &    \\
+ *                         1/5 &  0  & 1/5 &  0  &     &    \\
+ *                         1/3 &  0  &  0  & 1/3 &  0  &    \\
+ *                         2/3 &  0  &  0  &  0  & 2/3 &  0 \\ \hline
+ *                             & 1/4 &  0  &  0  &  0  & 3/4 \end{array}
+ *  \f]
+ *  Reference:  Modified by P. Ullrich.  From the prim_advance_mod.F90
+ *              routine in the HOMME atmosphere model code.
+ */
+template<class Scalar>
+class StepperERK_5Stage3rdOrderKandG :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_5Stage3rdOrderKandG()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_5Stage3rdOrderKandG(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const
+    { return "RK Explicit 5 Stage 3rd order by Kinnmark and Gray"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Kinnmark & Gray 5 stage, 3rd order scheme \n"
+                << "Modified by P. Ullrich.  From the prim_advance_mod.F90 \n"
+                << "routine in the HOMME atmosphere model code.\n"
+                << "c = [  0  1/5  1/5  1/3  2/3  ]'\n"
+                << "A = [  0                      ]\n"
+                << "    [ 1/5  0                  ]\n"
+                << "    [  0  1/5   0             ]\n"
+                << "    [  0   0   1/3   0        ]\n"
+                << "    [  0   0    0   2/3   0   ]\n"
+                << "b = [ 1/4  0    0    0   3/4  ]'";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    int NumStages = 5;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    const Scalar one = ST::one();
+    const Scalar onefifth = one/(5*one);
+    const Scalar onefourth = one/(4*one);
+    const Scalar onethird = one/(3*one);
+    const Scalar twothirds = 2*one/(3*one);
+    const Scalar threefourths = 3*one/(4*one);
+    const Scalar zero = ST::zero();
+
+    // Fill A:
+    A(0,0) =     zero; A(0,1) =     zero; A(0,2) =     zero; A(0,3) =      zero; A(0,4) = zero;
+    A(1,0) = onefifth; A(1,1) =     zero; A(1,2) =     zero; A(1,3) =      zero; A(1,4) = zero;
+    A(2,0) =     zero; A(2,1) = onefifth; A(2,2) =     zero; A(2,3) =      zero; A(2,4) = zero;
+    A(3,0) =     zero; A(3,1) =     zero; A(3,2) = onethird; A(3,3) =      zero; A(3,4) = zero;
+    A(4,0) =     zero; A(4,1) =     zero; A(4,2) =     zero; A(4,3) = twothirds; A(4,4) = zero;
+
+    // Fill b:
+    b(0) =onefourth; b(1) =zero; b(2) =zero; b(3) =zero; b(4) =threefourths;
+
+    // Fill c:
+    c(0) =zero; c(1) =onefifth; c(2) =onefifth; c(3) =onethird; c(4) =twothirds;
+
+    int order = 3;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief RK Explicit 3 Stage 3rd order
+ *
+ *  The tableau (order=3) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|ccc}  0  &  0  &     &     \\
+ *                       1/2 & 1/2 &  0  &     \\
+ *                        1  & -1  &  2  &  0  \\ \hline
+ *                           & 1/6 & 4/6 & 1/6  \end{array}
+ *  \f]
+ */
+template<class Scalar>
+class StepperERK_3Stage3rdOrder :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_3Stage3rdOrder()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_3Stage3rdOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const
+    { return "RK Explicit 3 Stage 3rd order"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "c = [  0  1/2  1  ]'\n"
+                << "A = [  0          ]\n"
+                << "    [ 1/2  0      ]\n"
+                << "    [ -1   2   0  ]\n"
+                << "b = [ 1/6 4/6 1/6 ]'";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar two = Teuchos::as<Scalar>(2*one);
+    const Scalar zero = ST::zero();
+    const Scalar onehalf = one/(2*one);
+    const Scalar onesixth = one/(6*one);
+    const Scalar foursixth = 4*one/(6*one);
+
+    int NumStages = 3;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) =    zero; A(0,1) = zero; A(0,2) = zero;
+    A(1,0) = onehalf; A(1,1) = zero; A(1,2) = zero;
+    A(2,0) =    -one; A(2,1) =  two; A(2,2) = zero;
+
+    // Fill b:
+    b(0) = onesixth; b(1) = foursixth; b(2) = onesixth;
+
+    // fill c:
+    c(0) = zero; c(1) = onehalf; c(2) = one;
+
+    int order = 3;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief RK Explicit 3 Stage 3rd order TVD
+ *
+ *  The tableau (order=3) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|ccc}  0  &  0  &     &     \\
+ *                        1  &  1  &  0  &     \\
+ *                       1/2 & 1/4 & 1/4 &  0  \\ \hline
+ *                           & 1/6 & 1/6 & 4/6  \end{array}
+ *  \f]
+ *  Reference: Sigal Gottlieb and Chi-Wang Shu,
+ *             'Total Variation Diminishing Runge-Kutta Schemes',
+ *             Mathematics of Computation,
+ *             Volume 67, Number 221, January 1998, pp. 73-85.
+ *
+ *  This is also written in the following set of updates.
+    \verbatim
+      u1 = u^n + dt L(u^n)
+      u2 = 3 u^n/4 + u1/4 + dt L(u1)/4
+      u^(n+1) = u^n/3 + 2 u2/2 + 2 dt L(u2)/3
+    \endverbatim
+ */
+template<class Scalar>
+class StepperERK_3Stage3rdOrderTVD :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_3Stage3rdOrderTVD()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_3Stage3rdOrderTVD(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+
+  virtual std::string description() const
+    { return "RK Explicit 3 Stage 3rd order TVD"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                  << "Sigal Gottlieb and Chi-Wang Shu\n"
+                  << "`Total Variation Diminishing Runge-Kutta Schemes'\n"
+                  << "Mathematics of Computation\n"
+                  << "Volume 67, Number 221, January 1998, pp. 73-85\n"
+                  << "c = [  0   1  1/2 ]'\n"
+                  << "A = [  0          ]\n"
+                  << "    [  1   0      ]\n"
+                  << "    [ 1/4 1/4  0  ]\n"
+                  << "b = [ 1/6 1/6 4/6 ]'\n"
+                  << "This is also written in the following set of updates.\n"
+                  << "u1 = u^n + dt L(u^n)\n"
+                  << "u2 = 3 u^n/4 + u1/4 + dt L(u1)/4\n"
+                  << "u^(n+1) = u^n/3 + 2 u2/2 + 2 dt L(u2)/3";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    const Scalar onehalf = one/(2*one);
+    const Scalar onefourth = one/(4*one);
+    const Scalar onesixth = one/(6*one);
+    const Scalar foursixth = 4*one/(6*one);
+
+    int NumStages = 3;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) =      zero; A(0,1) =      zero; A(0,2) = zero;
+    A(1,0) =       one; A(1,1) =      zero; A(1,2) = zero;
+    A(2,0) = onefourth; A(2,1) = onefourth; A(2,2) = zero;
+
+    // Fill b:
+    b(0) = onesixth; b(1) = onesixth; b(2) = foursixth;
+
+    // fill c:
+    c(0) = zero; c(1) = one; c(2) = onehalf;
+
+    int order = 3;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief RK Explicit 3 Stage 3rd order by Heun
+ *
+ *  The tableau (order=3) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|ccc}  0  &  0  &     &     \\
+ *                       1/3 & 1/3 &  0  &     \\
+ *                       2/3 &  0  & 2/3 &  0  \\ \hline
+ *                           & 1/4 &  0  & 3/4  \end{array}
+ *  \f]
+ *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
+ *              "Solving Ordinary Differential Equations I:
+ *              Nonstiff Problems", 2nd Revised Edition,
+ *              Table 1.1, pg 135.
+ */
+template<class Scalar>
+class StepperERK_3Stage3rdOrderHeun :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_3Stage3rdOrderHeun()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_3Stage3rdOrderHeun(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const
+    { return "RK Explicit 3 Stage 3rd order by Heun"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Solving Ordinary Differential Equations I:\n"
+                << "Nonstiff Problems, 2nd Revised Edition\n"
+                << "E. Hairer, S.P. Norsett, G. Wanner\n"
+                << "Table 1.1, pg 135\n"
+                << "c = [  0  1/3 2/3 ]'\n"
+                << "A = [  0          ] \n"
+                << "    [ 1/3  0      ]\n"
+                << "    [  0  2/3  0  ]\n"
+                << "b = [ 1/4  0  3/4 ]'";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    const Scalar onethird = one/(3*one);
+    const Scalar twothirds = 2*one/(3*one);
+    const Scalar onefourth = one/(4*one);
+    const Scalar threefourths = 3*one/(4*one);
+
+    int NumStages = 3;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) =     zero; A(0,1) =      zero; A(0,2) = zero;
+    A(1,0) = onethird; A(1,1) =      zero; A(1,2) = zero;
+    A(2,0) =     zero; A(2,1) = twothirds; A(2,2) = zero;
+
+    // Fill b:
+    b(0) = onefourth; b(1) = zero; b(2) = threefourths;
+
+    // fill c:
+    c(0) = zero; c(1) = onethird; c(2) = twothirds;
+
+    int order = 3;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief RK Explicit Midpoint
+ *
+ *  The tableau (order=2) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cc}  0  &  0  &     \\
+ *                      1/2 & 1/2 &  0  \\ \hline
+ *                          &  0  &  1   \end{array}
+ *  \f]
+ *  Reference:  E. Hairer, S.P. Norsett, G. Wanner,
+ *              "Solving Ordinary Differential Equations I:
+ *              Nonstiff Problems", 2nd Revised Edition,
+ *              Table 1.1, pg 135.
+ */
+template<class Scalar>
+class StepperERK_Midpoint :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_Midpoint()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_Midpoint(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const { return "RK Explicit Midpoint"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Solving Ordinary Differential Equations I:\n"
+                << "Nonstiff Problems, 2nd Revised Edition\n"
+                << "E. Hairer, S.P. Norsett, G. Wanner\n"
+                << "Table 1.1, pg 135\n"
+                << "c = [  0  1/2 ]'\n"
+                << "A = [  0      ]\n"
+                << "    [ 1/2  0  ]\n"
+                << "b = [  0   1  ]'";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    const Scalar onehalf = one/(2*one);
+
+    int NumStages = 2;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) =    zero; A(0,1) = zero;
+    A(1,0) = onehalf; A(1,1) = zero;
+
+    // Fill b:
+    b(0) = zero; b(1) = one;
+
+    // fill c:
+    c(0) = zero; c(1) = onehalf;
+
+    int order = 2;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief RK Explicit Trapezoidal
+ *
+ *  The tableau (order=2) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cc}  0  &  0  &     \\
+ *                       1  &  1  &  0  \\ \hline
+ *                          & 1/2 & 1/2  \end{array}
+ *  \f]
+ */
+template<class Scalar>
+class StepperERK_Trapezoidal :
+  virtual public StepperExplicitRK_new<Scalar>
+{
+  public:
+  StepperERK_Trapezoidal()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperERK_Trapezoidal(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  virtual std::string description() const
+  {
+    std::string stepperType = this->getStepperType();
+    if ( stepperType == "" ) stepperType = "RK Explicit Trapezoidal";
+
+    TEUCHOS_TEST_FOR_EXCEPTION(
+      !( stepperType == "RK Explicit Trapezoidal" or
+         stepperType == "Heuns Method")
+      ,std::logic_error,
+      "  ParameterList 'Stepper Type' (='" + stepperType + "')\n"
+      "  does not match any name for this Stepper:\n"
+      "    'RK Explicit Trapezoidal'\n"
+      "    'Heuns Method'");
+
+    return stepperType;
+  }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "This Stepper is known as 'RK Explicit Trapezoidal' or 'Heuns Method'.\n"
+                << "c = [  0   1  ]'\n"
+                << "A = [  0      ]\n"
+                << "    [  1   0  ]\n"
+                << "b = [ 1/2 1/2 ]'";
+    return Description.str();
+  }
+
+protected:
+
+  void setupTableau()
+  {
+   typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+    const Scalar onehalf = one/(2*one);
+
+    int NumStages = 2;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) = zero; A(0,1) = zero;
+    A(1,0) =  one; A(1,1) = zero;
+
+    // Fill b:
+    b(0) = onehalf; b(1) = onehalf;
+
+    // fill c:
+    c(0) = zero; c(1) = one;
+
+    int order = 2;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
+
+
 //// ----------------------------------------------------------------------------
 ///** \brief General Implicit Runge-Kutta Butcher Tableau
 // *

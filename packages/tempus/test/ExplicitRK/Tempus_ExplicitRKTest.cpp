@@ -82,10 +82,6 @@ TEUCHOS_UNIT_TEST(ExplicitRK, ParameterList)
     RCP<ParameterList> tempusPL  = sublist(pList, "Tempus", true);
     if (RKMethods[m] == "General ERK") {
       tempusPL->sublist("Demo Integrator").set("Stepper Name", "Demo Stepper 2");
-    } else if (RKMethods[m] == "Heuns Method") {
-      // Match default Stepper Type
-      tempusPL->sublist("Demo Stepper")
-                   .set("Stepper Type", "RK Explicit Trapezoidal");
     } else {
       tempusPL->sublist("Demo Stepper").set("Stepper Type", RKMethods[m]);
     }
