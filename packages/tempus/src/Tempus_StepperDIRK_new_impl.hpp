@@ -58,7 +58,6 @@ void StepperDIRK_new<Scalar>::setup(
   stepperDIRKObserver_ = Teuchos::rcp(new StepperDIRKObserver<Scalar>());
   this->setObserver(obs);
 
-
   if (appModel != Teuchos::null) {
     this->setModel(appModel);
     this->setSolverWSolver(solver);
@@ -68,7 +67,7 @@ void StepperDIRK_new<Scalar>::setup(
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::getValidParametersBasicRKImplicit(
+void StepperDIRK_new<Scalar>::getValidParametersBasicDIRK(
   Teuchos::RCP<Teuchos::ParameterList> pl) const
 {
   getValidParametersBasic(pl, this->getStepperType());
@@ -370,7 +369,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperDIRK_new<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  this->getValidParametersBasicRKImplicit(pl);
+  this->getValidParametersBasicDIRK(pl);
 
   return pl;
 }

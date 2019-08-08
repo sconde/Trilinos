@@ -120,9 +120,9 @@ TEUCHOS_UNIT_TEST(DIRK, ParameterList)
     } else if (RKMethods[m] == "General DIRK") {
       // Add the default tableau.
       Teuchos::RCP<Teuchos::ParameterList> tableauPL = Teuchos::parameterList();
-      tableauPL->set<std::string>("A", " 2.92893218813452e-01 0.00000000000000e+00;  7.07106781186548e-01 2.92893218813452e-01");
-      tableauPL->set<std::string>("b", " 7.07106781186548e-01 2.92893218813452e-01");
-      tableauPL->set<std::string>("c", " 2.92893218813452e-01 1.00000000000000e+00");
+      tableauPL->set<std::string>("A", "0.2928932188134524 0.0; 0.7071067811865476 0.2928932188134524");
+      tableauPL->set<std::string>("b", "0.7071067811865476 0.2928932188134524");
+      tableauPL->set<std::string>("c", "0.2928932188134524 1.0");
       tableauPL->set<int>("order", 2);
       tableauPL->set<std::string>("bstar", "");
       tempusPL->sublist("Default Stepper").set("Tableau", *tableauPL);

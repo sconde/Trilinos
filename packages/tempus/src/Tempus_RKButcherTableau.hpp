@@ -68,7 +68,7 @@ class RKButcherTableau :
       const Teuchos::SerialDenseVector<int,Scalar>&
         bstar = Teuchos::SerialDenseVector<int,Scalar>())
     {
-      this->setAbc(A,b,c,order,orderMin,orderMin,bstar);
+      this->setAbc(A,b,c,order,orderMin,orderMax,bstar);
     }
 
     /** \brief Return the number of stages */

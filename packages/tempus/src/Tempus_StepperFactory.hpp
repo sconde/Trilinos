@@ -276,7 +276,8 @@ public:
       setStepperValues(stepper, stepperPL);
       stepper->setUseEmbedded(
         stepperPL->get<bool>("Use Embedded",stepper->getUseEmbeddedDefault()));
-
+      stepper->setZeroInitialGuess(
+        stepperPL->get<bool>("Zero Initial Guess", false));
 
       std::string solverName = stepperPL->get<std::string>("Solver Name");
       if ( stepperPL->isSublist(solverName) ) {
@@ -379,17 +380,22 @@ private:
       setStepperRKValues(model, stepperPL, stepper);
       return stepper;
     }
-    else if ( stepperType == "Bogacki-Shampine 3(2) Pair" ) {
+    else if (stepperType == "Bogacki-Shampine 3(2) Pair" ) {
       auto stepper = Teuchos::rcp(new StepperERK_BogackiShampine32<Scalar>());
       setStepperRKValues(model, stepperPL, stepper);
       return stepper;
     }
-    else if ( stepperType == "Merson 4(5) Pair" ) {
+    else if (stepperType == "Merson 4(5) Pair" ) {
       auto stepper = Teuchos::rcp(new StepperERK_Merson45<Scalar>());
       setStepperRKValues(model, stepperPL, stepper);
       return stepper;
     }
-    else if ( stepperType == "RK Backward Euler" ) {
+    else if (stepperType == "General DIRK" ) {
+      auto stepper = Teuchos::rcp(new StepperDIRK_General<Scalar>());
+      setStepperDIRKValues(model, stepperPL, stepper);
+      return stepper;
+    }
+    else if (stepperType == "RK Backward Euler" ) {
       auto stepper = Teuchos::rcp(new StepperDIRK_BackwardEuler<Scalar>());
       setStepperDIRKValues(model, stepperPL, stepper);
       return stepper;
@@ -406,8 +412,7 @@ private:
       stepperType == "SDIRK 5 Stage 4th order" ||
       stepperType == "SDIRK 5 Stage 5th order" ||
       stepperType == "SDIRK 2(1) Pair" ||
-      stepperType == "RK Trapezoidal Rule" || stepperType == "RK Crank-Nicolson" ||
-      stepperType == "General DIRK"
+      stepperType == "RK Trapezoidal Rule" || stepperType == "RK Crank-Nicolson"
       )
       return rcp(new StepperDIRK<Scalar>(model, stepperType, stepperPL));
     else if (

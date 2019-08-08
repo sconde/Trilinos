@@ -129,7 +129,7 @@ public:
 
     virtual OrderODE getOrderODE()   const {return FIRST_ORDER_ODE;}
 
-    void getValidParametersBasicRKImplicit(
+    void getValidParametersBasicDIRK(
       Teuchos::RCP<Teuchos::ParameterList> pl) const;
 
     virtual std::string getDescription() const

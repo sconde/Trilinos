@@ -147,7 +147,7 @@ Scalar StepperExplicitRK_new<Scalar>::getInitTimeStep(
 
 
 template<class Scalar>
-void StepperExplicitRK_new<Scalar>::getValidParametersBasicRK(
+void StepperExplicitRK_new<Scalar>::getValidParametersBasicERK(
   Teuchos::RCP<Teuchos::ParameterList> pl) const
 {
   getValidParametersBasic(pl, this->getStepperType());
@@ -393,7 +393,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperExplicitRK_new<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  this->getValidParametersBasicRK(pl);
+  this->getValidParametersBasicERK(pl);
   return pl;
 }
 

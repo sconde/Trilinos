@@ -132,7 +132,7 @@ public:
 
     virtual OrderODE getOrderODE()   const {return FIRST_ORDER_ODE;}
 
-    void getValidParametersBasicRK(Teuchos::RCP<Teuchos::ParameterList> pl) const;
+    void getValidParametersBasicERK(Teuchos::RCP<Teuchos::ParameterList> pl) const;
     virtual std::string getDescription() const
     { return tableau_->getDescription();}
 
