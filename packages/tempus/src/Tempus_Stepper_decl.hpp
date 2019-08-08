@@ -85,7 +85,7 @@ public:
     virtual void setSolver(
       Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null) = 0;
     /// Set solver.
-    virtual void setSolver(
+    virtual void setSolverWSolver(
         Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver) = 0;
     /// Get solver
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >
@@ -126,19 +126,19 @@ public:
     virtual bool isOneStepMethod() const = 0;
     virtual bool isMultiStepMethod() const = 0;
 
-    virtual void setStepperType(std::string s) { stepperType_ = s;}
-    virtual std::string getStepperType() const { return stepperType_; }
+    void setStepperType(std::string s) { stepperType_ = s;}
+    std::string getStepperType() const { return stepperType_; }
 
-    virtual void setUseFSAL(bool a) { useFSAL_ = a; }
-    virtual bool getUseFSAL() const { return useFSAL_; }
+    void setUseFSAL(bool a) { useFSAL_ = a; }
+    bool getUseFSAL() const { return useFSAL_; }
     virtual bool getUseFSALDefault() const { return false; }
 
-    virtual void setICConsistency(std::string s) { ICConsistency_ = s;}
-    virtual std::string getICConsistency() const { return ICConsistency_; }
+    void setICConsistency(std::string s) { ICConsistency_ = s;}
+    std::string getICConsistency() const { return ICConsistency_; }
     virtual std::string getICConsistencyDefault() const { return "None"; }
 
-    virtual void setICConsistencyCheck(bool c) {ICConsistencyCheck_ = c;}
-    virtual bool getICConsistencyCheck() const { return ICConsistencyCheck_; }
+    void setICConsistencyCheck(bool c) {ICConsistencyCheck_ = c;}
+    bool getICConsistencyCheck() const { return ICConsistencyCheck_; }
     virtual bool getICConsistencyCheckDefault() const { return false; }
 
     virtual OrderODE getOrderODE() const = 0;

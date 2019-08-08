@@ -190,8 +190,8 @@ public:
   /// \name Accessors methods
   //@{
     /** \brief Use embedded if avialable. */
-    virtual void setUseEmbedded(bool a) { useEmbedded_ = a; }
-    virtual bool getUseEmbedded() const { return useEmbedded_; }
+    void setUseEmbedded(bool a) { useEmbedded_ = a; }
+    bool getUseEmbedded() const { return useEmbedded_; }
     virtual bool getUseEmbeddedDefault() const { return false; }
   //@}
 

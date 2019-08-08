@@ -239,6 +239,14 @@ void StepperTrapezoidal<Scalar>::setParameterList(
     << "  Stepper Type = "<<stepperPL->get<std::string>("Stepper Type")<<"\n");
 
   this->stepperPL_ = stepperPL;
+
+  this->setStepperType(this->description());
+  this->setUseFSAL(this->stepperPL_->template get<bool>(
+    "Use FSAL", this->getUseFSALDefault()));
+  this->setICConsistency( this->stepperPL_->template get<std::string>(
+    "Initial Condition Consistency", this->getICConsistencyDefault()));
+  this->setICConsistencyCheck( this->stepperPL_->template get<bool>(
+    "Initial Condition Consistency Check", this->getICConsistencyCheckDefault()));
 }
 
 

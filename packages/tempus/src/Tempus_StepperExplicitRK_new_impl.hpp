@@ -28,7 +28,7 @@ void StepperExplicitRK_new<Scalar>::setupDefault()
   this->setUseEmbedded(        this->getUseEmbeddedDefault());
 
   this->stepperObserver_ =
-    Teuchos::rcp(new StepperObserverComposite<Scalar>);
+    Teuchos::rcp(new StepperObserverComposite<Scalar>());
   this->stepperExplicitRKObserver_ =
     Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
 }
@@ -50,7 +50,7 @@ void StepperExplicitRK_new<Scalar>::setup(
   this->setUseEmbedded(        useEmbedded);
 
   this->stepperObserver_ =
-    Teuchos::rcp(new StepperObserverComposite<Scalar>);
+    Teuchos::rcp(new StepperObserverComposite<Scalar>());
   this->stepperExplicitRKObserver_ =
     Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
   this->setObserver(obs);
@@ -402,6 +402,7 @@ template <class Scalar>
 Teuchos::RCP<Teuchos::ParameterList>
 StepperExplicitRK_new<Scalar>::getNonconstParameterList()
 {
+  //TEUCHOS_ASSERT(false);
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
   return pl;
 }
@@ -411,6 +412,7 @@ template <class Scalar>
 Teuchos::RCP<Teuchos::ParameterList>
 StepperExplicitRK_new<Scalar>::unsetParameterList()
 {
+  TEUCHOS_ASSERT(false);
   return Teuchos::null;
 }
 

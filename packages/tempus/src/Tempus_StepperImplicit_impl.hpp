@@ -260,15 +260,21 @@ void StepperImplicit<Scalar>::setSolver(
   using Teuchos::RCP;
   using Teuchos::ParameterList;
 
-  std::string solverName = stepperPL_->get<std::string>("Solver Name");
-  if (is_null(solverPL)) {
-    if ( stepperPL_->isSublist(solverName) ) {
-      solverPL = Teuchos::sublist(stepperPL_, solverName, true);
-    } else {
+  if (stepperPL_ == Teuchos::null) {
+    if (is_null(solverPL)) {
       solverPL = defaultSolverParameters();
-      solverName = solverPL->name();
-      stepperPL_->set("Solver Name", solverName);
-      stepperPL_->set(solverName, *solverPL);      // Add sublist
+    }
+  } else {
+    std::string solverName = stepperPL_->get<std::string>("Solver Name");
+    if (is_null(solverPL)) {
+      if ( stepperPL_->isSublist(solverName) ) {
+        solverPL = Teuchos::sublist(stepperPL_, solverName, true);
+      } else {
+        solverPL = defaultSolverParameters();
+        solverName = solverPL->name();
+        stepperPL_->set("Solver Name", solverName);
+        stepperPL_->set(solverName, *solverPL);      // Add sublist
+      }
     }
   }
 
@@ -290,12 +296,21 @@ void StepperImplicit<Scalar>::setSolver(
  *  to the Stepper ParameterList.
  */
 template<class Scalar>
-void StepperImplicit<Scalar>::setSolver(
+void StepperImplicit<Scalar>::setSolverWSolver(
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver)
 {
-  Teuchos::RCP<Teuchos::ParameterList> solverPL =
-    solver->getNonconstParameterList();
-  this->setSolver(solverPL);
+  //Teuchos::RCP<Teuchos::ParameterList> solverPL =
+  //  solver->getNonconstParameterList();
+  //this->setSolver(solverPL);
+
+  solver_ = solver;
+
+  TEUCHOS_TEST_FOR_EXCEPTION(wrapperModel_ == Teuchos::null, std::logic_error,
+       "Error - StepperImplicit<Scalar>::setSolver() wrapperModel_ is unset!\n"
+    << "  Should call setModel(...) first.\n");
+
+  solver_->setModel(wrapperModel_);
+
 }
 
 template<class Scalar>

@@ -16,6 +16,7 @@
 
 //#include "Tempus_String_Utilities.hpp"
 #include "Tempus_StepperExplicitRK_new.hpp"
+#include "Tempus_StepperDIRK_new.hpp"
 #include "Tempus_RKButcherTableau.hpp"
 
 //#include "Teuchos_Assert.hpp"
@@ -173,66 +174,93 @@ public:
 };
 
 
-//// ----------------------------------------------------------------------------
-///** \brief Backward Euler Runge-Kutta Butcher Tableau
-// *
-// *  The tableau for Backward Euler (order=1) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|c} 1 & 1 \\ \hline
-// *                       & 1 \end{array}
-// *  \f]
-// */
-//template<class Scalar>
-//class StepperERK_BackwardEuler :
-//  virtual public StepperExplicitRK_new<Scalar>
-//{
-//  public:
-//  StepperERK_BackwardEuler()
-//  {
-//    this->setupDefault();
-//  }
-//
-//  StepperERK_BackwardEuler(
-//    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-//    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
-//    bool useFSAL,
-//    std::string ICConsistency,
-//    bool ICConsistencyCheck,
-//    bool useEmbedded)
-//  {
-//    this->setup(appModel, obs, useFSAL, ICConsistency,
-//                ICConsistencyCheck, useEmbedded);
-//  }
-//
-//  std::string description() const { return "RK Backward Euler"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "c = [ 1 ]'\n"
-//                << "A = [ 1 ]\n"
-//                << "b = [ 1 ]'";
-//    return Description.str();
-//  }
-//
-//  virtual bool getDefaultICConsistencyCheck() const { return false; }
-//
-//  Teuchos::RCP<const Teuchos::ParameterList>
-//  getValidParameters() const
-//  {
-//    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    this->getValidParametersBasicRK(pl);
-//    pl->set<bool>("Initial Condition Consistency Check",
-//                  this->getDefaultICConsistencyCheck());
-//    return pl;
-//  }
-//};
+// ----------------------------------------------------------------------------
+/** \brief Backward Euler Runge-Kutta Butcher Tableau
+ *
+ *  The tableau for Backward Euler (order=1) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|c} 1 & 1 \\ \hline
+ *                       & 1 \end{array}
+ *  \f]
+ */
+template<class Scalar>
+class StepperDIRK_BackwardEuler :
+  virtual public StepperDIRK_new<Scalar>
+{
+  public:
+  StepperDIRK_BackwardEuler()
+  {
+    this->setupDefault();
+    this->setupTableau();
+  }
+
+  StepperDIRK_BackwardEuler(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded)
+  {
+    this->setup(appModel, obs, solver, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
+    this->setupTableau();
+  }
+
+  std::string description() const { return "RK Backward Euler"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "c = [ 1 ]'\n"
+                << "A = [ 1 ]\n"
+                << "b = [ 1 ]'";
+    return Description.str();
+  }
+
+  virtual bool getDefaultICConsistencyCheck() const { return false; }
+
+  Teuchos::RCP<const Teuchos::ParameterList>
+  getValidParameters() const
+  {
+    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
+    this->getValidParametersBasicRKImplicit(pl);
+    pl->set<bool>("Initial Condition Consistency Check",
+                  this->getDefaultICConsistencyCheck());
+    return pl;
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    int NumStages = 1;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) = ST::one();
+
+    // Fill b:
+    b(0) = ST::one();
+
+    // Fill c:
+    c(0) = ST::one();
+
+    int order = 1;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+};
 
 
 // ----------------------------------------------------------------------------

@@ -26,6 +26,7 @@
 #include "Tempus_StepperOperatorSplit.hpp"
 #include "Tempus_StepperTrapezoidal.hpp"
 
+#include "NOX_Thyra.H"
 
 namespace Tempus {
 
@@ -260,6 +261,40 @@ public:
     }
   }
 
+  /// Set StepperDIRK member data from the model and ParameterList.
+  void setStepperDIRKValues(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL,
+    Teuchos::RCP<StepperDIRK_new<Scalar> > stepper)
+  {
+    auto solver = rcp(new Thyra::NOXNonlinearSolver());
+    solver->setParameterList(defaultSolverParameters());
+    if (stepperPL != Teuchos::null) {
+      // Can not validate because of optional Parameters, e.g., 'Solver Name'.
+      //stepperPL->validateParametersAndSetDefaults(
+      //                                      *stepper->getValidParameters());
+      setStepperValues(stepper, stepperPL);
+      stepper->setUseEmbedded(
+        stepperPL->get<bool>("Use Embedded",stepper->getUseEmbeddedDefault()));
+
+
+      std::string solverName = stepperPL->get<std::string>("Solver Name");
+      if ( stepperPL->isSublist(solverName) ) {
+        auto solverPL = Teuchos::parameterList();
+        solverPL = Teuchos::sublist(stepperPL, solverName);
+        Teuchos::RCP<Teuchos::ParameterList> noxPL =
+          Teuchos::sublist(solverPL,"NOX",true);
+        solver->setParameterList(noxPL);
+      }
+    }
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      stepper->setSolverWSolver(solver);
+      stepper->initialize();
+    }
+  }
+
   // ---------------------------------------------------------------------------
 
 private:
@@ -354,8 +389,12 @@ private:
       setStepperRKValues(model, stepperPL, stepper);
       return stepper;
     }
+    else if ( stepperType == "RK Backward Euler" ) {
+      auto stepper = Teuchos::rcp(new StepperDIRK_BackwardEuler<Scalar>());
+      setStepperDIRKValues(model, stepperPL, stepper);
+      return stepper;
+    }
     else if (
-      stepperType == "RK Backward Euler" ||
       stepperType == "IRK 1 Stage Theta Method" ||
       stepperType == "RK Implicit Midpoint" ||
       stepperType == "SDIRK 1 Stage 1st order" ||

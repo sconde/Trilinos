@@ -128,11 +128,11 @@ void StepperOperatorSplit<Scalar>::setSolver(
 }
 
 template<class Scalar>
-void StepperOperatorSplit<Scalar>::setSolver(
+void StepperOperatorSplit<Scalar>::setSolverWSolver(
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > /* solver */)
 {
   Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
-  Teuchos::OSTab ostab(out,1,"StepperOperatorSplit::setSolver()");
+  Teuchos::OSTab ostab(out,1,"StepperOperatorSplit::setSolverWSolver()");
   *out << "Warning -- No solver to set for StepperOperatorSplit "
        << "because it is a Stepper of Steppers.\n" << std::endl;
   return;

@@ -88,7 +88,7 @@ public:
     virtual void setSolver(std::string solverName);
     virtual void setSolver(
       Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null);
-    virtual void setSolver(
+    virtual void setSolverWSolver(
       Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver);
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const
     { return stateStepper_->getSolver(); }
