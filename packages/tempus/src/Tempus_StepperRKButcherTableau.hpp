@@ -68,8 +68,8 @@ class StepperERK_General :
 public:
   StepperERK_General()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_General(
@@ -87,14 +87,14 @@ public:
     const int orderMax,
     const Teuchos::SerialDenseVector<int,Scalar>& bstar)
   {
-    this->setup(appModel, obs, useFSAL, ICConsistency,
-                ICConsistencyCheck, useEmbedded);
-
     this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
 
     TEUCHOS_TEST_FOR_EXCEPTION(
       this->tableau_->isImplicit() == true, std::logic_error,
       "Error - General ERK received an implicit Butcher Tableau!\n");
+
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded);
   }
 
   virtual std::string description() const { return "General ERK"; }
@@ -194,8 +194,8 @@ class StepperDIRK_BackwardEuler :
   public:
   StepperDIRK_BackwardEuler()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperDIRK_BackwardEuler(
@@ -208,9 +208,9 @@ class StepperDIRK_BackwardEuler :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
-    this->setupTableau();
   }
 
   std::string description() const { return "RK Backward Euler"; }
@@ -289,8 +289,8 @@ class StepperERK_ForwardEuler :
   public:
   StepperERK_ForwardEuler()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_ForwardEuler(
@@ -301,9 +301,9 @@ class StepperERK_ForwardEuler :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const { return "RK Forward Euler"; }
@@ -360,8 +360,8 @@ class StepperERK_4Stage4thOrder :
   public:
   StepperERK_4Stage4thOrder()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_4Stage4thOrder(
@@ -372,9 +372,9 @@ class StepperERK_4Stage4thOrder :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const { return "RK Explicit 4 Stage"; }
@@ -459,8 +459,8 @@ class StepperERK_BogackiShampine32 :
   public:
   StepperERK_BogackiShampine32()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_BogackiShampine32(
@@ -471,9 +471,9 @@ class StepperERK_BogackiShampine32 :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const {return "Bogacki-Shampine 3(2) Pair";}
@@ -571,8 +571,8 @@ class StepperERK_Merson45 :
   public:
   StepperERK_Merson45()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_Merson45(
@@ -583,9 +583,9 @@ class StepperERK_Merson45 :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const { return "Merson 4(5) Pair"; }
@@ -691,8 +691,8 @@ public:
 
   StepperERK_3_8Rule()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_3_8Rule(
@@ -703,9 +703,9 @@ public:
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const { return "RK Explicit 3/8 Rule"; }
@@ -793,8 +793,8 @@ class StepperERK_4Stage3rdOrderRunge :
   public:
   StepperERK_4Stage3rdOrderRunge()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_4Stage3rdOrderRunge(
@@ -805,9 +805,9 @@ class StepperERK_4Stage3rdOrderRunge :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const
@@ -891,8 +891,8 @@ class StepperERK_5Stage3rdOrderKandG :
   public:
   StepperERK_5Stage3rdOrderKandG()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_5Stage3rdOrderKandG(
@@ -903,9 +903,9 @@ class StepperERK_5Stage3rdOrderKandG :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const
@@ -989,8 +989,8 @@ class StepperERK_3Stage3rdOrder :
   public:
   StepperERK_3Stage3rdOrder()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_3Stage3rdOrder(
@@ -1001,9 +1001,9 @@ class StepperERK_3Stage3rdOrder :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const
@@ -1090,8 +1090,8 @@ class StepperERK_3Stage3rdOrderTVD :
   public:
   StepperERK_3Stage3rdOrderTVD()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_3Stage3rdOrderTVD(
@@ -1102,9 +1102,9 @@ class StepperERK_3Stage3rdOrderTVD :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
 
@@ -1193,8 +1193,8 @@ class StepperERK_3Stage3rdOrderHeun :
   public:
   StepperERK_3Stage3rdOrderHeun()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_3Stage3rdOrderHeun(
@@ -1205,9 +1205,9 @@ class StepperERK_3Stage3rdOrderHeun :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const
@@ -1290,8 +1290,8 @@ class StepperERK_Midpoint :
   public:
   StepperERK_Midpoint()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_Midpoint(
@@ -1302,9 +1302,9 @@ class StepperERK_Midpoint :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const { return "RK Explicit Midpoint"; }
@@ -1377,8 +1377,8 @@ class StepperERK_Trapezoidal :
   public:
   StepperERK_Trapezoidal()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperERK_Trapezoidal(
@@ -1389,9 +1389,9 @@ class StepperERK_Trapezoidal :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
-    this->setupTableau();
   }
 
   virtual std::string description() const
@@ -1492,8 +1492,8 @@ class StepperDIRK_General :
   public:
   StepperDIRK_General()
   {
-    this->setupDefault();
     this->setupTableau();
+    this->setupDefault();
   }
 
   StepperDIRK_General(
@@ -1513,14 +1513,14 @@ class StepperDIRK_General :
     const int orderMax,
     const Teuchos::SerialDenseVector<int,Scalar>& bstar)
   {
-    this->setup(appModel, obs, useFSAL, ICConsistency,
-                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
-
     this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
 
     TEUCHOS_TEST_FOR_EXCEPTION(
       this->tableau_->isImplicit() != true, std::logic_error,
       "Error - General DIRK did not receive a DIRK Butcher Tableau!\n");
+
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
   virtual std::string description() const { return "General DIRK"; }
@@ -1601,326 +1601,301 @@ class StepperDIRK_General :
 };
 
 
-//// ----------------------------------------------------------------------------
-///** \brief SDIRK 2 Stage 2nd order
-// *
-// *  The tableau (order=1 or 2) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cc} \gamma  & \gamma &        \\
-// *                         1    & 1-\gamma & \gamma \\ \hline
-// *                              & 1-\gamma & \gamma  \end{array}
-// *  \f]
-// *  The default value is \f$\gamma = (2\pm \sqrt{2})/2\f$.
-// *  This will produce an L-stable 2nd order method with the stage
-// *  times within the timestep.  Other values of gamma will still
-// *  produce an L-stable scheme, but will only be 1st order accurate.
-// *  L-stability is guaranteed because \f$A_{sj} = b_j\f$.
-// *
-// *  Reference: U. M. Ascher and L. R. Petzold,
-// *             Computer Methods for ODEs and DAEs, p. 106.
-// */
-//template<class Scalar>
-//class SDIRK2Stage2ndOrder_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  SDIRK2Stage2ndOrder_RKBT()
-//  {
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    gamma_default_ = Teuchos::as<Scalar>((2*one-ST::squareroot(2*one))/(2*one));
-//
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  SDIRK2Stage2ndOrder_RKBT(Scalar gamma)
-//  {
-//    setGamma(gamma);
-//  }
-//
-//  void setGamma(Scalar gamma)
-//  {
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//    gamma_default_ = Teuchos::as<Scalar>((2*one-ST::squareroot(2*one))/(2*one));
-//
-//    RKButcherTableau<Scalar>::setParameterList(Teuchos::null);
-//    this->RK_stepperPL_->template set<double>("gamma", gamma);
-//    gamma_ = gamma;
-//
-//    int NumStages = 2;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    // Fill A:
-//    A(0,0) =                              gamma; A(0,1) = zero;
-//    A(1,0) = Teuchos::as<Scalar>( one - gamma ); A(1,1) = gamma;
-//
-//    // Fill b:
-//    b(0) = Teuchos::as<Scalar>( one - gamma ); b(1) = gamma;
-//
-//    // Fill c:
-//    c(0) = gamma; c(1) = one;
-//
-//    int order = 1;
-//    if ( std::abs((gamma-gamma_default_)/gamma) < 1.0e-08 ) order = 2;
-//
-//    this->setAbc(A,b,c,order,1,2);
-//  }
-//
-//  virtual std::string description() const { return "SDIRK 2 Stage 2nd order"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Computer Methods for ODEs and DAEs\n"
-//                << "U. M. Ascher and L. R. Petzold\n"
-//                << "p. 106\n"
-//                << "gamma = (2+-sqrt(2))/2\n"
-//                << "c = [  gamma   1     ]'\n"
-//                << "A = [  gamma   0     ]\n"
-//                << "    [ 1-gamma  gamma ]\n"
-//                << "b = [ 1-gamma  gamma ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//
-//    Teuchos::RCP<Teuchos::ParameterList> pl = this->RK_stepperPL_;
-//    Scalar gamma = pl->get<double>("gamma", gamma_default_);
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    int NumStages = 2;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//
-//    // Fill A:
-//    A(0,0) =                              gamma; A(0,1) = zero;
-//    A(1,0) = Teuchos::as<Scalar>( one - gamma ); A(1,1) = gamma;
-//
-//    // Fill b:
-//    b(0) = Teuchos::as<Scalar>( one - gamma ); b(1) = gamma;
-//
-//    // Fill c:
-//    c(0) = gamma; c(1) = one;
-//
-//    int order = 1;
-//    if ( std::abs((gamma-gamma_default_)/gamma) < 1.0e-08 ) order = 2;
-//
-//    this->setAbc(A,b,c,order,1,2);
-//  }
-//
-//  Teuchos::RCP<const Teuchos::ParameterList>
-//  getValidParameters() const
-//  {
-//    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
-//
-//    pl->set<bool>("Initial Condition Consistency Check", false);
-//    pl->set<double>("gamma",gamma_default_,
-//      "The default value is gamma = (2-sqrt(2))/2. "
-//      "This will produce an L-stable 2nd order method with the stage "
-//      "times within the timestep.  Other values of gamma will still "
-//      "produce an L-stable scheme, but will only be 1st order accurate.");
-//
-//    return pl;
-//  }
-//
-//  private:
-//    Scalar gamma_default_;
-//    Scalar gamma_;
-//};
-//
-//
-//// ----------------------------------------------------------------------------
-///** \brief SDIRK 2 Stage 3rd order
-// *
-// *  The tableau (order=2 or 3) is
-// *  \f[
-// *  \begin{array}{c|c}
-// *    c & A \\ \hline
-// *      & b^T
-// *  \end{array}
-// *  \;\;\;\;\mbox{ where }\;\;\;\;
-// *  \begin{array}{c|cc}  \gamma  &  \gamma   &        \\
-// *                      1-\gamma & 1-2\gamma & \gamma \\ \hline
-// *                               &   1/2     &   1/2   \end{array}
-// *  \f]
-// *  \f[
-// *  \gamma = \left\{ \begin{array}{cc}
-// *                     (2\pm \sqrt{2})/2 & \mbox{then 2nd order and L-stable} \\
-// *                     (3\pm \sqrt{3})/6 & \mbox{then 3rd order and A-stable}
-// *                   \end{array} \right.
-// *  \f]
-// *  The default value is \f$\gamma = (3\pm \sqrt{3})/6\f$.
-// *
-// *  Reference: E. Hairer, S. P. Norsett, and G. Wanner,
-// *             Solving Ordinary Differential Equations I:
-// *             Nonstiff Problems, 2nd Revised Edition,
-// *             Table 7.2, pg 207.
-// */
-//template<class Scalar>
-//class SDIRK2Stage3rdOrder_RKBT :
-//  virtual public RKButcherTableau<Scalar>
-//{
-//  public:
-//  SDIRK2Stage3rdOrder_RKBT()
-//  {
-//    this->setParameterList(Teuchos::null);
-//  }
-//
-//  SDIRK2Stage3rdOrder_RKBT(std::string gammaType,
-//                           Scalar gamma = 0.7886751345948128)
-//  {
-//    TEUCHOS_TEST_FOR_EXCEPTION(
-//      !(gammaType == "3rd Order A-stable" or
-//        gammaType == "2nd Order L-stable" or
-//        gammaType == "gamma"), std::logic_error,
-//      "gammaType needs to be '3rd Order A-stable', '2nd Order L-stable' or 'gamma'.");
-//
-//    RKButcherTableau<Scalar>::setParameterList(Teuchos::null);
-//    Teuchos::RCP<Teuchos::ParameterList> pl = this->RK_stepperPL_;
-//
-//    pl->set<std::string>("Gamma Type", gammaType);
-//    gamma_ = gamma;
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    using Teuchos::as;
-//    int NumStages = 2;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//
-//    int order = 0;
-//    if (gammaType == "3rd Order A-stable") {
-//      order = 3;
-//      gamma_ = as<Scalar>((3*one+ST::squareroot(3*one))/(6*one));
-//    } else if (gammaType == "2nd Order L-stable") {
-//      order = 2;
-//      gamma_ = as<Scalar>( (2*one - ST::squareroot(2*one))/(2*one) );
-//    } else if (gammaType == "gamma") {
-//      order = 2;
-//      gamma_ = pl->get<double>("gamma",
-//        as<Scalar>((3*one+ST::squareroot(3*one))/(6*one)));
-//    }
-//
-//    // Fill A:
-//    A(0,0) =                     gamma_; A(0,1) = zero;
-//    A(1,0) = as<Scalar>(one - 2*gamma_); A(1,1) = gamma_;
-//
-//    // Fill b:
-//    b(0) = as<Scalar>( one/(2*one) ); b(1) = as<Scalar>( one/(2*one) );
-//
-//    // Fill c:
-//    c(0) = gamma_; c(1) = as<Scalar>( one - gamma_ );
-//
-//    this->setAbc(A,b,c,order,2,3);
-//  }
-//
-//  virtual std::string description() const { return "SDIRK 2 Stage 3rd order"; }
-//
-//  std::string getDescription() const
-//  {
-//    std::ostringstream Description;
-//    Description << this->description() << "\n"
-//                << "Solving Ordinary Differential Equations I:\n"
-//                << "Nonstiff Problems, 2nd Revised Edition\n"
-//                << "E. Hairer, S. P. Norsett, and G. Wanner\n"
-//                << "Table 7.2, pg 207\n"
-//                << "gamma = (3+sqrt(3))/6 -> 3rd order and A-stable\n"
-//                << "gamma = (2-sqrt(2))/2 -> 2nd order and L-stable\n"
-//                << "c = [  gamma     1-gamma  ]'\n"
-//                << "A = [  gamma     0        ]\n"
-//                << "    [ 1-2*gamma  gamma    ]\n"
-//                << "b = [ 1/2        1/2      ]'";
-//    return Description.str();
-//  }
-//
-//  void setParameterList(Teuchos::RCP<Teuchos::ParameterList> const& pList)
-//  {
-//    RKButcherTableau<Scalar>::setParameterList(pList);
-//    Teuchos::RCP<Teuchos::ParameterList> pl = this->RK_stepperPL_;
-//
-//    std::string gammaType =
-//      pl->get<std::string>("Gamma Type", "3rd Order A-stable");
-//    TEUCHOS_TEST_FOR_EXCEPTION(
-//      !(gammaType == "3rd Order A-stable" or
-//        gammaType == "2nd Order L-stable" or
-//        gammaType == "gamma"), std::logic_error,
-//      "gammaType needs to be '3rd Order A-stable', '2nd Order L-stable' or 'gamma'.");
-//
-//    typedef Teuchos::ScalarTraits<Scalar> ST;
-//    using Teuchos::as;
-//    int NumStages = 2;
-//    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-//    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-//    const Scalar one = ST::one();
-//    const Scalar zero = ST::zero();
-//
-//    int order = 0;
-//    Scalar gammaValue = 0.0;
-//    if (gammaType == "3rd Order A-stable") {
-//      order = 3;
-//      gammaValue = as<Scalar>((3*one+ST::squareroot(3*one))/(6*one));
-//    } else if (gammaType == "2nd Order L-stable") {
-//      order = 2;
-//      gammaValue = as<Scalar>( (2*one - ST::squareroot(2*one))/(2*one) );
-//    } else if (gammaType == "gamma") {
-//      order = 2;
-//      gammaValue = pl->get<double>("gamma",
-//        as<Scalar>((3*one+ST::squareroot(3*one))/(6*one)));
-//    }
-//
-//    // Fill A:
-//    A(0,0) =                     gammaValue; A(0,1) = zero;
-//    A(1,0) = as<Scalar>(one - 2*gammaValue); A(1,1) = gammaValue;
-//
-//    // Fill b:
-//    b(0) = as<Scalar>( one/(2*one) ); b(1) = as<Scalar>( one/(2*one) );
-//
-//    // Fill c:
-//    c(0) = gammaValue; c(1) = as<Scalar>( one - gammaValue );
-//
-//    this->setAbc(A,b,c,order,2,3);
-//  }
-//
-//  Teuchos::RCP<const Teuchos::ParameterList>
-//  getValidParameters() const
-//  {
-//    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
-//
-//    pl->set<bool>("Initial Condition Consistency Check", false);
-//    pl->set<std::string>("Gamma Type", "3rd Order A-stable",
-//      "Valid values are '3rd Order A-stable' ((3+sqrt(3))/6.) "
-//      "and '2nd Order L-stable' ((2-sqrt(2))/2).  The default "
-//      "value is '3rd Order A-stable'");
-//
-//    return pl;
-//  }
-//
-//  private:
-//    Scalar gamma_default_;
-//    Scalar gamma_;
-//};
-//
-//
+// ----------------------------------------------------------------------------
+/** \brief SDIRK 2 Stage 2nd order
+ *
+ *  The tableau (order=1 or 2) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cc} \gamma  & \gamma &        \\
+ *                         1    & 1-\gamma & \gamma \\ \hline
+ *                              & 1-\gamma & \gamma  \end{array}
+ *  \f]
+ *  The default value is \f$\gamma = (2\pm \sqrt{2})/2\f$.
+ *  This will produce an L-stable 2nd order method with the stage
+ *  times within the timestep.  Other values of gamma will still
+ *  produce an L-stable scheme, but will only be 1st order accurate.
+ *  L-stability is guaranteed because \f$A_{sj} = b_j\f$.
+ *
+ *  Reference: U. M. Ascher and L. R. Petzold,
+ *             Computer Methods for ODEs and DAEs, p. 106.
+ */
+template<class Scalar>
+class StepperSDIRK_2Stage2ndOrder :
+  virtual public StepperDIRK_new<Scalar>
+{
+  public:
+  StepperSDIRK_2Stage2ndOrder()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    gammaDefault_ = Teuchos::as<Scalar>((2*one-ST::squareroot(2*one))/(2*one));
+
+    this->setGamma(gammaDefault_);
+    this->setupTableau();
+    this->setupDefault();
+  }
+
+  StepperSDIRK_2Stage2ndOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded,
+    bool zeroInitialGuess,
+    Scalar gamma = Scalar(0.2928932188134524))
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    const Scalar one = ST::one();
+    gammaDefault_ = Teuchos::as<Scalar>((2*one-ST::squareroot(2*one))/(2*one));
+
+    this->setGamma(gamma);
+    this->setupTableau();
+    this->setup(appModel, obs, solver, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
+  }
+
+  void setGamma(Scalar gamma) { gamma_ = gamma; }
+
+  virtual std::string description() const { return "SDIRK 2 Stage 2nd order"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Computer Methods for ODEs and DAEs\n"
+                << "U. M. Ascher and L. R. Petzold\n"
+                << "p. 106\n"
+                << "gamma = (2+-sqrt(2))/2\n"
+                << "c = [  gamma   1     ]'\n"
+                << "A = [  gamma   0     ]\n"
+                << "    [ 1-gamma  gamma ]\n"
+                << "b = [ 1-gamma  gamma ]'";
+    return Description.str();
+  }
+
+  Teuchos::RCP<const Teuchos::ParameterList>
+  getValidParameters() const
+  {
+    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
+    this->getValidParametersBasicDIRK(pl);
+    pl->set<bool>("Initial Condition Consistency Check", false);
+    pl->set<double>("gamma",gammaDefault_,
+      "The default value is gamma = (2-sqrt(2))/2. "
+      "This will produce an L-stable 2nd order method with the stage "
+      "times within the timestep.  Other values of gamma will still "
+      "produce an L-stable scheme, but will only be 1st order accurate.");
+
+    return pl;
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    int NumStages = 2;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+
+    // Fill A:
+    A(0,0) =                              gamma_; A(0,1) = zero;
+    A(1,0) = Teuchos::as<Scalar>( one - gamma_ ); A(1,1) = gamma_;
+
+    // Fill b:
+    b(0) = Teuchos::as<Scalar>( one - gamma_ ); b(1) = gamma_;
+
+    // Fill c:
+    c(0) = gamma_; c(1) = one;
+
+    int order = 1;
+    if ( std::abs((gamma_-gammaDefault_)/gamma_) < 1.0e-08 ) order = 2;
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+  }
+
+  private:
+    Scalar gammaDefault_;
+    Scalar gamma_;
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief SDIRK 2 Stage 3rd order
+ *
+ *  The tableau (order=2 or 3) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cc}  \gamma  &  \gamma   &        \\
+ *                      1-\gamma & 1-2\gamma & \gamma \\ \hline
+ *                               &   1/2     &   1/2   \end{array}
+ *  \f]
+ *  \f[
+ *  \gamma = \left\{ \begin{array}{cc}
+ *                     (2\pm \sqrt{2})/2 & \mbox{then 2nd order and L-stable} \\
+ *                     (3\pm \sqrt{3})/6 & \mbox{then 3rd order and A-stable}
+ *                   \end{array} \right.
+ *  \f]
+ *  The default value is \f$\gamma = (3\pm \sqrt{3})/6\f$.
+ *
+ *  Reference: E. Hairer, S. P. Norsett, and G. Wanner,
+ *             Solving Ordinary Differential Equations I:
+ *             Nonstiff Problems, 2nd Revised Edition,
+ *             Table 7.2, pg 207.
+ */
+template<class Scalar>
+class StepperSDIRK_2Stage3rdOrder :
+  virtual public StepperDIRK_new<Scalar>
+{
+  public:
+  StepperSDIRK_2Stage3rdOrder()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    using Teuchos::as;
+    const Scalar one = ST::one();
+    gammaDefault_ = as<Scalar>((3*one+ST::squareroot(3*one))/(6*one));
+    gammaTypeDefault_ = "3rd Order A-stable";
+
+    this->setGammaType(gammaTypeDefault_);
+    this->setGamma(gammaDefault_);
+    this->setupTableau();
+    this->setupDefault();
+  }
+
+  StepperSDIRK_2Stage3rdOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded,
+    bool zeroInitialGuess,
+    std::string gammaType = "3rd Order A-stable",
+    Scalar gamma = Scalar(0.7886751345948128))
+  {
+    TEUCHOS_TEST_FOR_EXCEPTION(
+      !(gammaType == "3rd Order A-stable" or
+        gammaType == "2nd Order L-stable" or
+        gammaType == "gamma"), std::logic_error,
+      "gammaType needs to be '3rd Order A-stable', '2nd Order L-stable' "
+      "or 'gamma'.");
+
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    using Teuchos::as;
+    const Scalar one = ST::one();
+    gammaDefault_ = as<Scalar>((3*one+ST::squareroot(3*one))/(6*one));
+    gammaTypeDefault_ = "3rd Order A-stable";
+
+    this->setGammaType(gammaType);
+    this->setGamma(gamma);
+    this->setupTableau();
+    this->setup(appModel, obs, solver, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
+  }
+
+  void setGammaType(std::string gammaType) { gammaType_ = gammaType; }
+  void setGamma(Scalar gamma) { gamma_ = gamma; }
+
+  virtual std::string description() const { return "SDIRK 2 Stage 3rd order"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "Solving Ordinary Differential Equations I:\n"
+                << "Nonstiff Problems, 2nd Revised Edition\n"
+                << "E. Hairer, S. P. Norsett, and G. Wanner\n"
+                << "Table 7.2, pg 207\n"
+                << "gamma = (3+sqrt(3))/6 -> 3rd order and A-stable\n"
+                << "gamma = (2-sqrt(2))/2 -> 2nd order and L-stable\n"
+                << "c = [  gamma     1-gamma  ]'\n"
+                << "A = [  gamma     0        ]\n"
+                << "    [ 1-2*gamma  gamma    ]\n"
+                << "b = [ 1/2        1/2      ]'";
+    return Description.str();
+  }
+
+  Teuchos::RCP<const Teuchos::ParameterList>
+  getValidParameters() const
+  {
+    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
+    this->getValidParametersBasicDIRK(pl);
+
+    pl->set<bool>("Initial Condition Consistency Check", false);
+    pl->set<std::string>("Gamma Type", gammaTypeDefault_,
+      "Valid values are '3rd Order A-stable' ((3+sqrt(3))/6.), "
+      "'2nd Order L-stable' ((2-sqrt(2))/2) and 'gamma' (user defined).  "
+      "The default value is '3rd Order A-stable'.");
+    pl->set<double>("gamma", gammaDefault_,
+      "Equal to (3+sqrt(3))/6 if 'Gamma Type' = '3rd Order A-stable', or "
+      "(2-sqrt(2))/2 if 'Gamma Type' = '2nd Order L-stable', or "
+      "user-defined gamma value if 'Gamma Type = 'gamma'.  "
+      "The default value is gamma = (3+sqrt(3))/6, which matches "
+      "the default 'Gamma Type' = '3rd Order A-stable'.");
+
+    return pl;
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    using Teuchos::as;
+    int NumStages = 2;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+    const Scalar one = ST::one();
+    const Scalar zero = ST::zero();
+
+    int order = 0;
+    if (gammaType_ == "3rd Order A-stable") {
+      order = 3;
+      gamma_ = gammaDefault_;
+    } else if (gammaType_ == "2nd Order L-stable") {
+      order = 2;
+      gamma_ = as<Scalar>( (2*one - ST::squareroot(2*one))/(2*one) );
+    } else if (gammaType_ == "gamma") {
+      order = 2;
+    }
+
+    // Fill A:
+    A(0,0) =                     gamma_; A(0,1) = zero;
+    A(1,0) = as<Scalar>(one - 2*gamma_); A(1,1) = gamma_;
+
+    // Fill b:
+    b(0) = as<Scalar>( one/(2*one) ); b(1) = as<Scalar>( one/(2*one) );
+
+    // Fill c:
+    c(0) = gamma_; c(1) = as<Scalar>( one - gamma_ );
+
+    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,2,3));
+  }
+
+  private:
+    std::string gammaTypeDefault_;
+    std::string gammaType_;
+    Scalar      gammaDefault_;
+    Scalar      gamma_;
+};
+
+
 //// ----------------------------------------------------------------------------
 ///** \brief EDIRK 2 Stage 3rd order
 // *
@@ -1999,7 +1974,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //
 //    return pl;
@@ -2092,7 +2067,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //    pl->set<double>("theta",theta_default_,
@@ -2227,7 +2202,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //    pl->set<double>("theta",theta_default_,
@@ -2326,7 +2301,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //
 //    return pl;
@@ -2397,7 +2372,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //
 //    return pl;
@@ -2458,7 +2433,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //
 //    return pl;
 //  }
@@ -2517,7 +2492,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //
 //    return pl;
 //  }
@@ -2590,7 +2565,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //
 //    return pl;
 //  }
@@ -2663,7 +2638,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //
 //    return pl;
 //  }
@@ -2781,7 +2756,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //
 //    return pl;
@@ -2870,7 +2845,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //
 //    return pl;
@@ -2958,7 +2933,7 @@ class StepperDIRK_General :
 //  getValidParameters() const
 //  {
 //    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-//    pl->setParameters( *(this->getValidParametersImplicit()));
+//    this->getValidParametersBasicDIRK(pl);
 //    pl->set<bool>("Initial Condition Consistency Check", false);
 //
 //    return pl;

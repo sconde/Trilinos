@@ -113,6 +113,8 @@ TEUCHOS_UNIT_TEST(DIRK, ParameterList)
       tempusPL->sublist("Default Stepper").set("Default Solver", *solverPL);
       tempusPL->sublist("Default Stepper")
            .set<std::string>("Gamma Type", "3rd Order A-stable");
+      tempusPL->sublist("Default Stepper")
+           .set<double>("gamma", 0.7886751345948128);
     } else if (RKMethods[m] == "RK Crank-Nicolson") {
       // Match default Stepper Type
       tempusPL->sublist("Default Stepper")
