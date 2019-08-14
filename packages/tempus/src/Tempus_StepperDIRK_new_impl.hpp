@@ -9,7 +9,6 @@
 #ifndef Tempus_StepperDIRK_new_impl_hpp
 #define Tempus_StepperDIRK_new_impl_hpp
 
-#include "Tempus_RKButcherTableauFactory.hpp"
 #include "Tempus_config.hpp"
 #include "Tempus_StepperFactory.hpp"
 #include "Tempus_WrapperModelEvaluatorBasic.hpp"

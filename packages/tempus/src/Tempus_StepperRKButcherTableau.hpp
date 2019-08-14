@@ -34,236 +34,6 @@ namespace Tempus {
 
 
 // ----------------------------------------------------------------------------
-/** \brief General Explicit Runge-Kutta Butcher Tableau
- *
- *  The format of the Butcher Tableau parameter list is
-    \verbatim
-      <Parameter name="A" type="string" value="# # # ;
-                                               # # # ;
-                                               # # #">
-      <Parameter name="b" type="string" value="# # #">
-      <Parameter name="c" type="string" value="# # #">
-    \endverbatim
- *  Note the number of stages is implicit in the number of entries.
- *  The number of stages must be consistent.
- *
- *  Default tableau is RK4 (order=4):
- *  \f[
- *  \begin{array}{c|c}
- *    c & A \\ \hline
- *      & b^T
- *  \end{array}
- *  \;\;\;\;\mbox{ where }\;\;\;\;
- *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
- *                        1/2 & 1/2 &  0  &     &    \\
- *                        1/2 &  0  & 1/2 &  0  &    \\
- *                         1  &  0  &  0  &  1  &  0 \\ \hline
- *                            & 1/6 & 1/3 & 1/3 & 1/6 \end{array}
- *  \f]
- */
-template<class Scalar>
-class StepperERK_General :
-  virtual public StepperExplicitRK_new<Scalar>
-{
-public:
-  StepperERK_General()
-  {
-    this->setupTableau();
-    this->setupDefault();
-  }
-
-  StepperERK_General(
-    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
-    bool useFSAL,
-    std::string ICConsistency,
-    bool ICConsistencyCheck,
-    bool useEmbedded,
-    const Teuchos::SerialDenseMatrix<int,Scalar>& A,
-    const Teuchos::SerialDenseVector<int,Scalar>& b,
-    const Teuchos::SerialDenseVector<int,Scalar>& c,
-    const int order,
-    const int orderMin,
-    const int orderMax,
-    const Teuchos::SerialDenseVector<int,Scalar>& bstar)
-  {
-    this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
-
-    TEUCHOS_TEST_FOR_EXCEPTION(
-      this->tableau_->isImplicit() == true, std::logic_error,
-      "Error - General ERK received an implicit Butcher Tableau!\n");
-
-    this->setup(appModel, obs, useFSAL, ICConsistency,
-                ICConsistencyCheck, useEmbedded);
-  }
-
-  virtual std::string description() const { return "General ERK"; }
-
-  virtual std::string getDescription() const
-  {
-    std::stringstream Description;
-    Description << this->description() << "\n"
-      << "The format of the Butcher Tableau parameter list is\n"
-      << "  <Parameter name=\"A\" type=\"string\" value=\"# # # ;\n"
-      << "                                           # # # ;\n"
-      << "                                           # # #\"/>\n"
-      << "  <Parameter name=\"b\" type=\"string\" value=\"# # #\"/>\n"
-      << "  <Parameter name=\"c\" type=\"string\" value=\"# # #\"/>\n\n"
-      << "Note the number of stages is implicit in the number of entries.\n"
-      << "The number of stages must be consistent.\n"
-      << "\n"
-      << "Default tableau is RK4 (order=4):\n"
-      << "c = [  0  1/2 1/2  1  ]'\n"
-      << "A = [  0              ]\n"
-      << "    [ 1/2  0          ]\n"
-      << "    [  0  1/2  0      ]\n"
-      << "    [  0   0   1   0  ]\n"
-      << "b = [ 1/6 1/3 1/3 1/6 ]'";
-    return Description.str();
-  }
-
-  void setupTableau()
-  {
-    if (this->tableau_ == Teuchos::null) {
-      // Set tableau to the default if null, otherwise keep current tableau.
-      auto t = rcp(new Explicit4Stage4thOrder_RKBT<Scalar>());
-      this->tableau_ = rcp(new RKButcherTableau<Scalar>(
-                                 t->A(),t->b(),t->c(),
-                                 t->order(),t->orderMin(),t->orderMax(),
-                                 t->bstar()));
-    }
-  }
-
-  void setTableau(const Teuchos::SerialDenseMatrix<int,Scalar>& A,
-                  const Teuchos::SerialDenseVector<int,Scalar>& b,
-                  const Teuchos::SerialDenseVector<int,Scalar>& c,
-                  const int order,
-                  const int orderMin,
-                  const int orderMax,
-                  const Teuchos::SerialDenseVector<int,Scalar>&
-                    bstar = Teuchos::SerialDenseVector<int,Scalar>())
-  {
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(
-                               A,b,c,order,orderMin,orderMax,bstar));
-  }
-
-  virtual std::string getDefaultICConsistency() const { return "Consistent"; }
-
-  Teuchos::RCP<const Teuchos::ParameterList>
-  getValidParameters() const
-  {
-    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-    this->getValidParametersBasicERK(pl);
-    pl->set<std::string>("Initial Condition Consistency",
-                         this->getDefaultICConsistency());
-
-    // Tableau ParameterList
-    Teuchos::RCP<Teuchos::ParameterList> tableauPL = Teuchos::parameterList();
-    tableauPL->set<std::string>("A",
-     "0.0 0.0 0.0 0.0; 0.5 0.0 0.0 0.0; 0.0 0.5 0.0 0.0; 0.0 0.0 1.0 0.0");
-    tableauPL->set<std::string>("b",
-     "0.166666666666667 0.333333333333333 0.333333333333333 0.166666666666667");
-    tableauPL->set<std::string>("c", "0.0 0.5 0.5 1.0");
-    tableauPL->set<int>("order", 4);
-    tableauPL->set<std::string>("bstar", "");
-    pl->set("Tableau", *tableauPL);
-
-    return pl;
-  }
-};
-
-
-// ----------------------------------------------------------------------------
-/** \brief Backward Euler Runge-Kutta Butcher Tableau
- *
- *  The tableau for Backward Euler (order=1) is
- *  \f[
- *  \begin{array}{c|c}
- *    c & A \\ \hline
- *      & b^T
- *  \end{array}
- *  \;\;\;\;\mbox{ where }\;\;\;\;
- *  \begin{array}{c|c} 1 & 1 \\ \hline
- *                       & 1 \end{array}
- *  \f]
- */
-template<class Scalar>
-class StepperDIRK_BackwardEuler :
-  virtual public StepperDIRK_new<Scalar>
-{
-  public:
-  StepperDIRK_BackwardEuler()
-  {
-    this->setupTableau();
-    this->setupDefault();
-  }
-
-  StepperDIRK_BackwardEuler(
-    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
-    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
-    bool useFSAL,
-    std::string ICConsistency,
-    bool ICConsistencyCheck,
-    bool useEmbedded,
-    bool zeroInitialGuess)
-  {
-    this->setupTableau();
-    this->setup(appModel, obs, solver, useFSAL, ICConsistency,
-                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
-  }
-
-  std::string description() const { return "RK Backward Euler"; }
-
-  std::string getDescription() const
-  {
-    std::ostringstream Description;
-    Description << this->description() << "\n"
-                << "c = [ 1 ]'\n"
-                << "A = [ 1 ]\n"
-                << "b = [ 1 ]'";
-    return Description.str();
-  }
-
-  virtual bool getICConsistencyCheckDefault() const { return false; }
-
-  Teuchos::RCP<const Teuchos::ParameterList>
-  getValidParameters() const
-  {
-    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-    this->getValidParametersBasicDIRK(pl);
-    pl->set<bool>("Initial Condition Consistency Check",
-                  this->getICConsistencyCheckDefault());
-    return pl;
-  }
-
-protected:
-
-  void setupTableau()
-  {
-    typedef Teuchos::ScalarTraits<Scalar> ST;
-    int NumStages = 1;
-    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
-    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
-    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
-
-    // Fill A:
-    A(0,0) = ST::one();
-
-    // Fill b:
-    b(0) = ST::one();
-
-    // Fill c:
-    c(0) = ST::one();
-
-    int order = 1;
-
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
-  }
-};
-
-
-// ----------------------------------------------------------------------------
 /** \brief Forward Euler Runge-Kutta Butcher Tableau
  *
  *  The tableau for Forward Euler (order=1) is
@@ -331,7 +101,8 @@ protected:
     c(0) = ST::zero();
     int order = 1;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -425,7 +196,8 @@ class StepperERK_4Stage4thOrder :
 
     int order = 4;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -534,7 +306,8 @@ protected:
     bstar(3) = as<Scalar>(1*one/(8*one));
     int order = 3;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order,bstar));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order,bstar));
   }
 };
 
@@ -657,7 +430,8 @@ protected:
     bstar(4) = as<Scalar>(1*one/(5*one));
     int order = 4;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order,bstar));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order,bstar));
   }
 };
 
@@ -760,7 +534,8 @@ protected:
 
     int order = 4;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -859,7 +634,8 @@ protected:
 
     int order = 3;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -961,7 +737,8 @@ protected:
 
     int order = 3;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -1051,7 +828,8 @@ protected:
 
     int order = 3;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -1161,7 +939,8 @@ protected:
 
     int order = 3;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -1259,7 +1038,8 @@ protected:
 
     int order = 3;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -1350,7 +1130,8 @@ protected:
 
     int order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -1449,13 +1230,14 @@ protected:
 
     int order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
 
 // ----------------------------------------------------------------------------
-/** \brief General Implicit Runge-Kutta Butcher Tableau
+/** \brief General Explicit Runge-Kutta Butcher Tableau
  *
  *  The format of the Butcher Tableau parameter list is
     \verbatim
@@ -1468,43 +1250,38 @@ protected:
  *  Note the number of stages is implicit in the number of entries.
  *  The number of stages must be consistent.
  *
- *  Default tableau is "SDIRK 2 Stage 2nd order":
+ *  Default tableau is RK4 (order=4):
  *  \f[
  *  \begin{array}{c|c}
  *    c & A \\ \hline
  *      & b^T
  *  \end{array}
  *  \;\;\;\;\mbox{ where }\;\;\;\;
- *  \begin{array}{c|cc} \gamma  & \gamma &        \\
- *                         1    & 1-\gamma & \gamma \\ \hline
- *                              & 1-\gamma & \gamma  \end{array}
+ *  \begin{array}{c|cccc}  0  &  0  &     &     &    \\
+ *                        1/2 & 1/2 &  0  &     &    \\
+ *                        1/2 &  0  & 1/2 &  0  &    \\
+ *                         1  &  0  &  0  &  1  &  0 \\ \hline
+ *                            & 1/6 & 1/3 & 1/3 & 1/6 \end{array}
  *  \f]
- *  where \f$\gamma = (2\pm \sqrt{2})/2\f$.  This will produce an
- *  L-stable 2nd order method.
- *
- *  Reference: U. M. Ascher and L. R. Petzold,
- *             Computer Methods for ODEs and DAEs, p. 106.
  */
 template<class Scalar>
-class StepperDIRK_General :
-  virtual public StepperDIRK_new<Scalar>
+class StepperERK_General :
+  virtual public StepperExplicitRK_new<Scalar>
 {
-  public:
-  StepperDIRK_General()
+public:
+  StepperERK_General()
   {
     this->setupTableau();
     this->setupDefault();
   }
 
-  StepperDIRK_General(
+  StepperERK_General(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
     const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
-    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
     bool useFSAL,
     std::string ICConsistency,
     bool ICConsistencyCheck,
     bool useEmbedded,
-    bool zeroInitialGuess,
     const Teuchos::SerialDenseMatrix<int,Scalar>& A,
     const Teuchos::SerialDenseVector<int,Scalar>& b,
     const Teuchos::SerialDenseVector<int,Scalar>& c,
@@ -1516,16 +1293,16 @@ class StepperDIRK_General :
     this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
 
     TEUCHOS_TEST_FOR_EXCEPTION(
-      this->tableau_->isImplicit() != true, std::logic_error,
-      "Error - General DIRK did not receive a DIRK Butcher Tableau!\n");
+      this->tableau_->isImplicit() == true, std::logic_error,
+      "Error - General ERK received an implicit Butcher Tableau!\n");
 
     this->setup(appModel, obs, useFSAL, ICConsistency,
-                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
+                ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const { return "General DIRK"; }
+  virtual std::string description() const { return "General ERK"; }
 
-  std::string getDescription() const
+  virtual std::string getDescription() const
   {
     std::stringstream Description;
     Description << this->description() << "\n"
@@ -1538,26 +1315,24 @@ class StepperDIRK_General :
       << "Note the number of stages is implicit in the number of entries.\n"
       << "The number of stages must be consistent.\n"
       << "\n"
-      << "Default tableau is 'SDIRK 2 Stage 2nd order':\n"
-      << "  Computer Methods for ODEs and DAEs\n"
-      << "  U. M. Ascher and L. R. Petzold\n"
-      << "  p. 106\n"
-      << "  gamma = (2-sqrt(2))/2\n"
-      << "  c = [  gamma   1     ]'\n"
-      << "  A = [  gamma   0     ]\n"
-      << "      [ 1-gamma  gamma ]\n"
-      << "  b = [ 1-gamma  gamma ]'";
+      << "Default tableau is RK4 (order=4):\n"
+      << "c = [  0  1/2 1/2  1  ]'\n"
+      << "A = [  0              ]\n"
+      << "    [ 1/2  0          ]\n"
+      << "    [  0  1/2  0      ]\n"
+      << "    [  0   0   1   0  ]\n"
+      << "b = [ 1/6 1/3 1/3 1/6 ]'";
     return Description.str();
   }
-
-  virtual bool getICConsistencyCheckDefault() const { return false; }
 
   void setupTableau()
   {
     if (this->tableau_ == Teuchos::null) {
       // Set tableau to the default if null, otherwise keep current tableau.
-      auto t = rcp(new SDIRK2Stage2ndOrder_RKBT<Scalar>());
-      this->tableau_ = rcp(new RKButcherTableau<Scalar>(
+      auto stepper = Teuchos::rcp(new StepperERK_4Stage4thOrder<Scalar>());
+      auto t = stepper->getTableau();
+      this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+                                 this->description(),
                                  t->A(),t->b(),t->c(),
                                  t->order(),t->orderMin(),t->orderMax(),
                                  t->bstar()));
@@ -1573,9 +1348,89 @@ class StepperDIRK_General :
                   const Teuchos::SerialDenseVector<int,Scalar>&
                     bstar = Teuchos::SerialDenseVector<int,Scalar>())
   {
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(
-                               A,b,c,order,orderMin,orderMax,bstar));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,orderMin,orderMax,bstar));
   }
+
+  virtual std::string getDefaultICConsistency() const { return "Consistent"; }
+
+  Teuchos::RCP<const Teuchos::ParameterList>
+  getValidParameters() const
+  {
+    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
+    this->getValidParametersBasicERK(pl);
+    pl->set<std::string>("Initial Condition Consistency",
+                         this->getDefaultICConsistency());
+
+    // Tableau ParameterList
+    Teuchos::RCP<Teuchos::ParameterList> tableauPL = Teuchos::parameterList();
+    tableauPL->set<std::string>("A",
+     "0.0 0.0 0.0 0.0; 0.5 0.0 0.0 0.0; 0.0 0.5 0.0 0.0; 0.0 0.0 1.0 0.0");
+    tableauPL->set<std::string>("b",
+     "0.166666666666667 0.333333333333333 0.333333333333333 0.166666666666667");
+    tableauPL->set<std::string>("c", "0.0 0.5 0.5 1.0");
+    tableauPL->set<int>("order", 4);
+    tableauPL->set<std::string>("bstar", "");
+    pl->set("Tableau", *tableauPL);
+
+    return pl;
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief Backward Euler Runge-Kutta Butcher Tableau
+ *
+ *  The tableau for Backward Euler (order=1) is
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|c} 1 & 1 \\ \hline
+ *                       & 1 \end{array}
+ *  \f]
+ */
+template<class Scalar>
+class StepperDIRK_BackwardEuler :
+  virtual public StepperDIRK_new<Scalar>
+{
+  public:
+  StepperDIRK_BackwardEuler()
+  {
+    this->setupTableau();
+    this->setupDefault();
+  }
+
+  StepperDIRK_BackwardEuler(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded,
+    bool zeroInitialGuess)
+  {
+    this->setupTableau();
+    this->setup(appModel, obs, solver, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
+  }
+
+  std::string description() const { return "RK Backward Euler"; }
+
+  std::string getDescription() const
+  {
+    std::ostringstream Description;
+    Description << this->description() << "\n"
+                << "c = [ 1 ]'\n"
+                << "A = [ 1 ]\n"
+                << "b = [ 1 ]'";
+    return Description.str();
+  }
+
+  virtual bool getICConsistencyCheckDefault() const { return false; }
 
   Teuchos::RCP<const Teuchos::ParameterList>
   getValidParameters() const
@@ -1584,19 +1439,32 @@ class StepperDIRK_General :
     this->getValidParametersBasicDIRK(pl);
     pl->set<bool>("Initial Condition Consistency Check",
                   this->getICConsistencyCheckDefault());
-
-    // Tableau ParameterList
-    Teuchos::RCP<Teuchos::ParameterList> tableauPL = Teuchos::parameterList();
-    tableauPL->set<std::string>("A",
-     "0.2928932188134524 0.0; 0.7071067811865476 0.2928932188134524");
-    tableauPL->set<std::string>("b",
-     "0.7071067811865476 0.2928932188134524");
-    tableauPL->set<std::string>("c", "0.2928932188134524 1.0");
-    tableauPL->set<int>("order", 2);
-    tableauPL->set<std::string>("bstar", "");
-    pl->set("Tableau", *tableauPL);
-
     return pl;
+  }
+
+protected:
+
+  void setupTableau()
+  {
+    typedef Teuchos::ScalarTraits<Scalar> ST;
+    int NumStages = 1;
+    Teuchos::SerialDenseMatrix<int,Scalar> A(NumStages,NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> b(NumStages);
+    Teuchos::SerialDenseVector<int,Scalar> c(NumStages);
+
+    // Fill A:
+    A(0,0) = ST::one();
+
+    // Fill b:
+    b(0) = ST::one();
+
+    // Fill c:
+    c(0) = ST::one();
+
+    int order = 1;
+
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -1724,7 +1592,8 @@ protected:
     int order = 1;
     if ( std::abs((gamma_-gammaDefault_)/gamma_) < 1.0e-08 ) order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 
   private:
@@ -1898,7 +1767,8 @@ protected:
     // Fill c:
     c(0) = gamma_; c(1) = as<Scalar>( one - gamma_ );
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,2,3));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,2,3));
   }
 
   private:
@@ -2008,7 +1878,8 @@ protected:
     c(0) = zero; c(1) = as<Scalar>( 2*one/(3*one) );
     int order = 3;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -2137,7 +2008,8 @@ protected:
     int order = 1;
     if ( std::abs((theta_-thetaDefault_)/theta_) < 1.0e-08 ) order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,1,2));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,1,2));
   }
 
   private:
@@ -2280,7 +2152,8 @@ protected:
     int order = 1;
     if ( std::abs((theta_-thetaDefault_)/theta_) < 1.0e-08 ) order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,1,2));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,1,2));
   }
 
   private:
@@ -2388,7 +2261,8 @@ protected:
 
     int order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -2501,7 +2375,8 @@ protected:
 
     int order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -2598,7 +2473,8 @@ protected:
     c(0) = zero;
     int order = 1;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -2710,7 +2586,8 @@ protected:
     c(1) = one;
     int order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 
 };
@@ -2871,7 +2748,8 @@ protected:
 
     int order = 4;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -3000,7 +2878,8 @@ protected:
 
     int order = 4;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -3016,12 +2895,12 @@ protected:
  *  \end{array}
  *  \;\;\;\;\mbox{ where }\;\;\;\;
  *  \begin{array}{c|ccccc}
- *    (6-\sqrt{6})/10   & (6-\sqrt{6})/10               & 0                            & 0                        & 0                      & 0                  \\
- *    (6+9*\sqrt{6})/35 & (-6+5*\sqrt{6})/14            & (6-\sqrt{6})/10              & 0                        & 0                      & 0                  \\
- *         1            & (888+607*\sqrt{6})/2850       & (126-161*\sqrt{6})/1425      & (6-\sqrt{6})/10          & 0                      & 0                  \\
- *    (4-\sqrt{6})/10   & (3153-3082*\sqrt{6})/14250    & (3213+1148*\sqrt{6})/28500   & (-267+88*\sqrt{6})/500   & (6-\sqrt{6})/10        & 0                  \\
- *    (4+\sqrt{6})/10   & (-32583+14638*\sqrt{6})/71250 & (-17199+364*\sqrt{6})/142500 & (1329-544*\sqrt{6})/2500 & (-96+131*\sqrt{6})/625 & (6-\sqrt{6})/10    \\ \hine
- *                      &       0                       &       0                      &           1/9            & (16-\sqrt{6})/36       &  (16+\sqrt{6})/36
+ *    (6-\sqrt{6})/10   & (6-\sqrt{6})/10              & 0                           & 0                       & 0                     & 0                \\
+ *    (6+9\sqrt{6})/35  & (-6+5\sqrt{6})/14            & (6-\sqrt{6})/10             & 0                       & 0                     & 0                \\
+ *         1            & (888+607\sqrt{6})/2850       & (126-161\sqrt{6})/1425      & (6-\sqrt{6})/10         & 0                     & 0                \\
+ *    (4-\sqrt{6})/10   & (3153-3082\sqrt{6})/14250    & (3213+1148\sqrt{6})/28500   & (-267+88\sqrt{6})/500   & (6-\sqrt{6})/10       & 0                \\
+ *    (4+\sqrt{6})/10   & (-32583+14638\sqrt{6})/71250 & (-17199+364\sqrt{6})/142500 & (1329-544\sqrt{6})/2500 & (-96+131\sqrt{6})/625 & (6-\sqrt{6})/10  \\ \hline
+ *                      &       0                      &       0                     &           1/9           & (16-\sqrt{6})/36      & (16+\sqrt{6})/36
  *  \end{array}
  *  \f]
  *
@@ -3179,7 +3058,8 @@ protected:
 
     int order = 5;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order));
   }
 };
 
@@ -3285,7 +3165,157 @@ protected:
     bstar(1) = zero;
     int order = 2;
 
-    this->tableau_ = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order,bstar));
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,order,order,bstar));
+  }
+};
+
+
+// ----------------------------------------------------------------------------
+/** \brief General Implicit Runge-Kutta Butcher Tableau
+ *
+ *  The format of the Butcher Tableau parameter list is
+    \verbatim
+      <Parameter name="A" type="string" value="# # # ;
+                                               # # # ;
+                                               # # #">
+      <Parameter name="b" type="string" value="# # #">
+      <Parameter name="c" type="string" value="# # #">
+    \endverbatim
+ *  Note the number of stages is implicit in the number of entries.
+ *  The number of stages must be consistent.
+ *
+ *  Default tableau is "SDIRK 2 Stage 2nd order":
+ *  \f[
+ *  \begin{array}{c|c}
+ *    c & A \\ \hline
+ *      & b^T
+ *  \end{array}
+ *  \;\;\;\;\mbox{ where }\;\;\;\;
+ *  \begin{array}{c|cc} \gamma  & \gamma &        \\
+ *                         1    & 1-\gamma & \gamma \\ \hline
+ *                              & 1-\gamma & \gamma  \end{array}
+ *  \f]
+ *  where \f$\gamma = (2\pm \sqrt{2})/2\f$.  This will produce an
+ *  L-stable 2nd order method.
+ *
+ *  Reference: U. M. Ascher and L. R. Petzold,
+ *             Computer Methods for ODEs and DAEs, p. 106.
+ */
+template<class Scalar>
+class StepperDIRK_General :
+  virtual public StepperDIRK_new<Scalar>
+{
+  public:
+  StepperDIRK_General()
+  {
+    this->setupTableau();
+    this->setupDefault();
+  }
+
+  StepperDIRK_General(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
+    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    bool useEmbedded,
+    bool zeroInitialGuess,
+    const Teuchos::SerialDenseMatrix<int,Scalar>& A,
+    const Teuchos::SerialDenseVector<int,Scalar>& b,
+    const Teuchos::SerialDenseVector<int,Scalar>& c,
+    const int order,
+    const int orderMin,
+    const int orderMax,
+    const Teuchos::SerialDenseVector<int,Scalar>& bstar)
+  {
+    this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
+
+    TEUCHOS_TEST_FOR_EXCEPTION(
+      this->tableau_->isImplicit() != true, std::logic_error,
+      "Error - General DIRK did not receive a DIRK Butcher Tableau!\n");
+
+    this->setup(appModel, obs, useFSAL, ICConsistency,
+                ICConsistencyCheck, useEmbedded, zeroInitialGuess);
+  }
+
+  virtual std::string description() const { return "General DIRK"; }
+
+  std::string getDescription() const
+  {
+    std::stringstream Description;
+    Description << this->description() << "\n"
+      << "The format of the Butcher Tableau parameter list is\n"
+      << "  <Parameter name=\"A\" type=\"string\" value=\"# # # ;\n"
+      << "                                           # # # ;\n"
+      << "                                           # # #\"/>\n"
+      << "  <Parameter name=\"b\" type=\"string\" value=\"# # #\"/>\n"
+      << "  <Parameter name=\"c\" type=\"string\" value=\"# # #\"/>\n\n"
+      << "Note the number of stages is implicit in the number of entries.\n"
+      << "The number of stages must be consistent.\n"
+      << "\n"
+      << "Default tableau is 'SDIRK 2 Stage 2nd order':\n"
+      << "  Computer Methods for ODEs and DAEs\n"
+      << "  U. M. Ascher and L. R. Petzold\n"
+      << "  p. 106\n"
+      << "  gamma = (2-sqrt(2))/2\n"
+      << "  c = [  gamma   1     ]'\n"
+      << "  A = [  gamma   0     ]\n"
+      << "      [ 1-gamma  gamma ]\n"
+      << "  b = [ 1-gamma  gamma ]'";
+    return Description.str();
+  }
+
+  virtual bool getICConsistencyCheckDefault() const { return false; }
+
+  void setupTableau()
+  {
+    if (this->tableau_ == Teuchos::null) {
+      // Set tableau to the default if null, otherwise keep current tableau.
+      auto stepper = Teuchos::rcp(new StepperSDIRK_2Stage2ndOrder<Scalar>());
+      auto t = stepper->getTableau();
+      this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+                                 this->description(),
+                                 t->A(),t->b(),t->c(),
+                                 t->order(),t->orderMin(),t->orderMax(),
+                                 t->bstar()));
+    }
+  }
+
+  void setTableau(const Teuchos::SerialDenseMatrix<int,Scalar>& A,
+                  const Teuchos::SerialDenseVector<int,Scalar>& b,
+                  const Teuchos::SerialDenseVector<int,Scalar>& c,
+                  const int order,
+                  const int orderMin,
+                  const int orderMax,
+                  const Teuchos::SerialDenseVector<int,Scalar>&
+                    bstar = Teuchos::SerialDenseVector<int,Scalar>())
+  {
+    this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
+      this->description(),A,b,c,order,orderMin,orderMax,bstar));
+  }
+
+  Teuchos::RCP<const Teuchos::ParameterList>
+  getValidParameters() const
+  {
+    Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
+    this->getValidParametersBasicDIRK(pl);
+    pl->set<bool>("Initial Condition Consistency Check",
+                  this->getICConsistencyCheckDefault());
+
+    // Tableau ParameterList
+    Teuchos::RCP<Teuchos::ParameterList> tableauPL = Teuchos::parameterList();
+    tableauPL->set<std::string>("A",
+     "0.2928932188134524 0.0; 0.7071067811865476 0.2928932188134524");
+    tableauPL->set<std::string>("b",
+     "0.7071067811865476 0.2928932188134524");
+    tableauPL->set<std::string>("c", "0.2928932188134524 1.0");
+    tableauPL->set<int>("order", 2);
+    tableauPL->set<std::string>("bstar", "");
+    pl->set("Tableau", *tableauPL);
+
+    return pl;
   }
 };
 

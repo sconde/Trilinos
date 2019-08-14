@@ -132,8 +132,7 @@ public:
     void getValidParametersBasicDIRK(
       Teuchos::RCP<Teuchos::ParameterList> pl) const;
 
-    virtual std::string getDescription() const
-    { return tableau_->getDescription();}
+    virtual std::string getDescription() const = 0;
   //@}
 
   /// Return alpha = d(xDot)/dx.

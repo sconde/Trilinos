@@ -14,7 +14,7 @@
 #include "Thyra_VectorStdOps.hpp"
 
 #include "Tempus_IntegratorBasic.hpp"
-#include "Tempus_StepperExplicitRK.hpp"
+#include "Tempus_StepperFactory.hpp"
 
 #include "../TestModels/SinCosModel.hpp"
 #include "../TestModels/VanDerPolModel.hpp"
@@ -156,7 +156,10 @@ TEUCHOS_UNIT_TEST(ExplicitRK, ConstructingFromDefaults)
   auto model = rcp(new SinCosModel<double>(scm_pl));
 
   // Setup Stepper for field solve ----------------------------
-  auto stepper = rcp(new Tempus::StepperExplicitRK<double>());
+  RCP<Tempus::StepperFactory<double> > sf =
+    Teuchos::rcp(new Tempus::StepperFactory<double>());
+  RCP<Tempus::Stepper<double> > stepper =
+    sf->createStepper("RK Explicit 4 Stage");
   stepper->setModel(model);
   stepper->initialize();
 

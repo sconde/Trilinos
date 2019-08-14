@@ -9,7 +9,6 @@
 #ifndef Tempus_StepperExplicitRK_new_impl_hpp
 #define Tempus_StepperExplicitRK_new_impl_hpp
 
-#include "Tempus_RKButcherTableauFactory.hpp"
 #include "Tempus_RKButcherTableau.hpp"
 #include "Teuchos_VerboseObjectParameterListHelpers.hpp"
 #include "Thyra_VectorStdOps.hpp"

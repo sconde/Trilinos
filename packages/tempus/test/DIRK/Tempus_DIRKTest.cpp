@@ -13,7 +13,7 @@
 #include "Thyra_VectorStdOps.hpp"
 
 #include "Tempus_IntegratorBasic.hpp"
-#include "Tempus_StepperDIRK.hpp"
+#include "Tempus_StepperFactory.hpp"
 
 #include "../TestModels/SinCosModel.hpp"
 #include "../TestModels/VanDerPolModel.hpp"
@@ -27,6 +27,7 @@ namespace Tempus_Test {
 using Teuchos::RCP;
 using Teuchos::rcp;
 using Teuchos::rcp_const_cast;
+using Teuchos::rcp_dynamic_cast;
 using Teuchos::ParameterList;
 using Teuchos::parameterList;
 using Teuchos::sublist;
@@ -195,8 +196,12 @@ TEUCHOS_UNIT_TEST(DIRK, ConstructingFromDefaults)
   auto model = rcp(new SinCosModel<double>(scm_pl));
 
   // Setup Stepper for field solve ----------------------------
-  auto stepper = rcp(new Tempus::StepperDIRK<double>());
+  RCP<Tempus::StepperFactory<double> > sf =
+    Teuchos::rcp(new Tempus::StepperFactory<double>());
+  RCP<Tempus::Stepper<double> > stepper =
+    sf->createStepper("SDIRK 2 Stage 2nd order");
   stepper->setModel(model);
+  stepper->setSolver();
   stepper->initialize();
 
   // Setup TimeStepControl ------------------------------------

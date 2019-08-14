@@ -17,9 +17,7 @@
 #include "Tempus_StepperNewmarkImplicitDForm.hpp"
 #include "Tempus_StepperNewmarkExplicitAForm.hpp"
 #include "Tempus_StepperHHTAlpha.hpp"
-#include "Tempus_StepperExplicitRK.hpp"
 #include "Tempus_StepperRKButcherTableau.hpp"
-#include "Tempus_StepperDIRK.hpp"
 #include "Tempus_StepperIMEX_RK.hpp"
 #include "Tempus_StepperIMEX_RK_Partition.hpp"
 #include "Tempus_StepperLeapfrog.hpp"
@@ -211,9 +209,11 @@ public:
         for(std::size_t i=0;i<numStages;i++)
           bstar(i) = values[i];
       }
-      tableau = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order,bstar));
+      tableau = rcp(new RKButcherTableau<Scalar>(
+        "From ParameterList",A,b,c,order,order,order,bstar));
     } else {
-      tableau = rcp(new RKButcherTableau<Scalar>(A,b,c,order,order,order));
+      tableau = rcp(new RKButcherTableau<Scalar>(
+        "From ParameterList",A,b,c,order,order,order));
     }
     return tableau;
   }
