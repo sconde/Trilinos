@@ -6,8 +6,8 @@
 // ****************************************************************************
 // @HEADER
 
-#ifndef Tempus_StepperExplicitRK_new_decl_hpp
-#define Tempus_StepperExplicitRK_new_decl_hpp
+#ifndef Tempus_StepperExplicitRK_decl_hpp
+#define Tempus_StepperExplicitRK_decl_hpp
 
 #include "Tempus_config.hpp"
 #include "Tempus_StepperExplicit.hpp"
@@ -89,7 +89,7 @@ namespace Tempus {
  *   \f]
  */
 template<class Scalar>
-class StepperExplicitRK_new : virtual public Tempus::StepperExplicit<Scalar>
+class StepperExplicitRK : virtual public Tempus::StepperExplicit<Scalar>
 {
 
 public:
@@ -196,4 +196,4 @@ protected:
 
 } // namespace Tempus
 
-#endif // Tempus_StepperExplicitRK_new_decl_hpp
+#endif // Tempus_StepperExplicitRK_decl_hpp

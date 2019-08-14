@@ -221,7 +221,7 @@ public:
 
   /// Set StepperRK member data from the model and ParameterList.
   void setStepperRKValues(
-    Teuchos::RCP<StepperExplicitRK_new<Scalar> > stepper,
+    Teuchos::RCP<StepperExplicitRK<Scalar> > stepper,
     Teuchos::RCP<Teuchos::ParameterList> stepperPL)
   {
     if (stepperPL != Teuchos::null) {
@@ -235,7 +235,7 @@ public:
 
   /// Set solver from ParameterList.
   void setStepperSolverValues(
-    Teuchos::RCP<StepperDIRK_new<Scalar> > stepper,
+    Teuchos::RCP<StepperDIRK<Scalar> > stepper,
     Teuchos::RCP<Teuchos::ParameterList> stepperPL)
   {
     auto solver = rcp(new Thyra::NOXNonlinearSolver());
@@ -255,7 +255,7 @@ public:
 
   /// Set StepperDIRK member data from the model and ParameterList.
   void setStepperDIRKValues(
-    Teuchos::RCP<StepperDIRK_new<Scalar> > stepper,
+    Teuchos::RCP<StepperDIRK<Scalar> > stepper,
     Teuchos::RCP<Teuchos::ParameterList> stepperPL)
   {
     auto solver = rcp(new Thyra::NOXNonlinearSolver());

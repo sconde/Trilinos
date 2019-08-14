@@ -34,7 +34,7 @@ using Teuchos::sublist;
 using Teuchos::getParametersFromXmlFile;
 
 using Tempus::StepperFactory;
-using Tempus::StepperExplicitRK_new;
+using Tempus::StepperExplicitRK;
 
 // Comment out any of the following tests to exclude from build/run.
 #define SETTABLEAU
@@ -46,8 +46,8 @@ using Tempus::StepperExplicitRK_new;
 TEUCHOS_UNIT_TEST(ExplicitRKUnitTest, setTableau)
 {
   RCP<StepperFactory<double> > sf = Teuchos::rcp(new StepperFactory<double>());
-  RCP<StepperExplicitRK_new<double> > stepperRef;
-  RCP<StepperExplicitRK_new<double> > stepperReset;
+  RCP<StepperExplicitRK<double> > stepperRef;
+  RCP<StepperExplicitRK<double> > stepperReset;
 
   // Setup the SinCosModel
   RCP<ParameterList> pList =
@@ -82,7 +82,7 @@ TEUCHOS_UNIT_TEST(ExplicitRKUnitTest, setTableau)
 //    std::string stepperType = RKMethods[m];
 //    std::cout << "  a -  ExplicitRKUnitTest" << std::endl;
 //    std::cout << " stepperRef = " << stepperRef << std::endl;
-//    stepperRef = rcp_dynamic_cast<StepperExplicitRK_new<double> >(
+//    stepperRef = rcp_dynamic_cast<StepperExplicitRK<double> >(
 //      sf->createStepper(stepperType, model));
 //    std::cout << "  b -  ExplicitRKUnitTest" << std::endl;
 //    std::cout << " stepperRef = " << stepperRef << std::endl;
@@ -92,7 +92,7 @@ TEUCHOS_UNIT_TEST(ExplicitRKUnitTest, setTableau)
 //    for(std::vector<std::string>::size_type r = 0; r != resetMethod.size(); r++)
 //    {
 //      //  Reset Stepper
-//      stepperReset = rcp_dynamic_cast<StepperExplicitRK_new<double> >(
+//      stepperReset = rcp_dynamic_cast<StepperExplicitRK<double> >(
 //        sf->createStepper("RK Explicit 4 Stage", model));
 //
 //      if (resetMethod[r] == "stepperType") {          // Reset via stepperType

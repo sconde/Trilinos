@@ -6,8 +6,8 @@
 // ****************************************************************************
 // @HEADER
 
-#ifndef Tempus_StepperDIRK_new_decl_hpp
-#define Tempus_StepperDIRK_new_decl_hpp
+#ifndef Tempus_StepperDIRK_decl_hpp
+#define Tempus_StepperDIRK_decl_hpp
 
 #include "Tempus_config.hpp"
 #include "Tempus_RKButcherTableau.hpp"
@@ -84,7 +84,7 @@ namespace Tempus {
  *  The default is to set useFSAL=false.
  */
 template<class Scalar>
-class StepperDIRK_new : virtual public Tempus::StepperImplicit<Scalar>
+class StepperDIRK : virtual public Tempus::StepperImplicit<Scalar>
 {
 public:
 
@@ -260,4 +260,4 @@ private:
 
 } // namespace Tempus
 
-#endif // Tempus_StepperDIRK_new_decl_hpp
+#endif // Tempus_StepperDIRK_decl_hpp

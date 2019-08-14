@@ -246,7 +246,7 @@ void StepperIMEX_RK_Partition<Scalar>::setExplicitTableau(
   using Teuchos::rcp_dynamic_cast;
   RCP<StepperFactory<Scalar> > sf = Teuchos::rcp(new StepperFactory<Scalar>());
   RCP<Stepper<Scalar> > stepper = sf->createStepper(stepperType);
-  auto stepperERK = rcp_dynamic_cast<StepperExplicitRK_new<Scalar> > (stepper,true);
+  auto stepperERK = rcp_dynamic_cast<StepperExplicitRK<Scalar> > (stepper,true);
 
   this->setExplicitTableau(stepperERK->getTableau());
 }
@@ -260,7 +260,7 @@ void StepperIMEX_RK_Partition<Scalar>::setExplicitTableau(
   using Teuchos::rcp_dynamic_cast;
   RCP<StepperFactory<Scalar> > sf = Teuchos::rcp(new StepperFactory<Scalar>());
   RCP<Stepper<Scalar> > stepper = sf->createStepper(pList, Teuchos::null);
-  auto stepperERK = rcp_dynamic_cast<StepperExplicitRK_new<Scalar> > (stepper,true);
+  auto stepperERK = rcp_dynamic_cast<StepperExplicitRK<Scalar> > (stepper,true);
 
   this->setExplicitTableau(stepperERK->getTableau());
 }
@@ -286,7 +286,7 @@ void StepperIMEX_RK_Partition<Scalar>::setImplicitTableau(
   using Teuchos::rcp_dynamic_cast;
   RCP<StepperFactory<Scalar> > sf = Teuchos::rcp(new StepperFactory<Scalar>());
   RCP<Stepper<Scalar> > stepper = sf->createStepper(stepperType);
-  auto stepperDIRK = rcp_dynamic_cast<StepperDIRK_new<Scalar> > (stepper,true);
+  auto stepperDIRK = rcp_dynamic_cast<StepperDIRK<Scalar> > (stepper,true);
 
   this->setImplicitTableau(stepperDIRK->getTableau());
 }
@@ -300,7 +300,7 @@ void StepperIMEX_RK_Partition<Scalar>::setImplicitTableau(
   using Teuchos::rcp_dynamic_cast;
   RCP<StepperFactory<Scalar> > sf = Teuchos::rcp(new StepperFactory<Scalar>());
   RCP<Stepper<Scalar> > stepper = sf->createStepper(pList, Teuchos::null);
-  auto stepperDIRK = rcp_dynamic_cast<StepperDIRK_new<Scalar> > (stepper,true);
+  auto stepperDIRK = rcp_dynamic_cast<StepperDIRK<Scalar> > (stepper,true);
 
   this->setImplicitTableau(stepperDIRK->getTableau());
 }

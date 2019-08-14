@@ -14,20 +14,9 @@
 #pragma clang system_header
 #endif
 
-//#include "Tempus_String_Utilities.hpp"
-#include "Tempus_StepperExplicitRK_new.hpp"
-#include "Tempus_StepperDIRK_new.hpp"
+#include "Tempus_StepperExplicitRK.hpp"
+#include "Tempus_StepperDIRK.hpp"
 #include "Tempus_RKButcherTableau.hpp"
-
-//#include "Teuchos_Assert.hpp"
-//#include "Teuchos_as.hpp"
-//#include "Teuchos_Describable.hpp"
-//#include "Teuchos_ParameterListAcceptorDefaultBase.hpp"
-//#include "Teuchos_VerboseObject.hpp"
-//#include "Teuchos_VerboseObjectParameterListHelpers.hpp"
-//#include "Teuchos_SerialDenseMatrix.hpp"
-//#include "Teuchos_SerialDenseVector.hpp"
-//#include "Thyra_MultiVectorStdOps.hpp"
 
 
 namespace Tempus {
@@ -43,18 +32,13 @@ namespace Tempus {
  *      & b^T
  *  \end{array}
  *  \;\;\;\;\mbox{ where }\;\;\;\;
- *  \begin{array}{c|c}
- *    c & A \\ \hline
- *      & b^T
- *  \end{array}
- *  \;\;\;\;\mbox{ where }\;\;\;\;
  *  \begin{array}{c|c} 0 & 0 \\ \hline
  *                       & 1 \end{array}
  *  \f]
  */
 template<class Scalar>
 class StepperERK_ForwardEuler :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_ForwardEuler()
@@ -126,7 +110,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_4Stage4thOrder :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_4Stage4thOrder()
@@ -208,9 +192,9 @@ class StepperERK_4Stage4thOrder :
  *  The tableau (order=3(2)) is
  *  \f[
  *  \begin{array}{c|c}
- *    c & A \\ \hline
- *      & b^T \\ \hline
- *      & \hat{b}^T
+ *    c & A   \\ \hline
+ *      & b^T \\
+ *      & b^{*T}
  *  \end{array}
  *  \;\;\;\;\mbox{ where }\;\;\;\;
  *  \begin{array}{c|cccc}  0  & 0    &     &     & \\
@@ -226,7 +210,7 @@ class StepperERK_4Stage4thOrder :
  */
 template<class Scalar>
 class StepperERK_BogackiShampine32 :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_BogackiShampine32()
@@ -318,9 +302,9 @@ protected:
  *  The tableau (order=4(5)) is
  *  \f[
  *  \begin{array}{c|c}
- *    c & A \\ \hline
- *      & b^T \\ \hline
- *      & \hat{b}^T
+ *    c & A   \\ \hline
+ *      & b^T \\
+ *      & b^{*T}
  *  \end{array}
  *  \;\;\;\;\mbox{ where }\;\;\;\;
  *  \begin{array}{c|ccccc}  0 & 0    &     &      &     & \\
@@ -339,7 +323,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_Merson45 :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_Merson45()
@@ -459,7 +443,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_3_8Rule :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
 public:
 
@@ -563,7 +547,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_4Stage3rdOrderRunge :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_4Stage3rdOrderRunge()
@@ -662,7 +646,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_5Stage3rdOrderKandG :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_5Stage3rdOrderKandG()
@@ -761,7 +745,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_3Stage3rdOrder :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_3Stage3rdOrder()
@@ -863,7 +847,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_3Stage3rdOrderTVD :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_3Stage3rdOrderTVD()
@@ -967,7 +951,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_3Stage3rdOrderHeun :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_3Stage3rdOrderHeun()
@@ -1065,7 +1049,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_Midpoint :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_Midpoint()
@@ -1153,7 +1137,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_Trapezoidal :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
   public:
   StepperERK_Trapezoidal()
@@ -1266,7 +1250,7 @@ protected:
  */
 template<class Scalar>
 class StepperERK_General :
-  virtual public StepperExplicitRK_new<Scalar>
+  virtual public StepperExplicitRK<Scalar>
 {
 public:
   StepperERK_General()
@@ -1394,7 +1378,7 @@ public:
  */
 template<class Scalar>
 class StepperDIRK_BackwardEuler :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperDIRK_BackwardEuler()
@@ -1483,7 +1467,7 @@ protected:
  *                         1    & 1-\gamma & \gamma \\ \hline
  *                              & 1-\gamma & \gamma  \end{array}
  *  \f]
- *  The default value is \f$\gamma = (2\pm \sqrt{2})/2\f$.
+ *  The default value is \f$\gamma = (2 - \sqrt{2})/2\f$.
  *  This will produce an L-stable 2nd order method with the stage
  *  times within the timestep.  Other values of gamma will still
  *  produce an L-stable scheme, but will only be 1st order accurate.
@@ -1494,7 +1478,7 @@ protected:
  */
 template<class Scalar>
 class StepperSDIRK_2Stage2ndOrder :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperSDIRK_2Stage2ndOrder()
@@ -1622,7 +1606,7 @@ protected:
  *                     (3\pm \sqrt{3})/6 & \mbox{then 3rd order and A-stable}
  *                   \end{array} \right.
  *  \f]
- *  The default value is \f$\gamma = (3\pm \sqrt{3})/6\f$.
+ *  The default value is \f$\gamma = (3 + \sqrt{3})/6\f$.
  *
  *  Reference: E. Hairer, S. P. Norsett, and G. Wanner,
  *             Solving Ordinary Differential Equations I:
@@ -1631,7 +1615,7 @@ protected:
  */
 template<class Scalar>
 class StepperSDIRK_2Stage3rdOrder :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperSDIRK_2Stage3rdOrder()
@@ -1800,7 +1784,7 @@ protected:
  */
 template<class Scalar>
 class StepperEDIRK_2Stage3rdOrder :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperEDIRK_2Stage3rdOrder()
@@ -1912,7 +1896,7 @@ protected:
  */
 template<class Scalar>
 class StepperDIRK_1StageTheta :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperDIRK_1StageTheta()
@@ -2032,20 +2016,20 @@ protected:
  *                       1  & 1-\theta & \theta \\ \hline
  *                          & 1-\theta & \theta  \end{array}
  *  \f]
- *  Valid values are \f$0 < \theta <= 1\f$, where \f$\theta\f$ = 0 "
+ *  Valid values are \f$0 < \theta <= 1\f$, where \f$\theta\f$ = 0
  *  implies Forward Euler (not avialble with this stepepr as it makes it
- *  explicit), \f$\theta\f$ = 1/2 implies trapezoidal "
- *  method (default), and \f$\theta\f$ = 1 implies Backward Euler. "
- *  For \f$\theta\f$ != 1/2, this method is first-order accurate, "
- *  and with \f$\theta\f$ = 1/2, it is second-order accurate.  "
- *  This method is A-stable, but becomes L-stable with \f$\theta\f$=1.");
+ *  explicit), \f$\theta\f$ = 1/2 implies trapezoidal
+ *  method (default), and \f$\theta\f$ = 1 implies Backward Euler.
+ *  For \f$\theta\f$ != 1/2, this method is first-order accurate,
+ *  and with \f$\theta\f$ = 1/2, it is second-order accurate.
+ *  This method is A-stable, but becomes L-stable with \f$\theta\f$=1.
  *
  *  Reference: Computer Methods for ODEs and DAEs,
  *             U. M. Ascher and L. R. Petzold, p. 113.
  */
 template<class Scalar>
 class StepperEDIRK_2StageTheta :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperEDIRK_2StageTheta()
@@ -2183,7 +2167,7 @@ protected:
  */
 template<class Scalar>
 class StepperEDIRK_TrapezoidalRule :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperEDIRK_TrapezoidalRule()
@@ -2277,7 +2261,7 @@ protected:
  *      & b^T
  *  \end{array}
  *  \;\;\;\;\mbox{ where }\;\;\;\;
- *  \begin{array}{c|c} 1/2  & 1/2  \\
+ *  \begin{array}{c|c} 1/2  & 1/2  \\ \hline
  *                          & 1    \end{array}
  *  \f]
  *  Implicit midpoint method is second-order accurate, and is A-stable.
@@ -2294,7 +2278,7 @@ protected:
  */
 template<class Scalar>
 class StepperSDIRK_ImplicitMidpoint :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperSDIRK_ImplicitMidpoint()
@@ -2402,7 +2386,7 @@ protected:
  */
 template<class Scalar>
 class StepperDIRK_1Stage1stOrderRadauIA :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperDIRK_1Stage1stOrderRadauIA()
@@ -2502,7 +2486,7 @@ protected:
  */
 template<class Scalar>
 class StepperDIRK_2Stage2ndOrderLobattoIIIB :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperDIRK_2Stage2ndOrderLobattoIIIB()
@@ -2619,7 +2603,7 @@ protected:
  */
 template<class Scalar>
 class StepperSDIRK_5Stage4thOrder :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperSDIRK_5Stage4thOrder()
@@ -2766,12 +2750,12 @@ protected:
  *  \;\;\;\;\mbox{ where }\;\;\;\;
  *  \begin{array}{c|ccc}
  *    \gamma   &     \gamma &           &        \\
- *    1/2      & 1/2-\gamma &    \gamma &        \\ \hline
+ *    1/2      & 1/2-\gamma &    \gamma &        \\
  *    1-\gamma &    2\gamma & 1-4\gamma & \gamma \\ \hline
  *             &     \delta & 1-2\delta & \delta \end{array}
  *  \f]
- *  where \f$\gamma = (1/\sqrt{3})*\cos(pi/18)+1/2\f$ and
- *  \f$\delta = 1/(6*(2*\gamma-1)^2)\f$, and is A-stable.
+ *  where \f$\gamma = (1/\sqrt{3})\cos(\pi/18)+1/2\f$ and
+ *  \f$\delta = 1/(6(2\gamma-1)^2)\f$, and is A-stable.
  *
  *  Reference: Solving Ordinary Differential Equations II:
  *             Stiff and Differential-Algebraic Problems,
@@ -2779,7 +2763,7 @@ protected:
  */
 template<class Scalar>
 class StepperSDIRK_3Stage4thOrder :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperSDIRK_3Stage4thOrder()
@@ -2906,11 +2890,11 @@ protected:
  *
  *  Reference: Solving Ordinary Differential Equations II:
  *             Stiff and Differential-Algebraic Problems,
- *             2nd Revised Edition, E. Hairer and G. Wanner, pg101,
+ *             2nd Revised Edition, E. Hairer and G. Wanner, pg101.
  */
 template<class Scalar>
 class StepperSDIRK_5Stage5thOrder :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperSDIRK_5Stage5thOrder()
@@ -3070,9 +3054,9 @@ protected:
  *  The tableau (order=2(1)) is
  *  \f[
  *  \begin{array}{c|c}
- *    c & A \\ \hline
- *      & b^T \\ \hline
- *      & \hat{b}^T
+ *    c & A   \\ \hline
+ *      & b^T \\
+ *      & b^{*T}
  *  \end{array}
  *  \;\;\;\;\mbox{ where }\;\;\;\;
  *  \begin{array}{c|cccc}  0 & 0   & \\
@@ -3083,7 +3067,7 @@ protected:
  */
 template<class Scalar>
 class StepperSDIRK_21Pair :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperSDIRK_21Pair()
@@ -3204,7 +3188,7 @@ protected:
  */
 template<class Scalar>
 class StepperDIRK_General :
-  virtual public StepperDIRK_new<Scalar>
+  virtual public StepperDIRK<Scalar>
 {
   public:
   StepperDIRK_General()

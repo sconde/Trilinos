@@ -6,8 +6,8 @@
 // ****************************************************************************
 // @HEADER
 
-#ifndef Tempus_StepperDIRK_new_impl_hpp
-#define Tempus_StepperDIRK_new_impl_hpp
+#ifndef Tempus_StepperDIRK_impl_hpp
+#define Tempus_StepperDIRK_impl_hpp
 
 #include "Tempus_config.hpp"
 #include "Tempus_StepperFactory.hpp"
@@ -23,7 +23,7 @@ namespace Tempus {
 template<class Scalar> class StepperFactory;
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::setupDefault()
+void StepperDIRK<Scalar>::setupDefault()
 {
   this->setStepperType(        this->description());
   this->setUseFSAL(            this->getUseFSALDefault());
@@ -37,7 +37,7 @@ void StepperDIRK_new<Scalar>::setupDefault()
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::setup(
+void StepperDIRK<Scalar>::setup(
   const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
   const Teuchos::RCP<StepperDIRKObserver<Scalar> >& obs,
   const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
@@ -66,7 +66,7 @@ void StepperDIRK_new<Scalar>::setup(
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::getValidParametersBasicDIRK(
+void StepperDIRK<Scalar>::getValidParametersBasicDIRK(
   Teuchos::RCP<Teuchos::ParameterList> pl) const
 {
   getValidParametersBasic(pl, this->getStepperType());
@@ -84,7 +84,7 @@ void StepperDIRK_new<Scalar>::getValidParametersBasicDIRK(
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::setObserver(
+void StepperDIRK<Scalar>::setObserver(
   Teuchos::RCP<StepperObserver<Scalar> > obs)
 {
   if (obs == Teuchos::null) {
@@ -105,21 +105,21 @@ void StepperDIRK_new<Scalar>::setObserver(
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::initialize()
+void StepperDIRK<Scalar>::initialize()
 {
   TEUCHOS_TEST_FOR_EXCEPTION( tableau_ == Teuchos::null, std::logic_error,
     "Error - Need to set the tableau, before calling "
-    "StepperDIRK_new::initialize()\n");
+    "StepperDIRK::initialize()\n");
 
   TEUCHOS_TEST_FOR_EXCEPTION( this->wrapperModel_ == Teuchos::null,
     std::logic_error,
     "Error - Need to set the model, setModel(), before calling "
-    "StepperDIRK_new::initialize()\n");
+    "StepperDIRK::initialize()\n");
 
   TEUCHOS_TEST_FOR_EXCEPTION( this->solver_ == Teuchos::null,
     std::logic_error,
     "Error - Need to set the solver, setSolver(), before calling "
-    "StepperDIRK_new::initialize()\n");
+    "StepperDIRK::initialize()\n");
 
   this->setObserver();
 
@@ -148,7 +148,7 @@ void StepperDIRK_new<Scalar>::initialize()
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::setInitialConditions (
+void StepperDIRK<Scalar>::setInitialConditions (
       const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory)
 {
   using Teuchos::RCP;
@@ -164,16 +164,16 @@ void StepperDIRK_new<Scalar>::setInitialConditions (
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::takeStep(
+void StepperDIRK<Scalar>::takeStep(
   const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory)
 {
   using Teuchos::RCP;
 
-  TEMPUS_FUNC_TIME_MONITOR("Tempus::StepperDIRK_new::takeStep()");
+  TEMPUS_FUNC_TIME_MONITOR("Tempus::StepperDIRK::takeStep()");
   {
     TEUCHOS_TEST_FOR_EXCEPTION(solutionHistory->getNumStates() < 2,
       std::logic_error,
-      "Error - StepperDIRK_new<Scalar>::takeStep(...)\n"
+      "Error - StepperDIRK<Scalar>::takeStep(...)\n"
       "Need at least two SolutionStates for DIRK.\n"
       "  Number of States = " << solutionHistory->getNumStates() << "\n"
       "Try setting in \"Solution History\" \"Storage Type\" = \"Undo\"\n"
@@ -330,7 +330,7 @@ void StepperDIRK_new<Scalar>::takeStep(
  */
 template<class Scalar>
 Teuchos::RCP<Tempus::StepperState<Scalar> >
-StepperDIRK_new<Scalar>::
+StepperDIRK<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
@@ -340,14 +340,14 @@ getDefaultStepperState()
 
 
 template<class Scalar>
-std::string StepperDIRK_new<Scalar>::description() const
+std::string StepperDIRK<Scalar>::description() const
 {
   return(this->getStepperType());
 }
 
 
 template<class Scalar>
-void StepperDIRK_new<Scalar>::describe(
+void StepperDIRK<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
@@ -357,7 +357,7 @@ void StepperDIRK_new<Scalar>::describe(
 
 
 template <class Scalar>
-void StepperDIRK_new<Scalar>::setParameterList(
+void StepperDIRK<Scalar>::setParameterList(
   const Teuchos::RCP<Teuchos::ParameterList> & pList)
 {
   TEUCHOS_ASSERT(false);
@@ -365,7 +365,7 @@ void StepperDIRK_new<Scalar>::setParameterList(
 
 template<class Scalar>
 Teuchos::RCP<const Teuchos::ParameterList>
-StepperDIRK_new<Scalar>::getValidParameters() const
+StepperDIRK<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
   this->getValidParametersBasicDIRK(pl);
@@ -375,7 +375,7 @@ StepperDIRK_new<Scalar>::getValidParameters() const
 
 template <class Scalar>
 Teuchos::RCP<Teuchos::ParameterList>
-StepperDIRK_new<Scalar>::getNonconstParameterList()
+StepperDIRK<Scalar>::getNonconstParameterList()
 {
   //TEUCHOS_ASSERT(false);
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
@@ -385,7 +385,7 @@ StepperDIRK_new<Scalar>::getNonconstParameterList()
 
 template <class Scalar>
 Teuchos::RCP<Teuchos::ParameterList>
-StepperDIRK_new<Scalar>::unsetParameterList()
+StepperDIRK<Scalar>::unsetParameterList()
 {
   TEUCHOS_ASSERT(false);
   return(Teuchos::null);
@@ -393,4 +393,4 @@ StepperDIRK_new<Scalar>::unsetParameterList()
 
 
 } // namespace Tempus
-#endif // Tempus_StepperDIRK_new_impl_hpp
+#endif // Tempus_StepperDIRK_impl_hpp
