@@ -108,7 +108,7 @@
       </ParameterList>
 
       <ParameterList name="Default Start Up Stepper">
-        <Parameter name="Stepper Type" type="string" value="IRK 1 Stage Theta Method"/>
+        <Parameter name="Stepper Type" type="string" value="DIRK 1 Stage Theta Method"/>
         <Parameter name="Use FSAL"       type="bool" value="false"/>
         <Parameter name="Initial Condition Consistency" type="string" value="None"/>
         <Parameter name="Initial Condition Consistency Check" type="bool" value="false"/>

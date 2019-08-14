@@ -23,8 +23,22 @@ TRIBITS_ADD_TEST(
 
 TRIBITS_ADD_TEST(
   DIRK_Combined_FSA
-  NAME "DIRK_Combined_FSA_IRK_1_Stage_Theta"
-  ARGS "--method=\"IRK 1 Stage Theta Method\""
+  NAME "DIRK_Combined_FSA_DIRK_1_Stage_Theta"
+  ARGS "--method=\"DIRK 1 Stage Theta Method\""
+  NUM_MPI_PROCS 1
+  )
+
+TRIBITS_ADD_TEST(
+  DIRK_Combined_FSA
+  NAME "DIRK_Combined_FSA_RK_Implicit_1_Stage_1st_order_Radau_IA"
+  ARGS "--method=\"RK Implicit 1 Stage 1st order Radau IA\""
+  NUM_MPI_PROCS 1
+  )
+
+TRIBITS_ADD_TEST(
+  DIRK_Combined_FSA
+  NAME "DIRK_Combined_FSA_RK_Implicit_2_Stage_2nd_order_Lobatto_IIIB"
+  ARGS "--method=\"RK Implicit 2 Stage 2nd order Lobatto IIIB\""
   NUM_MPI_PROCS 1
   )
 
@@ -120,8 +134,22 @@ TRIBITS_ADD_TEST(
 
 TRIBITS_ADD_TEST(
   DIRK_Staggered_FSA
-  NAME "DIRK_Staggered_FSA_IRK_1_Stage_Theta"
-  ARGS "--method=\"IRK 1 Stage Theta Method\""
+  NAME "DIRK_Staggered_FSA_DIRK_1_Stage_Theta"
+  ARGS "--method=\"DIRK 1 Stage Theta Method\""
+  NUM_MPI_PROCS 1
+  )
+
+TRIBITS_ADD_TEST(
+  DIRK_Staggered_FSA
+  NAME "DIRK_Staggered_FSA_RK_Implicit_1_Stage_1st_order_Radau_IA"
+  ARGS "--method=\"RK Implicit 1 Stage 1st order Radau IA\""
+  NUM_MPI_PROCS 1
+  )
+
+TRIBITS_ADD_TEST(
+  DIRK_Staggered_FSA
+  NAME "DIRK_Staggered_FSA_RK_Implicit_2_Stage_2nd_order_Lobatto_IIIB"
+  ARGS "--method=\"RK Implicit 2 Stage 2nd order Lobatto IIIB\""
   NUM_MPI_PROCS 1
   )
 

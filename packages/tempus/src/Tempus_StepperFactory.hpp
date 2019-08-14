@@ -584,6 +584,204 @@ public:
     return stepper;
   }
 
+  Teuchos::RCP<StepperEDIRK_2Stage3rdOrder<Scalar> >
+  createStepperEDIRK_2Stage3rdOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperEDIRK_2Stage3rdOrder<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperDIRK_1StageTheta<Scalar> >
+  createStepperDIRK_1StageTheta(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperDIRK_1StageTheta<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+    if (stepperPL != Teuchos::null) {
+      stepper->setTheta(stepperPL->get<double>("theta", 0.5));
+    }
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperEDIRK_2StageTheta<Scalar> >
+  createStepperEDIRK_2StageTheta(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperEDIRK_2StageTheta<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+    if (stepperPL != Teuchos::null) {
+      stepper->setTheta(stepperPL->get<double>("theta", 0.5));
+    }
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperEDIRK_TrapezoidalRule<Scalar> >
+  createStepperEDIRK_TrapezoidalRule(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    // This stepper goes by various names (e.g., 'RK Trapezoidal Rule'
+    // and 'RK Crank-Nicolson').  Make sure it is set to the default name.
+    if (stepperPL != Teuchos::null)
+      stepperPL->set<std::string>("Stepper Type", "RK Trapezoidal Rule");
+
+    auto stepper = Teuchos::rcp(new StepperEDIRK_TrapezoidalRule<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperSDIRK_ImplicitMidpoint<Scalar> >
+  createStepperSDIRK_ImplicitMidpoint(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperSDIRK_ImplicitMidpoint<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperDIRK_1Stage1stOrderRadauIA<Scalar> >
+  createStepperDIRK_1Stage1stOrderRadauIA(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperDIRK_1Stage1stOrderRadauIA<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperDIRK_2Stage2ndOrderLobattoIIIB<Scalar> >
+  createStepperDIRK_2Stage2ndOrderLobattoIIIB(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperDIRK_2Stage2ndOrderLobattoIIIB<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperSDIRK_5Stage4thOrder<Scalar> >
+  createStepperSDIRK_5Stage4thOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperSDIRK_5Stage4thOrder<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperSDIRK_3Stage4thOrder<Scalar> >
+  createStepperSDIRK_3Stage4thOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperSDIRK_3Stage4thOrder<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperSDIRK_5Stage5thOrder<Scalar> >
+  createStepperSDIRK_5Stage5thOrder(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperSDIRK_5Stage5thOrder<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperSDIRK_21Pair<Scalar> >
+  createStepperSDIRK_21Pair(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperSDIRK_21Pair<Scalar>());
+    setStepperDIRKValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
   // ---------------------------------------------------------------------------
 
 private:
@@ -619,9 +817,8 @@ private:
       return createStepperERK_4Stage4thOrder(model, stepperPL);
     else if (stepperType == "RK Explicit 3/8 Rule" )
       return createStepperERK_3_8Rule(model, stepperPL);
-    else if (stepperType == "RK Explicit 4 Stage 3rd order by Runge" ) {
+    else if (stepperType == "RK Explicit 4 Stage 3rd order by Runge" )
       return createStepperERK_4Stage3rdOrderRunge(model, stepperPL);
-    }
     else if (stepperType == "RK Explicit 5 Stage 3rd order by Kinnmark and Gray" )
       return createStepperERK_5Stage3rdOrderKandG(model, stepperPL);
     else if (stepperType == "RK Explicit 3 Stage 3rd order" )
@@ -647,44 +844,29 @@ private:
       return createStepperSDIRK_2Stage2ndOrder(model, stepperPL);
     else if (stepperType == "SDIRK 2 Stage 3rd order" )
       return createStepperSDIRK_2Stage3rdOrder(model, stepperPL);
-    else if (
-      stepperType == "IRK 1 Stage Theta Method" ||
-      stepperType == "RK Implicit Midpoint" ||
-      stepperType == "SDIRK 1 Stage 1st order" ||
-      stepperType == "EDIRK 2 Stage 3rd order" ||
-      stepperType == "EDIRK 2 Stage Theta Method" ||
-      stepperType == "SDIRK 3 Stage 4th order" ||
-      stepperType == "SDIRK 5 Stage 4th order" ||
-      stepperType == "SDIRK 5 Stage 5th order" ||
-      stepperType == "SDIRK 2(1) Pair" ||
-      stepperType == "RK Trapezoidal Rule" || stepperType == "RK Crank-Nicolson"
-      )
-      return rcp(new StepperDIRK<Scalar>(model, stepperType, stepperPL));
-    else if (
-      stepperType == "RK Implicit 3 Stage 6th Order Kuntzmann & Butcher" ||
-      stepperType == "RK Implicit 4 Stage 8th Order Kuntzmann & Butcher" ||
-      stepperType == "RK Implicit 2 Stage 4th Order Hammer & Hollingsworth" ||
-      stepperType == "RK Implicit 1 Stage 2nd order Gauss" ||
-      stepperType == "RK Implicit 2 Stage 4th order Gauss" ||
-      stepperType == "RK Implicit 3 Stage 6th order Gauss" ||
-      stepperType == "RK Implicit 1 Stage 1st order Radau left" ||
-      stepperType == "RK Implicit 2 Stage 3rd order Radau left" ||
-      stepperType == "RK Implicit 3 Stage 5th order Radau left" ||
-      stepperType == "RK Implicit 1 Stage 1st order Radau right" ||
-      stepperType == "RK Implicit 2 Stage 3rd order Radau right" ||
-      stepperType == "RK Implicit 3 Stage 5th order Radau right" ||
-      stepperType == "RK Implicit 2 Stage 2nd order Lobatto A" ||
-      stepperType == "RK Implicit 3 Stage 4th order Lobatto A" ||
-      stepperType == "RK Implicit 4 Stage 6th order Lobatto A" ||
-      stepperType == "RK Implicit 2 Stage 2nd order Lobatto B" ||
-      stepperType == "RK Implicit 3 Stage 4th order Lobatto B" ||
-      stepperType == "RK Implicit 4 Stage 6th order Lobatto B" ||
-      stepperType == "RK Implicit 2 Stage 2nd order Lobatto C" ||
-      stepperType == "RK Implicit 3 Stage 4th order Lobatto C" ||
-      stepperType == "RK Implicit 4 Stage 6th order Lobatto C" ) {
-      TEUCHOS_TEST_FOR_EXCEPTION(true, std::logic_error,
-        "Error - Implicit RK not implemented yet!.\n");
-    }
+    else if (stepperType == "EDIRK 2 Stage 3rd order" )
+      return createStepperEDIRK_2Stage3rdOrder(model, stepperPL);
+    else if (stepperType == "DIRK 1 Stage Theta Method" )
+      return createStepperDIRK_1StageTheta(model, stepperPL);
+    else if (stepperType == "EDIRK 2 Stage Theta Method" )
+      return createStepperEDIRK_2StageTheta(model, stepperPL);
+    else if (stepperType == "RK Trapezoidal Rule" ||
+             stepperType == "RK Crank-Nicolson" )
+      return createStepperEDIRK_TrapezoidalRule(model, stepperPL);
+    else if (stepperType == "RK Implicit Midpoint" )
+      return createStepperSDIRK_ImplicitMidpoint(model, stepperPL);
+    else if (stepperType == "RK Implicit 1 Stage 1st order Radau IA" )
+      return createStepperDIRK_1Stage1stOrderRadauIA(model, stepperPL);
+    else if (stepperType == "RK Implicit 2 Stage 2nd order Lobatto IIIB" )
+      return createStepperDIRK_2Stage2ndOrderLobattoIIIB(model, stepperPL);
+    else if (stepperType == "SDIRK 5 Stage 4th order" )
+      return createStepperSDIRK_5Stage4thOrder(model, stepperPL);
+    else if (stepperType == "SDIRK 3 Stage 4th order" )
+      return createStepperSDIRK_3Stage4thOrder(model, stepperPL);
+    else if (stepperType == "SDIRK 5 Stage 5th order" )
+      return createStepperSDIRK_5Stage5thOrder(model, stepperPL);
+    else if ( stepperType == "SDIRK 2(1) Pair" )
+      return createStepperSDIRK_21Pair(model, stepperPL);
     else if (
       stepperType == "IMEX RK 1st order" ||
       stepperType == "IMEX RK SSP2"      ||
@@ -734,7 +916,7 @@ private:
       << "    'General ERK'\n"
       << "  Implicit Runge-Kutta Methods:\n"
       << "    'RK Backward Euler'\n"
-      << "    'IRK 1 Stage Theta Method'\n"
+      << "    'DIRK 1 Stage Theta Method'\n"
       << "    'RK Implicit Midpoint'\n"
       << "    'SDIRK 1 Stage 1st order'\n"
       << "    'SDIRK 2 Stage 2nd order'\n"

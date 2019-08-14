@@ -48,9 +48,11 @@ void test_sincos_fsa(const std::string& method_name,
   std::vector<std::string> RKMethods;
   RKMethods.push_back("General DIRK");
   RKMethods.push_back("RK Backward Euler");
-  RKMethods.push_back("IRK 1 Stage Theta Method");
+  RKMethods.push_back("DIRK 1 Stage Theta Method");
+  RKMethods.push_back("RK Implicit 1 Stage 1st order Radau IA");
   RKMethods.push_back("RK Implicit Midpoint");
   RKMethods.push_back("SDIRK 2 Stage 2nd order");
+  RKMethods.push_back("RK Implicit 2 Stage 2nd order Lobatto IIIB");
   RKMethods.push_back("SDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage Theta Method");
@@ -73,8 +75,10 @@ void test_sincos_fsa(const std::string& method_name,
     RKMethodErrors.push_back(0.000144507);
     RKMethodErrors.push_back(0.0428449);
     RKMethodErrors.push_back(0.000297933);
+    RKMethodErrors.push_back(0.0428449);
     RKMethodErrors.push_back(0.000297933);
     RKMethodErrors.push_back(0.000144507);
+    RKMethodErrors.push_back(0.000297933);
     RKMethodErrors.push_back(8.65434e-06);
     RKMethodErrors.push_back(1.3468e-06);
     RKMethodErrors.push_back(0.000297933);
@@ -89,8 +93,10 @@ void test_sincos_fsa(const std::string& method_name,
     RKMethodErrors.push_back(0.000125232);
     RKMethodErrors.push_back(0.0428449);
     RKMethodErrors.push_back(0.000221049);
+    RKMethodErrors.push_back(0.0383339);
     RKMethodErrors.push_back(0.000221049);
     RKMethodErrors.push_back(0.000125232);
+    RKMethodErrors.push_back(0.000272997);
     RKMethodErrors.push_back(4.79475e-06);
     RKMethodErrors.push_back(9.63899e-07);
     RKMethodErrors.push_back(0.000297933);
@@ -259,8 +265,8 @@ void test_sincos_fsa(const std::string& method_name,
       L2norm = std::sqrt(L2norm);
       ErrorNorm.push_back(L2norm);
 
-      *my_out << " n = " << n << " dt = " << dt << " error = " << L2norm
-              << std::endl;
+      //*my_out << " n = " << n << " dt = " << dt << " error = " << L2norm
+      //        << std::endl;
     }
 
     if (comm->getRank() == 0) {

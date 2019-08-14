@@ -100,7 +100,7 @@ void StepperBDF2<Scalar>::setStartUpStepper(
         RCP<StepperFactory<Scalar> > sf =
           Teuchos::rcp(new StepperFactory<Scalar>());
         startUpStepper_ =
-          sf->createStepper("IRK 1 Stage Theta Method",
+          sf->createStepper("DIRK 1 Stage Theta Method",
                             this->wrapperModel_->getAppModel());
 
         startupStepperName = startUpStepper_->description();

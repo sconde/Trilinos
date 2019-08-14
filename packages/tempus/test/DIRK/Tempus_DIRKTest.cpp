@@ -52,9 +52,11 @@ TEUCHOS_UNIT_TEST(DIRK, ParameterList)
   std::vector<std::string> RKMethods;
   RKMethods.push_back("General DIRK");
   RKMethods.push_back("RK Backward Euler");
-  RKMethods.push_back("IRK 1 Stage Theta Method");
+  RKMethods.push_back("DIRK 1 Stage Theta Method");
+  RKMethods.push_back("RK Implicit 1 Stage 1st order Radau IA");
   RKMethods.push_back("RK Implicit Midpoint");
   RKMethods.push_back("SDIRK 2 Stage 2nd order");
+  RKMethods.push_back("RK Implicit 2 Stage 2nd order Lobatto IIIB");
   RKMethods.push_back("SDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage Theta Method");
@@ -80,7 +82,7 @@ TEUCHOS_UNIT_TEST(DIRK, ParameterList)
     RCP<ParameterList> tempusPL  = sublist(pList, "Tempus", true);
     tempusPL->sublist("Default Stepper").set("Stepper Type", RKMethods[m]);
 
-    if (RKMethods[m] == "IRK 1 Stage Theta Method" ||
+    if (RKMethods[m] == "DIRK 1 Stage Theta Method" ||
         RKMethods[m] == "EDIRK 2 Stage Theta Method") {
       // Construct in the same order as default.
       RCP<ParameterList> stepperPL = sublist(tempusPL, "Default Stepper", true);
@@ -280,9 +282,11 @@ TEUCHOS_UNIT_TEST(DIRK, SinCos)
   std::vector<std::string> RKMethods;
   RKMethods.push_back("General DIRK");
   RKMethods.push_back("RK Backward Euler");
-  RKMethods.push_back("IRK 1 Stage Theta Method");
+  RKMethods.push_back("DIRK 1 Stage Theta Method");
+  RKMethods.push_back("RK Implicit 1 Stage 1st order Radau IA");
   RKMethods.push_back("RK Implicit Midpoint");
   RKMethods.push_back("SDIRK 2 Stage 2nd order");
+  RKMethods.push_back("RK Implicit 2 Stage 2nd order Lobatto IIIB");
   RKMethods.push_back("SDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage 3rd order");
   RKMethods.push_back("EDIRK 2 Stage Theta Method");
@@ -297,8 +301,10 @@ TEUCHOS_UNIT_TEST(DIRK, SinCos)
   RKMethodErrors.push_back(2.52738e-05);
   RKMethodErrors.push_back(0.0124201);
   RKMethodErrors.push_back(5.20785e-05);
+  RKMethodErrors.push_back(0.0124201);
   RKMethodErrors.push_back(5.20785e-05);
   RKMethodErrors.push_back(2.52738e-05);
+  RKMethodErrors.push_back(5.20785e-05);
   RKMethodErrors.push_back(1.40223e-06);
   RKMethodErrors.push_back(2.17004e-07);
   RKMethodErrors.push_back(5.20785e-05);
@@ -338,7 +344,7 @@ TEUCHOS_UNIT_TEST(DIRK, SinCos)
       // Set the Stepper
       RCP<ParameterList> pl = sublist(pList, "Tempus", true);
       pl->sublist("Default Stepper").set("Stepper Type", RKMethods[m]);
-      if (RKMethods[m] == "IRK 1 Stage Theta Method" ||
+      if (RKMethods[m] == "DIRK 1 Stage Theta Method" ||
           RKMethods[m] == "EDIRK 2 Stage Theta Method") {
         pl->sublist("Default Stepper").set<double>("theta", 0.5);
       } else if (RKMethods[m] == "SDIRK 2 Stage 2nd order") {
