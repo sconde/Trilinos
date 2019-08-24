@@ -219,7 +219,36 @@ public:
   }
 
 
-  /// Set StepperRK member data from the model and ParameterList.
+  /// Set StepperExplicit member data from the ParameterList.
+  void setStepperExplicitValues(
+    Teuchos::RCP<StepperExplicit<Scalar> > stepper,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    if (stepperPL != Teuchos::null) {
+      stepperPL->validateParametersAndSetDefaults(
+                                              *stepper->getValidParameters());
+      setStepperValues(stepper, stepperPL);
+    }
+  }
+
+  /// Set StepperImplicit member data from the ParameterList.
+  void setStepperImplicitValues(
+    Teuchos::RCP<StepperImplicit<Scalar> > stepper,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto solver = rcp(new Thyra::NOXNonlinearSolver());
+    solver->setParameterList(defaultSolverParameters());
+    if (stepperPL != Teuchos::null) {
+      // Can not validate because of optional Parameters, e.g., 'Solver Name'.
+      //stepperPL->validateParametersAndSetDefaults(
+      //                                      *stepper->getValidParameters());
+      setStepperValues(stepper, stepperPL);
+      stepper->setZeroInitialGuess(
+        stepperPL->get<bool>("Zero Initial Guess", false));
+    }
+  }
+
+  /// Set StepperRK member data from the ParameterList.
   void setStepperRKValues(
     Teuchos::RCP<StepperExplicitRK<Scalar> > stepper,
     Teuchos::RCP<Teuchos::ParameterList> stepperPL)
@@ -235,7 +264,7 @@ public:
 
   /// Set solver from ParameterList.
   void setStepperSolverValues(
-    Teuchos::RCP<StepperDIRK<Scalar> > stepper,
+    Teuchos::RCP<StepperImplicit<Scalar> > stepper,
     Teuchos::RCP<Teuchos::ParameterList> stepperPL)
   {
     auto solver = rcp(new Thyra::NOXNonlinearSolver());
@@ -253,7 +282,7 @@ public:
     stepper->setSolverWSolver(solver);
   }
 
-  /// Set StepperDIRK member data from the model and ParameterList.
+  /// Set StepperDIRK member data from the ParameterList.
   void setStepperDIRKValues(
     Teuchos::RCP<StepperDIRK<Scalar> > stepper,
     Teuchos::RCP<Teuchos::ParameterList> stepperPL)
@@ -272,8 +301,338 @@ public:
     }
   }
 
+  void setTableausPartition(
+    Teuchos::RCP<StepperIMEX_RK_Partition<Scalar> > stepper,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL,
+    std::string stepperType)
+  {
+    using Teuchos::RCP;
+    if (stepperType == "") {
+      if (stepperPL == Teuchos::null)
+        stepperType = "Partitioned IMEX RK SSP2";
+      else
+        stepperType = stepperPL->get<std::string>("Stepper Type",
+                                                  "Partitioned IMEX RK SSP2");
+    }
+
+    if (stepperType != "General Partitioned IMEX RK") {
+      stepper->setTableaus(stepperType);
+    } else {
+      RCP<Teuchos::ParameterList> explicitPL = Teuchos::rcp(
+        new Teuchos::ParameterList(
+          stepperPL->sublist("IMEX-RK Explicit Stepper")));
+      auto stepperTemp = createStepper(explicitPL, Teuchos::null);
+      auto stepperERK = Teuchos::rcp_dynamic_cast<StepperExplicitRK<Scalar> > (
+                          stepperTemp,true);
+      auto explicitTableau = stepperERK->getTableau();
+
+      RCP<Teuchos::ParameterList> implicitPL = Teuchos::rcp(
+        new Teuchos::ParameterList(
+          stepperPL->sublist("IMEX-RK Implicit Stepper")));
+      stepperTemp = createStepper(implicitPL, Teuchos::null);
+      auto stepperDIRK = Teuchos::rcp_dynamic_cast<StepperDIRK<Scalar> > (
+                           stepperTemp,true);
+      auto implicitTableau = stepperDIRK->getTableau();
+
+      stepper->setTableaus(stepperType, explicitTableau, implicitTableau);
+
+      stepper->setOrder(stepperPL->get<int>("overall order", 1));
+    }
+  }
+
+
+  void setTableaus(Teuchos::RCP<StepperIMEX_RK<Scalar> > stepper,
+                   Teuchos::RCP<Teuchos::ParameterList> stepperPL,
+                   std::string stepperType)
+  {
+    using Teuchos::RCP;
+    if (stepperType == "") {
+      if (stepperPL == Teuchos::null)
+        stepperType = "IMEX RK SSP2";
+      else
+        stepperType = stepperPL->get<std::string>("Stepper Type",
+                                                  "IMEX RK SSP2");
+    }
+
+    if (stepperType != "General IMEX RK") {
+      stepper->setTableaus(stepperType);
+    } else {
+      RCP<Teuchos::ParameterList> explicitPL = Teuchos::rcp(
+        new Teuchos::ParameterList(
+          stepperPL->sublist("IMEX-RK Explicit Stepper")));
+      auto stepperTemp = createStepper(explicitPL, Teuchos::null);
+      auto stepperERK = Teuchos::rcp_dynamic_cast<StepperExplicitRK<Scalar> > (
+                          stepperTemp,true);
+      auto explicitTableau = stepperERK->getTableau();
+
+      RCP<Teuchos::ParameterList> implicitPL = Teuchos::rcp(
+        new Teuchos::ParameterList(
+          stepperPL->sublist("IMEX-RK Implicit Stepper")));
+      stepperTemp = createStepper(implicitPL, Teuchos::null);
+      auto stepperDIRK = Teuchos::rcp_dynamic_cast<StepperDIRK<Scalar> > (
+                           stepperTemp,true);
+      auto implicitTableau = stepperDIRK->getTableau();
+
+      stepper->setTableaus(stepperType, explicitTableau, implicitTableau);
+
+      stepper->setOrder(stepperPL->get<int>("overall order", 1));
+    }
+  }
+
+
   // ---------------------------------------------------------------------------
   // Create individual Steppers.
+
+  Teuchos::RCP<StepperIMEX_RK_Partition<Scalar> >
+  createStepperIMEX_RK_Partition(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    std::string stepperType,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperIMEX_RK_Partition<Scalar>());
+    stepper->setStepperType(stepperType);
+    setStepperImplicitValues(stepper, stepperPL);
+    setTableausPartition(stepper, stepperPL, stepperType);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperIMEX_RK<Scalar> >
+  createStepperIMEX_RK(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    std::string stepperType,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperIMEX_RK<Scalar>());
+    stepper->setStepperType(stepperType);
+    setStepperImplicitValues(stepper, stepperPL);
+    setTableaus(stepper, stepperPL, stepperType);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperHHTAlpha<Scalar> >
+  createStepperHHTAlpha(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperHHTAlpha<Scalar>());
+    setStepperImplicitValues(stepper, stepperPL);
+    if (stepperPL != Teuchos::null) {
+      if (stepperPL->isSublist("HHT-Alpha Parameters")) {
+        auto hhtalphaPL = stepperPL->sublist("HHT-Alpha Parameters", true);
+        std::string schemeName =
+          hhtalphaPL.get<std::string>("Scheme Name", "Newmark Beta Average Acceleration");
+        stepper->setSchemeName(schemeName);
+        if (schemeName == "Newmark Beta User Defined") {
+          stepper->setBeta (hhtalphaPL.get<double>("Beta",  0.25));
+          stepper->setGamma(hhtalphaPL.get<double>("Gamma", 0.5 ));
+        }
+        stepper->setAlphaF(hhtalphaPL.get<double>("Alpha_f",  0.0));
+        stepper->setAlphaM(hhtalphaPL.get<double>("Alpha_m",  0.0));
+      } else {
+        stepper->setSchemeName("Newmark Beta Average Acceleration");
+        stepper->setAlphaF(0.0);
+        stepper->setAlphaM(0.0);
+      }
+    }
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperNewmarkImplicitDForm<Scalar> >
+  createStepperNewmarkImplicitDForm(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperNewmarkImplicitDForm<Scalar>());
+    setStepperImplicitValues(stepper, stepperPL);
+    if (stepperPL != Teuchos::null) {
+      if (stepperPL->isSublist("Newmark Parameters")) {
+        auto newmarkPL = stepperPL->sublist("Newmark Parameters", true);
+        std::string schemeName =
+          newmarkPL.get<std::string>("Scheme Name", "Average Acceleration");
+        stepper->setSchemeName(schemeName);
+        if (schemeName == "User Defined") {
+          stepper->setBeta (newmarkPL.get<double>("Beta",  0.25));
+          stepper->setGamma(newmarkPL.get<double>("Gamma", 0.5 ));
+        }
+      } else {
+        stepper->setSchemeName("Average Acceleration");
+      }
+    }
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperNewmarkImplicitAForm<Scalar> >
+  createStepperNewmarkImplicitAForm(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperNewmarkImplicitAForm<Scalar>());
+    setStepperImplicitValues(stepper, stepperPL);
+    if (stepperPL != Teuchos::null) {
+      if (stepperPL->isSublist("Newmark Parameters")) {
+        auto newmarkPL = stepperPL->sublist("Newmark Parameters", true);
+        std::string schemeName =
+          newmarkPL.get<std::string>("Scheme Name", "Average Acceleration");
+        stepper->setSchemeName(schemeName);
+        if (schemeName == "User Defined") {
+          stepper->setBeta (newmarkPL.get<double>("Beta",  0.25));
+          stepper->setGamma(newmarkPL.get<double>("Gamma", 0.5 ));
+        }
+      } else {
+        stepper->setSchemeName("Average Acceleration");
+      }
+    }
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperBDF2<Scalar> >
+  createStepperBDF2(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperBDF2<Scalar>());
+    setStepperImplicitValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      std::string startUpStepper = "DIRK 1 Stage Theta Method";
+      if (stepperPL != Teuchos::null) startUpStepper =
+        stepperPL->get<std::string>("Start Up Stepper Type", startUpStepper);
+      stepper->setStartUpStepper(startUpStepper);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperTrapezoidal<Scalar> >
+  createStepperTrapezoidal(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperTrapezoidal<Scalar>());
+    setStepperImplicitValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperBackwardEuler<Scalar> >
+  createStepperBackwardEuler(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperBackwardEuler<Scalar>());
+    setStepperImplicitValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      setStepperSolverValues(stepper, stepperPL);
+
+      std::string predictor = "None";
+      if (stepperPL != Teuchos::null) predictor =
+        stepperPL->get<std::string>("Predictor Stepper Type", predictor);
+      stepper->setPredictor(predictor);
+
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperNewmarkExplicitAForm<Scalar> >
+  createStepperNewmarkExplicitAForm(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperNewmarkExplicitAForm<Scalar>());
+    setStepperExplicitValues(stepper, stepperPL);
+    if (stepperPL != Teuchos::null) {
+      Scalar gamma = stepperPL->sublist("Newmark Explicit Parameters")
+                                   .template get<double>("Gamma", 0.5);
+      stepper->setGamma(gamma);
+    }
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperLeapfrog<Scalar> >
+  createStepperLeapfrog(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperLeapfrog<Scalar>());
+    setStepperExplicitValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
+
+  Teuchos::RCP<StepperForwardEuler<Scalar> >
+  createStepperForwardEuler(
+    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& model,
+    Teuchos::RCP<Teuchos::ParameterList> stepperPL)
+  {
+    auto stepper = Teuchos::rcp(new StepperForwardEuler<Scalar>());
+    setStepperExplicitValues(stepper, stepperPL);
+
+    if (model != Teuchos::null) {
+      stepper->setModel(model);
+      stepper->initialize();
+    }
+
+    return stepper;
+  }
 
   Teuchos::RCP<StepperERK_General<Scalar> >
   createStepperERK_General(
@@ -794,21 +1153,21 @@ private:
   {
     using Teuchos::rcp;
     if (stepperType == "Forward Euler")
-      return rcp(new StepperForwardEuler<Scalar>(model, stepperPL));
+      return createStepperForwardEuler(model, stepperPL);
     else if (stepperType == "Backward Euler")
-      return rcp(new StepperBackwardEuler<Scalar>(model, stepperPL));
+      return createStepperBackwardEuler(model, stepperPL);
     else if (stepperType == "Trapezoidal Method")
-      return rcp(new StepperTrapezoidal<Scalar>(model, stepperPL));
+      return createStepperTrapezoidal(model, stepperPL);
     else if (stepperType == "BDF2")
-      return rcp(new StepperBDF2<Scalar>(model, stepperPL));
+      return createStepperBDF2(model, stepperPL);
     else if (stepperType == "Newmark Implicit a-Form")
-      return rcp(new StepperNewmarkImplicitAForm<Scalar>(model, stepperPL));
+      return createStepperNewmarkImplicitAForm(model, stepperPL);
     else if (stepperType == "Newmark Implicit d-Form")
-      return rcp(new StepperNewmarkImplicitDForm<Scalar>(model, stepperPL));
+      return createStepperNewmarkImplicitDForm(model, stepperPL);
     else if (stepperType == "Newmark Explicit a-Form")
-      return rcp(new StepperNewmarkExplicitAForm<Scalar>(model, stepperPL));
+      return createStepperNewmarkExplicitAForm(model, stepperPL);
     else if (stepperType == "HHT-Alpha")
-      return rcp(new StepperHHTAlpha<Scalar>(model, stepperPL));
+      return createStepperHHTAlpha(model, stepperPL);
     else if (stepperType == "General ERK" )
       return createStepperERK_General(model, stepperPL);
     else if (stepperType == "RK Forward Euler" )
@@ -872,16 +1231,15 @@ private:
       stepperType == "IMEX RK SSP2"      ||
       stepperType == "IMEX RK ARS 233"   ||
       stepperType == "General IMEX RK" )
-      return rcp(new StepperIMEX_RK<Scalar>(model, stepperType, stepperPL));
+      return createStepperIMEX_RK(model, stepperType, stepperPL);
     else if (
       stepperType == "Partitioned IMEX RK 1st order" ||
       stepperType == "Partitioned IMEX RK SSP2"      ||
       stepperType == "Partitioned IMEX RK ARS 233"   ||
       stepperType == "General Partitioned IMEX RK" )
-      return rcp(new StepperIMEX_RK_Partition<Scalar>(
-                        model, stepperType, stepperPL));
+      return createStepperIMEX_RK_Partition(model, stepperType, stepperPL);
     else if (stepperType == "Leapfrog")
-      return rcp(new StepperLeapfrog<Scalar>(model, stepperPL));
+      return createStepperLeapfrog(model, stepperPL);
     else {
       Teuchos::RCP<Teuchos::FancyOStream> out =
         Teuchos::VerboseObjectBase::getDefaultOStream();

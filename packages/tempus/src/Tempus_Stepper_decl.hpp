@@ -142,16 +142,24 @@ public:
     virtual bool getICConsistencyCheckDefault() const { return false; }
 
     virtual OrderODE getOrderODE() const = 0;
-
-    /// Warn that Stepper is being constructed without a ModelEvaluator.
-    virtual void modelWarning() const;
-
   //@}
 
   /// \name Functions for Steppers with subSteppers (e.g., OperatorSplit)
   //@{
     virtual void createSubSteppers(
       std::vector<Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > > /* models */){}
+  //@}
+
+  /// \name ParameterList methods
+  //@{
+    virtual void setParameterList(const Teuchos::RCP<Teuchos::ParameterList> & pl){TEUCHOS_ASSERT(false);}
+    virtual Teuchos::RCP<Teuchos::ParameterList> getNonconstParameterList()
+    {
+      //TEUCHOS_ASSERT(false);
+      Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
+      return pl;
+    }
+    virtual Teuchos::RCP<Teuchos::ParameterList> unsetParameterList(){TEUCHOS_ASSERT(false);}
   //@}
 
 private:

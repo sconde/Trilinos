@@ -13,19 +13,6 @@
 namespace Tempus {
 
 
-template<class Scalar>
-void Stepper<Scalar>::modelWarning() const
-{
-  Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
-  Teuchos::OSTab ostab(out,1,this->description());
-  *out << "Warning -- Constructing '" << this->description()
-       << "' without ModelEvaluator!\n"
-       << "  - Can reset ParameterList with setParameterList().\n"
-       << "  - Requires subsequent setModel() and initialize() calls\n"
-       << "    before calling takeStep().\n" << std::endl;
-}
-
-
 void getValidParametersBasic(
   Teuchos::RCP<Teuchos::ParameterList> pl, std::string description)
 {

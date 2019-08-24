@@ -77,9 +77,8 @@ TEUCHOS_UNIT_TEST(BackwardEuler, ParameterList)
       Tempus::integratorBasic<double>(tempusPL, model);
 
     RCP<ParameterList> stepperPL = sublist(tempusPL, "Default Stepper", true);
-    // Remove Predictor for comparison
-    stepperPL->remove("Predictor Name");
-    stepperPL->remove("Default Predictor");
+    // Match Predictor for comparison
+    stepperPL->set("Predictor Stepper Type", "None");
     RCP<const ParameterList> defaultPL =
       integrator->getStepper()->getValidParameters();
 
@@ -133,6 +132,7 @@ TEUCHOS_UNIT_TEST(BackwardEuler, ConstructingFromDefaults)
   // Setup Stepper for field solve ----------------------------
   auto stepper = rcp(new Tempus::StepperBackwardEuler<double>());
   stepper->setModel(model);
+  stepper->setSolverWSolver();
   stepper->initialize();
 
   // Setup TimeStepControl ------------------------------------

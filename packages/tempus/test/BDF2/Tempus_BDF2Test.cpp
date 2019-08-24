@@ -77,9 +77,6 @@ TEUCHOS_UNIT_TEST(BDF2, ParameterList)
       Tempus::integratorBasic<double>(tempusPL, model);
 
     RCP<ParameterList> stepperPL = sublist(tempusPL, "Default Stepper", true);
-    // Remove Start Up Stepper for comparison
-    stepperPL->remove("Start Up Stepper Name");
-    stepperPL->remove("Default Start Up Stepper");
     RCP<const ParameterList> defaultPL =
       integrator->getStepper()->getValidParameters();
     bool pass = haveSameValues(*stepperPL, *defaultPL, true);
@@ -132,6 +129,8 @@ TEUCHOS_UNIT_TEST(BDF2, ConstructingFromDefaults)
   // Setup Stepper for field solve ----------------------------
   auto stepper = rcp(new Tempus::StepperBDF2<double>());
   stepper->setModel(model);
+  stepper->setSolverWSolver();
+  stepper->setStartUpStepper();
   stepper->initialize();
 
   // Setup TimeStepControl ------------------------------------

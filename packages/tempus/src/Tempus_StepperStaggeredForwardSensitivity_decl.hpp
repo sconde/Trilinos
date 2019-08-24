@@ -33,8 +33,6 @@ public:
 
   /** \brief Default constructor.
    *
-   *  - Constructs with a default ParameterList.
-   *  - Can reset ParameterList with setParameterList().
    *  - Requires subsequent setModel() and initialize() calls before calling
    *    takeStep().
   */

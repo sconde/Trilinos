@@ -29,7 +29,6 @@ StepperStaggeredForwardSensitivity<Scalar>::
 StepperStaggeredForwardSensitivity()
 {
   this->setParams(Teuchos::null, Teuchos::null);
-  this->modelWarning();
 }
 
 

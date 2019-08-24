@@ -62,8 +62,6 @@ public:
 
   /** \brief Default constructor.
    *
-   *  - Constructs with a default ParameterList.
-   *  - Can reset ParameterList with setParameterList().
    *  - Requires subsequent setModel() and initialize() calls before calling
    *    takeStep().
   */
@@ -72,7 +70,11 @@ public:
   /// Constructor
   StepperNewmarkExplicitAForm(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    Teuchos::RCP<Teuchos::ParameterList> pList = Teuchos::null);
+    const Teuchos::RCP<StepperObserver<Scalar> >& obs,
+    bool useFSAL,
+    std::string ICConsistency,
+    bool ICConsistencyCheck,
+    Scalar gamma);
 
   /// \name Basic stepper methods
   //@{
@@ -115,14 +117,7 @@ public:
     virtual OrderODE getOrderODE()   const {return SECOND_ORDER_ODE;}
   //@}
 
-  /// \name ParameterList methods
-  //@{
-    void setParameterList(const Teuchos::RCP<Teuchos::ParameterList> & pl);
-    Teuchos::RCP<Teuchos::ParameterList> getNonconstParameterList();
-    Teuchos::RCP<Teuchos::ParameterList> unsetParameterList();
-    Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
-    Teuchos::RCP<Teuchos::ParameterList> getDefaultParameters() const;
-  //@}
+  Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
 
   /// \name Overridden from Teuchos::Describable
   //@{
@@ -131,24 +126,38 @@ public:
                           const Teuchos::EVerbosityLevel verbLevel) const;
   //@}
 
-    void predictVelocity(Thyra::VectorBase<Scalar>& vPred,
+  void predictVelocity(Thyra::VectorBase<Scalar>& vPred,
+                           const Thyra::VectorBase<Scalar>& v,
+                           const Thyra::VectorBase<Scalar>& a,
+                           const Scalar dt) const;
+
+  void predictDisplacement(Thyra::VectorBase<Scalar>& dPred,
+                             const Thyra::VectorBase<Scalar>& d,
                              const Thyra::VectorBase<Scalar>& v,
                              const Thyra::VectorBase<Scalar>& a,
                              const Scalar dt) const;
 
-    void predictDisplacement(Thyra::VectorBase<Scalar>& dPred,
-                               const Thyra::VectorBase<Scalar>& d,
-                               const Thyra::VectorBase<Scalar>& v,
-                               const Thyra::VectorBase<Scalar>& a,
-                               const Scalar dt) const;
+  void correctVelocity(Thyra::VectorBase<Scalar>& v,
+                           const Thyra::VectorBase<Scalar>& vPred,
+                           const Thyra::VectorBase<Scalar>& a,
+                           const Scalar dt) const;
 
-    void correctVelocity(Thyra::VectorBase<Scalar>& v,
-                             const Thyra::VectorBase<Scalar>& vPred,
-                             const Thyra::VectorBase<Scalar>& a,
-                             const Scalar dt) const;
+  void setGamma(Scalar gamma)
+  {
+    gamma_ = gamma;
+
+    TEUCHOS_TEST_FOR_EXCEPTION( (gamma_  > 1.0) || (gamma_ < 0.0),
+      std::logic_error,
+      "Error in 'Newmark Explicit a-Form' stepper: invalid value of Gamma = "
+       << gamma_ << ".  Please select 0 <= Gamma <= 1. \n");
+  }
+
+  bool getUseFSALDefault() const { return true; }
+  std::string getICConsistencyDefault() const { return "Consistent"; }
 
 protected:
 
+  Scalar gammaDefault_;
   Scalar gamma_;
 
 };

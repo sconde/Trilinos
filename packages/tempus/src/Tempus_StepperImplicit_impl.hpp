@@ -303,11 +303,15 @@ void StepperImplicit<Scalar>::setSolverWSolver(
   //  solver->getNonconstParameterList();
   //this->setSolver(solverPL);
 
+  if (solver == Teuchos::null) {
+    solver = rcp(new Thyra::NOXNonlinearSolver());
+    solver->setParameterList(defaultSolverParameters());
+  }
+
   solver_ = solver;
 
   TEUCHOS_TEST_FOR_EXCEPTION(wrapperModel_ == Teuchos::null, std::logic_error,
-       "Error - StepperImplicit<Scalar>::setSolver() wrapperModel_ is unset!\n"
-    << "  Should call setModel(...) first.\n");
+       "Error - ModelEvaluator is unset!  Should call setModel() first.\n");
 
   solver_->setModel(wrapperModel_);
 

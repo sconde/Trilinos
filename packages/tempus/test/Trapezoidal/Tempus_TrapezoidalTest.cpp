@@ -140,6 +140,7 @@ TEUCHOS_UNIT_TEST(Trapezoidal, ConstructingFromDefaults)
   //  stepper->setSolver(solverPL);
   //}
   stepper->setModel(model);
+  stepper->setSolverWSolver();
   stepper->initialize();
 
   // Setup TimeStepControl ------------------------------------

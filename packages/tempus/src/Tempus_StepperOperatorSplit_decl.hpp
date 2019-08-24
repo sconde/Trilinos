@@ -42,10 +42,8 @@ public:
 
   /** \brief Default constructor.
    *
-   *  - Constructs with a default ParameterList.
-   *  - Can reset ParameterList with setParameterList().
-   *  - Requires subsequent addStepper() and initialize() calls before calling
-   *    takeStep().
+   *  Requires subsequent setModel(), setSolver() and initialize()
+   *  calls before calling takeStep().
   */
   StepperOperatorSplit();
 

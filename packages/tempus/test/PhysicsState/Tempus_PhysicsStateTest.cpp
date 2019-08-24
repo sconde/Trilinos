@@ -70,11 +70,11 @@ TEUCHOS_UNIT_TEST(PhysicsState, SinCos)
       Tempus::integratorBasic<double>(pl, model);
 
     // Replace Tempus::StepperForwardEuler with
-    // Tempus_Test::PhysicsStateTest_StepperForwardEuler
+    // Tempus_Test::StepperPhysicsStateTest
     RCP<ParameterList> stepperPL =
       integrator->getStepper()->getNonconstParameterList();
     Teuchos::RCP<Tempus::Stepper<double> > physicsStepper = Teuchos::rcp(
-      new PhysicsStateTest_StepperForwardEuler<double>(model, stepperPL));
+      new StepperPhysicsStateTest<double>(model));
     integrator->setStepperWStepper(physicsStepper);
     order = integrator->getStepper()->getOrder();
 

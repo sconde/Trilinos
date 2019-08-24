@@ -165,11 +165,6 @@ public:
     virtual void setUseEmbedded(bool a) { useEmbedded_ = a; }
     virtual bool getUseEmbedded() const { return useEmbedded_; }
     virtual bool getUseEmbeddedDefault() const { return false; }
-
-    virtual void setZeroInitialGuess(bool zIG) { zeroInitialGuess_ = zIG; }
-    virtual bool getZeroInitialGuess() const
-      { return zeroInitialGuess_; }
-
   //@}
 
 
@@ -206,8 +201,6 @@ protected:
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               abs_u;
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               sc;
 
-  // For Zero Initial Guess
-  bool zeroInitialGuess_;
 };
 
 

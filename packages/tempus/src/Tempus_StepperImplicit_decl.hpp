@@ -68,7 +68,7 @@ public:
       Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null);
     /// Set solver.
     virtual void setSolverWSolver(
-      Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver);
+      Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver = Teuchos::null);
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const
       { return solver_; }
 
@@ -106,10 +106,9 @@ public:
       {initial_guess_ = initial_guess;}
 
     /// Set parameter so that the initial guess is set to zero (=True) or use last timestep (=False).
-    virtual void setZeroInitialGuess(bool zIG)
-      { stepperPL_->set<bool>("Zero Initial Guess", zIG); }
-    virtual bool getZeroInitialGuess() const
-      { return stepperPL_->get<bool>("Zero Initial Guess", false); }
+    virtual void setZeroInitialGuess(bool zIG) { zeroInitialGuess_ = zIG; }
+    virtual bool getZeroInitialGuess() const { return zeroInitialGuess_; }
+
     virtual Scalar getInitTimeStep(
         const Teuchos::RCP<SolutionHistory<Scalar> >& /* solutionHistory */) const
       {return Scalar(1.0e+99);}
@@ -139,6 +138,7 @@ protected:
   Teuchos::RCP<WrapperModelEvaluator<Scalar> >        wrapperModel_;
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >   solver_;
   Teuchos::RCP<const Thyra::VectorBase<Scalar> >      initial_guess_;
+  bool zeroInitialGuess_;
 
   Teuchos::RCP<StepperObserver<Scalar> >              stepperObserver_;
 

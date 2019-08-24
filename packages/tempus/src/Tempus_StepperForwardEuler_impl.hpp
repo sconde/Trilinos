@@ -15,28 +15,40 @@
 
 namespace Tempus {
 
+
 template<class Scalar>
 StepperForwardEuler<Scalar>::StepperForwardEuler()
 {
-  this->setParameterList(Teuchos::null);
-  this->modelWarning();
+  this->setStepperType(        this->description());
+  this->setUseFSAL(            this->getUseFSALDefault());
+  this->setICConsistency(      this->getICConsistencyDefault());
+  this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
+
+  this->setObserver();
 }
+
 
 template<class Scalar>
 StepperForwardEuler<Scalar>::StepperForwardEuler(
   const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-  Teuchos::RCP<Teuchos::ParameterList> pList)
+  const Teuchos::RCP<StepperObserver<Scalar> >& obs,
+  bool useFSAL,
+  std::string ICConsistency,
+  bool ICConsistencyCheck)
 {
-  this->setParameterList(pList);
+  this->setStepperType(        this->description());
+  this->setUseFSAL(            useFSAL);
+  this->setICConsistency(      ICConsistency);
+  this->setICConsistencyCheck( ICConsistencyCheck);
 
-  if (appModel == Teuchos::null) {
-    this->modelWarning();
-  }
-  else {
+  this->setObserver(obs);
+
+  if (appModel != Teuchos::null) {
     this->setModel(appModel);
     this->initialize();
   }
 }
+
 
 template<class Scalar>
 void StepperForwardEuler<Scalar>::setObserver(
@@ -48,13 +60,13 @@ void StepperForwardEuler<Scalar>::setObserver(
       stepperFEObserver_ =
         Teuchos::rcp(new StepperForwardEulerObserver<Scalar>());
       this->stepperObserver_ =
-        Teuchos::rcp_dynamic_cast<StepperObserver<Scalar> >(stepperFEObserver_);
+        Teuchos::rcp_dynamic_cast<StepperObserver<Scalar> >(stepperFEObserver_,true);
     }
   } else {
     this->stepperObserver_ = obs;
     stepperFEObserver_ =
       Teuchos::rcp_dynamic_cast<StepperForwardEulerObserver<Scalar> >
-        (this->stepperObserver_);
+        (this->stepperObserver_,true);
   }
 }
 
@@ -65,9 +77,6 @@ void StepperForwardEuler<Scalar>::initialize()
     this->appModel_ == Teuchos::null, std::logic_error,
     "Error - Need to set the model, setModel(), before calling "
     "StepperForwardEuler::initialize()\n");
-
-  this->setParameterList(this->stepperPL_);
-  this->setObserver();
 }
 
 template<class Scalar>
@@ -173,10 +182,7 @@ getDefaultStepperState()
 
 template<class Scalar>
 std::string StepperForwardEuler<Scalar>::description() const
-{
-  std::string name = "Forward Euler";
-  return(name);
-}
+{ return "Forward Euler"; }
 
 
 template<class Scalar>
@@ -189,36 +195,6 @@ void StepperForwardEuler<Scalar>::describe(
 }
 
 
-template <class Scalar>
-void StepperForwardEuler<Scalar>::setParameterList(
-  const Teuchos::RCP<Teuchos::ParameterList> & pList)
-{
-  if (pList == Teuchos::null) {
-    // Create default parameters if null, otherwise keep current parameters.
-    if (this->stepperPL_ == Teuchos::null) this->stepperPL_ =
-      Teuchos::rcp_const_cast<Teuchos::ParameterList>(this->getValidParameters());
-  } else {
-    this->stepperPL_ = pList;
-  }
-  this->stepperPL_->validateParametersAndSetDefaults(*this->getValidParameters());
-
-  this->setStepperType(this->description());
-  this->setUseFSAL(this->stepperPL_->template get<bool>(
-    "Use FSAL", this->getUseFSALDefault()));
-  this->setICConsistency( this->stepperPL_->template get<std::string>(
-    "Initial Condition Consistency", this->getICConsistencyDefault()));
-  this->setICConsistencyCheck( this->stepperPL_->template get<bool>(
-    "Initial Condition Consistency Check", this->getICConsistencyCheckDefault()));
-
-  std::string stepperType =
-    this->stepperPL_->template get<std::string>("Stepper Type");
-  TEUCHOS_TEST_FOR_EXCEPTION( stepperType != "Forward Euler",
-    std::logic_error,
-       "Error - Stepper Type is not 'Forward Euler'!\n"
-    << "  Stepper Type = "<< pList->get<std::string>("Stepper Type") << "\n");
-}
-
-
 template<class Scalar>
 Teuchos::RCP<const Teuchos::ParameterList>
 StepperForwardEuler<Scalar>::getValidParameters() const
@@ -228,24 +204,6 @@ StepperForwardEuler<Scalar>::getValidParameters() const
   pl->set<bool>("Use FSAL", true);
   pl->set<std::string>("Initial Condition Consistency", "Consistent");
   return pl;
-}
-
-
-template <class Scalar>
-Teuchos::RCP<Teuchos::ParameterList>
-StepperForwardEuler<Scalar>::getNonconstParameterList()
-{
-  return(this->stepperPL_);
-}
-
-
-template <class Scalar>
-Teuchos::RCP<Teuchos::ParameterList>
-StepperForwardEuler<Scalar>::unsetParameterList()
-{
-  Teuchos::RCP<Teuchos::ParameterList> temp_plist = this->stepperPL_;
-  this->stepperPL_ = Teuchos::null;
-  return(temp_plist);
 }
 
 
