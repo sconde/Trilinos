@@ -56,18 +56,11 @@ enum OrderODE {
  *       with ModelEvaluator C using Solver B
  *   - Steppers may maintain their own time history of the solution, e.g.,
  *     BDF steppers.
- *
- * <b> CS Design Considerations</b>
- *   - All input parameters (i.e., ParameterList) can be set by public methods.
- *   - The Stepper ParameterList must be consistent.
- *     - The "set" methods which update parameters in the ParameterList
- *       must update the Stepper ParameterList.
  */
 template<class Scalar>
 class Stepper
   : virtual public Teuchos::Describable,
-    virtual public Teuchos::VerboseObject<Stepper<Scalar> >,
-    virtual public Teuchos::ParameterListAcceptor
+    virtual public Teuchos::VerboseObject<Stepper<Scalar> >
 {
 public:
 
@@ -79,14 +72,10 @@ public:
       const Teuchos::RCP<Thyra::ModelEvaluator<Scalar> >& appModel) = 0;
     virtual Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > getModel() = 0;
 
-    /// Set solver via ParameterList solver name.
-    virtual void setSolver(std::string solverName) = 0;
-    /// Set solver via solver ParameterList.
-    virtual void setSolver(
-      Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null) = 0;
     /// Set solver.
     virtual void setSolverWSolver(
-        Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver) = 0;
+      Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver = Teuchos::null) = 0;
+
     /// Get solver
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >
       getSolver() const = 0;
@@ -150,17 +139,7 @@ public:
       std::vector<Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > > /* models */){}
   //@}
 
-  /// \name ParameterList methods
-  //@{
-    virtual void setParameterList(const Teuchos::RCP<Teuchos::ParameterList> & pl){TEUCHOS_ASSERT(false);}
-    virtual Teuchos::RCP<Teuchos::ParameterList> getNonconstParameterList()
-    {
-      //TEUCHOS_ASSERT(false);
-      Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-      return pl;
-    }
-    virtual Teuchos::RCP<Teuchos::ParameterList> unsetParameterList(){TEUCHOS_ASSERT(false);}
-  //@}
+  virtual Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const = 0;
 
 private:
   std::string stepperType_;    //< Name of stepper type

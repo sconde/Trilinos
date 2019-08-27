@@ -356,13 +356,6 @@ void StepperDIRK<Scalar>::describe(
 }
 
 
-template <class Scalar>
-void StepperDIRK<Scalar>::setParameterList(
-  const Teuchos::RCP<Teuchos::ParameterList> & pList)
-{
-  TEUCHOS_ASSERT(false);
-}
-
 template<class Scalar>
 Teuchos::RCP<const Teuchos::ParameterList>
 StepperDIRK<Scalar>::getValidParameters() const
@@ -371,24 +364,6 @@ StepperDIRK<Scalar>::getValidParameters() const
   this->getValidParametersBasicDIRK(pl);
 
   return pl;
-}
-
-template <class Scalar>
-Teuchos::RCP<Teuchos::ParameterList>
-StepperDIRK<Scalar>::getNonconstParameterList()
-{
-  //TEUCHOS_ASSERT(false);
-  Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  return pl;
-}
-
-
-template <class Scalar>
-Teuchos::RCP<Teuchos::ParameterList>
-StepperDIRK<Scalar>::unsetParameterList()
-{
-  TEUCHOS_ASSERT(false);
-  return(Teuchos::null);
 }
 
 

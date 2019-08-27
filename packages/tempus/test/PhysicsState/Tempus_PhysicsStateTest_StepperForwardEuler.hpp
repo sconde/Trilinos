@@ -95,6 +95,11 @@ public:
   return;
 }
 
+Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const
+{
+  return Teuchos::null;
+}
+
 };
 
 } // namespace Tempus_Test

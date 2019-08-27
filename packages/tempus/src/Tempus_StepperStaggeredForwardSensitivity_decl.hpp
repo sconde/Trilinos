@@ -27,7 +27,8 @@ namespace Tempus {
  */
 template<class Scalar>
 class StepperStaggeredForwardSensitivity :
-    virtual public Tempus::Stepper<Scalar>
+    virtual public Tempus::Stepper<Scalar>,
+    virtual public Teuchos::ParameterListAcceptor
 {
 public:
 
@@ -83,9 +84,6 @@ public:
       const Teuchos::RCP<Thyra::ModelEvaluator<Scalar> >& appModel);
     virtual Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > getModel();
 
-    virtual void setSolver(std::string solverName);
-    virtual void setSolver(
-      Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null);
     virtual void setSolverWSolver(
       Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver);
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const
@@ -105,9 +103,6 @@ public:
     /// Take the specified timestep, dt, and return true if successful.
     virtual void takeStep(
       const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory);
-
-    virtual std::string getStepperType() const
-     { return stepperPL_->get<std::string>("Stepper Type"); }
 
     /// Get a default (initial) StepperState
     virtual Teuchos::RCP<Tempus::StepperState<Scalar> >

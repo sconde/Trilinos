@@ -61,11 +61,6 @@ public:
     virtual Teuchos::RCP<const WrapperModelEvaluator<Scalar> >
       getWrapperModel(){return wrapperModel_;}
 
-    /// Set solver via ParameterList solver name.
-    virtual void setSolver(std::string solverName);
-    /// Set solver via solver ParameterList.
-    virtual void setSolver(
-      Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null);
     /// Set solver.
     virtual void setSolverWSolver(
       Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver = Teuchos::null);
@@ -113,9 +108,6 @@ public:
         const Teuchos::RCP<SolutionHistory<Scalar> >& /* solutionHistory */) const
       {return Scalar(1.0e+99);}
 
-    virtual bool getEmbedded() const
-      { return stepperPL_->get<bool>("Use Embedded", false); }
-
     /// Set xDot for Stepper storage.
     virtual void setStepperXDot(Teuchos::RCP<Thyra::VectorBase<Scalar> > xDot)
       { stepperXDot_ = xDot; }
@@ -129,12 +121,8 @@ public:
       Teuchos::RCP<SolutionState<Scalar> > state);
   //@}
 
-  virtual Teuchos::RCP<const Teuchos::ParameterList> getParameterList() const
-  { return stepperPL_; }
-
 protected:
 
-  Teuchos::RCP<Teuchos::ParameterList>                stepperPL_;
   Teuchos::RCP<WrapperModelEvaluator<Scalar> >        wrapperModel_;
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >   solver_;
   Teuchos::RCP<const Thyra::VectorBase<Scalar> >      initial_guess_;

@@ -232,77 +232,10 @@ void StepperImplicit<Scalar>::setInitialConditions(
 }
 
 
-/** \brief Set the solver to a pre-defined solver in the ParameterList.
- *
- *  The solver is set to solverName sublist in the Stepper's ParameterList.
- *  The solverName sublist should already be defined in the Stepper's
- *  ParameterList.  Otherwise it will fail.
- */
-template<class Scalar>
-void StepperImplicit<Scalar>::setSolver(std::string solverName)
-{
-  Teuchos::RCP<Teuchos::ParameterList> solverPL =
-    Teuchos::sublist(stepperPL_, solverName, true);
-  this->setSolver(solverPL);
-}
-
-
-/** \brief Set the solver to the supplied Parameter sublist.
- *
- *  This adds a new solver Parameter sublist to the Stepper's ParameterList.
- *  If the solver sublist is null, the solver is set to the solver name
- *  in the Stepper's ParameterList.
- */
-template<class Scalar>
-void StepperImplicit<Scalar>::setSolver(
-  Teuchos::RCP<Teuchos::ParameterList> solverPL)
-{
-  using Teuchos::RCP;
-  using Teuchos::ParameterList;
-
-  if (stepperPL_ == Teuchos::null) {
-    if (is_null(solverPL)) {
-      solverPL = defaultSolverParameters();
-    }
-  } else {
-    std::string solverName = stepperPL_->get<std::string>("Solver Name");
-    if (is_null(solverPL)) {
-      if ( stepperPL_->isSublist(solverName) ) {
-        solverPL = Teuchos::sublist(stepperPL_, solverName, true);
-      } else {
-        solverPL = defaultSolverParameters();
-        solverName = solverPL->name();
-        stepperPL_->set("Solver Name", solverName);
-        stepperPL_->set(solverName, *solverPL);      // Add sublist
-      }
-    }
-  }
-
-  RCP<ParameterList> noxPL = Teuchos::sublist(solverPL, "NOX", true);
-  solver_ = rcp(new Thyra::NOXNonlinearSolver());
-  solver_->setParameterList(noxPL);
-
-  TEUCHOS_TEST_FOR_EXCEPTION(wrapperModel_ == Teuchos::null, std::logic_error,
-       "Error - StepperImplicit<Scalar>::setSolver() wrapperModel_ is unset!\n"
-    << "  Should call setModel(...) first.\n");
-
-  solver_->setModel(wrapperModel_);
-}
-
-
-/** \brief Set the solver.
- *
- *  This sets the solver to supplied solver and adds solver's ParameterList
- *  to the Stepper ParameterList.
- */
 template<class Scalar>
 void StepperImplicit<Scalar>::setSolverWSolver(
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver)
 {
-  //Teuchos::RCP<Teuchos::ParameterList> solverPL =
-  //  solver->getNonconstParameterList();
-  //this->setSolver(solverPL);
-
   if (solver == Teuchos::null) {
     solver = rcp(new Thyra::NOXNonlinearSolver());
     solver->setParameterList(defaultSolverParameters());

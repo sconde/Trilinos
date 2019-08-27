@@ -41,14 +41,9 @@ public:
     virtual void setInitialConditions (
       const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory);
 
-    /// Set solver via ParameterList solver name.
-    virtual void setSolver(std::string solverName);
-    /// Set solver via solver ParameterList.
-    virtual void setSolver(
-      Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null);
-    /// Set solver.
     virtual void setSolverWSolver(
-      Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver);
+      Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver = Teuchos::null);
+
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const
       { return Teuchos::null; }
 
@@ -98,12 +93,7 @@ public:
       const Scalar time);
   //@}
 
-  virtual Teuchos::RCP<const Teuchos::ParameterList> getParameterList() const
-  { return stepperPL_; }
-
 protected:
-
-  Teuchos::RCP<Teuchos::ParameterList>               stepperPL_;
 
   /// Explicit ODE ModelEvaluator
   Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > appModel_;

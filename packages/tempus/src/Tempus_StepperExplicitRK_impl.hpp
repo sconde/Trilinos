@@ -379,14 +379,6 @@ void StepperExplicitRK<Scalar>::describe(
 }
 
 
-template <class Scalar>
-void StepperExplicitRK<Scalar>::setParameterList(
-  const Teuchos::RCP<Teuchos::ParameterList> & pList)
-{
-  TEUCHOS_ASSERT(false);
-}
-
-
 template<class Scalar>
 Teuchos::RCP<const Teuchos::ParameterList>
 StepperExplicitRK<Scalar>::getValidParameters() const
@@ -394,25 +386,6 @@ StepperExplicitRK<Scalar>::getValidParameters() const
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
   this->getValidParametersBasicERK(pl);
   return pl;
-}
-
-
-template <class Scalar>
-Teuchos::RCP<Teuchos::ParameterList>
-StepperExplicitRK<Scalar>::getNonconstParameterList()
-{
-  //TEUCHOS_ASSERT(false);
-  Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  return pl;
-}
-
-
-template <class Scalar>
-Teuchos::RCP<Teuchos::ParameterList>
-StepperExplicitRK<Scalar>::unsetParameterList()
-{
-  TEUCHOS_ASSERT(false);
-  return Teuchos::null;
 }
 
 

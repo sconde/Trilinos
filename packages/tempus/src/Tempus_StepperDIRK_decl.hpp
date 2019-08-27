@@ -144,13 +144,7 @@ public:
   /// Return beta  = d(x)/dx.
   virtual Scalar getBeta (const Scalar   ) const { return Scalar(1.0); }
 
-  /// \name ParameterList methods
-  //@{
-    void setParameterList(const Teuchos::RCP<Teuchos::ParameterList> & pl);
-    Teuchos::RCP<Teuchos::ParameterList> getNonconstParameterList();
-    Teuchos::RCP<Teuchos::ParameterList> unsetParameterList();
-    Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
-  //@}
+  Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
 
   /// \name Overridden from Teuchos::Describable
   //@{

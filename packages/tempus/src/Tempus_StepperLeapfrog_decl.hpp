@@ -108,9 +108,6 @@ public:
     virtual void takeStep(
       const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory);
 
-    virtual std::string getStepperType() const
-     { return this->stepperPL_->template get<std::string>("Stepper Type"); }
-
     /// Get a default (initial) StepperState
     virtual Teuchos::RCP<Tempus::StepperState<Scalar> > getDefaultStepperState();
     virtual Scalar getOrder() const {return 2.0;}

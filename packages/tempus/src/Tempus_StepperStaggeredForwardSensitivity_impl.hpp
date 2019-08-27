@@ -92,29 +92,11 @@ setNonConstModel(
 
 
 template<class Scalar>
-void StepperStaggeredForwardSensitivity<Scalar>::
-setSolver(std::string solverName)
-{
-  stateStepper_->setSolver(solverName);
-  sensitivityStepper_->setSolver(solverName);
-}
-
-template<class Scalar>
 Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >
 StepperStaggeredForwardSensitivity<Scalar>::
 getModel()
 {
   return combined_fsa_model_;
-}
-
-
-template<class Scalar>
-void StepperStaggeredForwardSensitivity<Scalar>::
-setSolver(
-  Teuchos::RCP<Teuchos::ParameterList> solverPL)
-{
-  stateStepper_->setSolver(solverPL);
-  sensitivityStepper_->setSolver(solverPL);
 }
 
 
@@ -132,7 +114,6 @@ template<class Scalar>
 void StepperStaggeredForwardSensitivity<Scalar>::
 initialize()
 {
-  this->setSolver();
 }
 
 
