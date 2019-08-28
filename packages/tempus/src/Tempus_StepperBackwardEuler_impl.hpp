@@ -57,7 +57,7 @@ StepperBackwardEuler<Scalar>::StepperBackwardEuler(
   if (appModel != Teuchos::null) {
 
     this->setModel(appModel);
-    this->setSolverWSolver(solver);
+    this->setSolver(solver);
     this->initialize();
   }
 }

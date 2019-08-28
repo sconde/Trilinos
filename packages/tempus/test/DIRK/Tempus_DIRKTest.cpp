@@ -201,7 +201,7 @@ TEUCHOS_UNIT_TEST(DIRK, ConstructingFromDefaults)
   RCP<Tempus::Stepper<double> > stepper =
     sf->createStepper("SDIRK 2 Stage 2nd order");
   stepper->setModel(model);
-  stepper->setSolverWSolver();
+  stepper->setSolver();
   stepper->initialize();
 
   // Setup TimeStepControl ------------------------------------

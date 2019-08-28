@@ -227,11 +227,11 @@ void StepperExplicit<Scalar>::setInitialConditions(
 }
 
 template<class Scalar>
-void StepperExplicit<Scalar>::setSolverWSolver(
+void StepperExplicit<Scalar>::setSolver(
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > /* solver */)
 {
   Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
-  Teuchos::OSTab ostab(out,1,"StepperExplicit::setSolverWSolver()");
+  Teuchos::OSTab ostab(out,1,"StepperExplicit::setSolver()");
   *out << "Warning -- No solver to set for StepperExplicit "
        << "(i.e., explicit method).\n" << std::endl;
   return;

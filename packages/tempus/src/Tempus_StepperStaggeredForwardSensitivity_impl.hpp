@@ -102,11 +102,11 @@ getModel()
 
 template<class Scalar>
 void StepperStaggeredForwardSensitivity<Scalar>::
-setSolverWSolver(
+setSolver(
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver)
 {
-  stateStepper_->setSolverWSolver(solver);
-  sensitivityStepper_->setSolverWSolver(solver);
+  stateStepper_->setSolver(solver);
+  sensitivityStepper_->setSolver(solver);
 }
 
 

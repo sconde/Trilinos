@@ -233,7 +233,7 @@ void StepperImplicit<Scalar>::setInitialConditions(
 
 
 template<class Scalar>
-void StepperImplicit<Scalar>::setSolverWSolver(
+void StepperImplicit<Scalar>::setSolver(
   Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver)
 {
   if (solver == Teuchos::null) {

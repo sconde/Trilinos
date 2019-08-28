@@ -41,7 +41,7 @@ public:
     virtual void setInitialConditions (
       const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory);
 
-    virtual void setSolverWSolver(
+    virtual void setSolver(
       Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver = Teuchos::null);
 
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const

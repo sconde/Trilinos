@@ -64,7 +64,7 @@ StepperIMEX_RK_Partition<Scalar>::StepperIMEX_RK_Partition(
   if (appModel != Teuchos::null) {
 
     this->setModel(appModel);
-    this->setSolverWSolver(solver);
+    this->setSolver(solver);
     this->initialize();
   }
 }

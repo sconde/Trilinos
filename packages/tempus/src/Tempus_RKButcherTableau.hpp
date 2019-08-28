@@ -62,10 +62,62 @@ class RKButcherTableau :
       const int orderMin,
       const int orderMax,
       const Teuchos::SerialDenseVector<int,Scalar>&
-        bstar = Teuchos::SerialDenseVector<int,Scalar>())
+        bstar = Teuchos::SerialDenseVector<int,Scalar>(),
+      bool checkC = true)
       : description_(stepperType)
     {
-      this->setAbc(A,b,c,order,orderMin,orderMax,bstar);
+      const int numStages = A.numRows();
+      TEUCHOS_ASSERT_EQUALITY( A.numCols(), numStages );
+      TEUCHOS_ASSERT_EQUALITY( b.length(), numStages );
+      TEUCHOS_ASSERT_EQUALITY( c.length(), numStages );
+      TEUCHOS_ASSERT( order > 0 );
+      A_ = A;
+      b_ = b;
+      c_ = c;
+      order_ = order;
+      orderMin_ = orderMin;
+      orderMax_ = orderMax;
+      this->set_isImplicit();
+      this->set_isDIRK();
+
+      // Consistency check on b
+      typedef Teuchos::ScalarTraits<Scalar> ST;
+      Scalar sumb = ST::zero();
+      for (size_t i = 0; i < this->numStages(); i++) sumb += b_(i);
+      TEUCHOS_TEST_FOR_EXCEPTION( std::abs(ST::one()-sumb) > 1.0e-08,
+          std::runtime_error,
+          "Error - Butcher Tableau b fails to satisfy Sum(b_i) = 1.\n"
+          << "          Sum(b_i) = " << sumb << "\n");
+
+      // Consistency check on c
+      if (checkC) {
+        for (size_t i = 0; i < this->numStages(); i++) {
+          Scalar sumai = ST::zero();
+          for (size_t j = 0; j < this->numStages(); j++) sumai += A_(i,j);
+          bool failed = false;
+          if (std::abs(sumai) > 1.0e-08)
+            failed = (std::abs((sumai-c_(i))/sumai) > 1.0e-08);
+          else
+            failed = (std::abs(c_(i)) > 1.0e-08);
+
+          TEUCHOS_TEST_FOR_EXCEPTION( failed, std::runtime_error,
+               "Error - Butcher Tableau fails to satisfy c_i = Sum_j(a_ij).\n"
+            << "  Stage i      = " << i << "\n"
+            << "    c_i         = " << c_(i) << "\n"
+            << "    Sum_j(a_ij) = " << sumai << "\n"
+            << "  This may be OK as some valid tableaus do not satisfy\n"
+            << "  this condition.  If so, construct this RKButcherTableau\n"
+            << "  with checkC = false.\n");
+        }
+      }
+
+      if ( bstar.length() > 0 ) {
+        TEUCHOS_ASSERT_EQUALITY( bstar.length(), numStages );
+        isEmbedded_ = true;
+      } else {
+        isEmbedded_ = false;
+      }
+      bstar_ = bstar;
     }
 
     /** \brief Return the number of stages */
@@ -124,69 +176,6 @@ class RKButcherTableau :
     RKButcherTableau();
 
   protected:
-
-    virtual void setAbc(
-      const Teuchos::SerialDenseMatrix<int,Scalar>& A,
-      const Teuchos::SerialDenseVector<int,Scalar>& b,
-      const Teuchos::SerialDenseVector<int,Scalar>& c,
-      const int order,
-      const int orderMin,
-      const int orderMax,
-      const Teuchos::SerialDenseVector<int,Scalar>&
-        bstar = Teuchos::SerialDenseVector<int,Scalar>())
-    {
-      const int numStages = A.numRows();
-      TEUCHOS_ASSERT_EQUALITY( A.numCols(), numStages );
-      TEUCHOS_ASSERT_EQUALITY( b.length(), numStages );
-      TEUCHOS_ASSERT_EQUALITY( c.length(), numStages );
-      TEUCHOS_ASSERT( order > 0 );
-      A_ = A;
-      b_ = b;
-      c_ = c;
-      order_ = order;
-      orderMin_ = orderMin;
-      orderMax_ = orderMax;
-      this->set_isImplicit();
-      this->set_isDIRK();
-
-      // Consistency check on b
-      typedef Teuchos::ScalarTraits<Scalar> ST;
-      Scalar sumb = ST::zero();
-      for (size_t i = 0; i < this->numStages(); i++) sumb += b_(i);
-      TEUCHOS_TEST_FOR_EXCEPTION( std::abs(ST::one()-sumb) > 1.0e-08,
-          std::runtime_error,
-          "Error - Butcher Tableau b fails to satisfy Sum(b_i) = 1.\n"
-          << "          Sum(b_i) = " << sumb << "\n");
-
-      // Consistency check on c   (some tableaus do not satisfy this!)
-      for (size_t i = 0; i < this->numStages(); i++) {
-        Scalar sumai = ST::zero();
-        for (size_t j = 0; j < this->numStages(); j++) sumai += A_(i,j);
-        bool failed = false;
-        if (std::abs(sumai) > 1.0e-08)
-          failed = (std::abs((sumai-c_(i))/sumai) > 1.0e-08);
-        else
-          failed = (std::abs(c_(i)) > 1.0e-08);
-
-        if (failed) {
-          Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
-          Teuchos::OSTab ostab(out,1,"RKButcherTableau::setAbc()");
-          *out <<
-            "Warning - Butcher Tableau c fails to satisfy c_i = Sum_j(a_ij).\n"
-            << "        Stage i      = " << i << "\n"
-            << "          c_i         = " << c_(i) << "\n"
-            << "          Sum_j(a_ij) = " << sumai << "\n" <<std::endl;
-        }
-      }
-
-      if ( bstar.length() > 0 ) {
-        TEUCHOS_ASSERT_EQUALITY( bstar.length(), numStages );
-        isEmbedded_ = true;
-      } else {
-        isEmbedded_ = false;
-      }
-      bstar_ = bstar;
-    }
 
     void set_isImplicit() {
       isImplicit_ = false;

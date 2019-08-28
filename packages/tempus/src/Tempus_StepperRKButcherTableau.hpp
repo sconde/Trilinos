@@ -2457,8 +2457,9 @@ protected:
     c(0) = zero;
     int order = 1;
 
+    auto emptyBStar = Teuchos::SerialDenseVector<int,Scalar>();
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->description(),A,b,c,order,order,order,emptyBStar,false));
   }
 };
 
@@ -2570,8 +2571,9 @@ protected:
     c(1) = one;
     int order = 2;
 
+    auto emptyBStar = Teuchos::SerialDenseVector<int,Scalar>();
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->description(),A,b,c,order,order,order,emptyBStar,false));
   }
 
 };

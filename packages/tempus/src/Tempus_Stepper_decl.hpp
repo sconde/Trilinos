@@ -73,7 +73,7 @@ public:
     virtual Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > getModel() = 0;
 
     /// Set solver.
-    virtual void setSolverWSolver(
+    virtual void setSolver(
       Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver = Teuchos::null) = 0;
 
     /// Get solver

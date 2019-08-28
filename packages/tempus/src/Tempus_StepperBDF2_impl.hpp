@@ -58,7 +58,7 @@ StepperBDF2<Scalar>::StepperBDF2(
   if (appModel != Teuchos::null) {
 
     this->setModel(appModel);
-    this->setSolverWSolver(solver);
+    this->setSolver(solver);
     this->setStartUpStepper(startUpStepper);
     this->initialize();
   }

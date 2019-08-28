@@ -279,7 +279,7 @@ public:
         solver->setParameterList(noxPL);
       }
     }
-    stepper->setSolverWSolver(solver);
+    stepper->setSolver(solver);
   }
 
   /// Set StepperDIRK member data from the ParameterList.

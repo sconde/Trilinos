@@ -62,7 +62,7 @@ public:
       getWrapperModel(){return wrapperModel_;}
 
     /// Set solver.
-    virtual void setSolverWSolver(
+    virtual void setSolver(
       Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver = Teuchos::null);
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const
       { return solver_; }

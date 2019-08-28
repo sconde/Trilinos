@@ -54,7 +54,7 @@ public:
   /** \brief Default constructor.
    *
    *  - Requires the following calls before takeStep():
-   *    setModel(), setSolverWSolver(), setStartUpStepper() and initialize().
+   *    setModel(), setSolver(), setStartUpStepper() and initialize().
   */
   StepperBDF2();
 
