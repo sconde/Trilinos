@@ -277,15 +277,6 @@ getDefaultStepperState()
 
 
 template<class Scalar>
-std::string StepperStaggeredForwardSensitivity<Scalar>::
-description() const
-{
-  std::string name = "StepperStaggeredForwardSensitivity";
-  return(name);
-}
-
-
-template<class Scalar>
 void StepperStaggeredForwardSensitivity<Scalar>::
 describe(
    Teuchos::FancyOStream               &out,

@@ -21,7 +21,7 @@ template<class Scalar>
 StepperOperatorSplit<Scalar>::StepperOperatorSplit()
   : OpSpSolnHistory_(Teuchos::null)
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Operator Split");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -46,7 +46,7 @@ StepperOperatorSplit<Scalar>::StepperOperatorSplit(
   int orderMax)
     : OpSpSolnHistory_(Teuchos::null)
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Operator Split");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -157,7 +157,7 @@ void StepperOperatorSplit<Scalar>::setSubStepperList(
       Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
       Teuchos::OSTab ostab(out,1,"StepperOperatorSplit::createSubSteppers()");
       *out << "Warning -- subStepper = '"
-           << subStepper->description() << "' has \n"
+           << subStepper->getStepperType() << "' has \n"
            << "  subStepper->getUseFSAL() = " << useFSAL << ".\n"
            << "  subSteppers usually can not use the FSAL priniciple with\n"
            << "  operator splitting.  Proceeding with it set to true.\n"
@@ -221,7 +221,7 @@ void StepperOperatorSplit<Scalar>::initialize()
     typename std::vector<Teuchos::RCP<Stepper<Scalar> > >::const_iterator
       subStepperIter = subStepperList_.begin();
     for (; subStepperIter < subStepperList_.end(); subStepperIter++) {
-      *out << "SubStepper, " << (*subStepperIter)->description()
+      *out << "SubStepper, " << (*subStepperIter)->getStepperType()
            << ", isOneStepMethod = " << (*subStepperIter)->isOneStepMethod()
            << std::endl;
     }
@@ -287,7 +287,7 @@ void StepperOperatorSplit<Scalar>::takeStep(
         pass = false;
         Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
         Teuchos::OSTab ostab(out,1,"StepperOperatorSplit::takeStep()");
-        *out << "SubStepper, " << (*subStepperIter)->description()
+        *out << "SubStepper, " << (*subStepperIter)->getStepperType()
              << ", failed!" << std::endl;
         break;
       }
@@ -318,15 +318,8 @@ Teuchos::RCP<Tempus::StepperState<Scalar> > StepperOperatorSplit<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
-}
-
-
-template<class Scalar>
-std::string StepperOperatorSplit<Scalar>::description() const
-{
-  return "Operator Split";
 }
 
 
@@ -335,7 +328,7 @@ void StepperOperatorSplit<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl;
+  out << this->getStepperType() << "::describe:" << std::endl;
 }
 
 
@@ -344,7 +337,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperOperatorSplit<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<int>   ("Minimum Order", 1,
     "Minimum Operator-split order.  (default = 1)\n");
   pl->set<int>   ("Order", 1,

@@ -14,10 +14,10 @@ namespace Tempus {
 
 
 void getValidParametersBasic(
-  Teuchos::RCP<Teuchos::ParameterList> pl, std::string description)
+  Teuchos::RCP<Teuchos::ParameterList> pl, std::string stepperType)
 {
-  pl->setName("Default Stepper - " + description);
-  pl->set<std::string>("Stepper Type", description);
+  pl->setName("Default Stepper - " + stepperType);
+  pl->set<std::string>("Stepper Type", stepperType);
 
   pl->set<bool>("Use FSAL", false,
     "The First-Step-As-Last (FSAL) principle is the situation where the\n"

@@ -160,7 +160,8 @@ public:
 
   /// \name Overridden from Teuchos::Describable
   //@{
-    virtual std::string description() const;
+    virtual std::string description() const
+    { return "StepperStaggeredForwardSensitivity"; }
     virtual void describe(Teuchos::FancyOStream        & out,
                           const Teuchos::EVerbosityLevel verbLevel) const;
   //@}

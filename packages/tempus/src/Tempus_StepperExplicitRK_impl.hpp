@@ -20,7 +20,6 @@ namespace Tempus {
 template<class Scalar>
 void StepperExplicitRK<Scalar>::setupDefault()
 {
-  this->setStepperType(        this->description());
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -42,7 +41,6 @@ void StepperExplicitRK<Scalar>::setup(
   bool ICConsistencyCheck,
   bool useEmbedded)
 {
-  this->setStepperType(        this->description());
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -257,8 +255,8 @@ void StepperExplicitRK<Scalar>::takeStep(
 
     // Compute stage solutions
     for (int i=0; i < numStages; ++i) {
-//////if (!Teuchos::is_null(stepperExplicitRKObserver_))
-//////  stepperExplicitRKObserver_->observeBeginStage(solutionHistory, *this);
+      if (!Teuchos::is_null(stepperExplicitRKObserver_))
+        stepperExplicitRKObserver_->observeBeginStage(solutionHistory, *this);
 
       if ( i == 0 && this->getUseFSAL() &&
            workingState->getNConsecutiveFailures() == 0 ) {
@@ -277,15 +275,15 @@ void StepperExplicitRK<Scalar>::takeStep(
         }
         const Scalar ts = time + c(i)*dt;
 
-//////  if (!Teuchos::is_null(stepperExplicitRKObserver_))
-//////    stepperExplicitRKObserver_->observeBeforeExplicit(solutionHistory,
-//////                                                      *this);
+        if (!Teuchos::is_null(stepperExplicitRKObserver_))
+          stepperExplicitRKObserver_->observeBeforeExplicit(solutionHistory,
+                                                            *this);
         // Evaluate xDot = f(x,t).
         this->evaluateExplicitODE(stageXDot_[i], stageX_, ts);
       }
 
-//////if (!Teuchos::is_null(stepperExplicitRKObserver_))
-//////  stepperExplicitRKObserver_->observeEndStage(solutionHistory, *this);
+      if (!Teuchos::is_null(stepperExplicitRKObserver_))
+        stepperExplicitRKObserver_->observeEndStage(solutionHistory, *this);
     }
 
     // Sum for solution: x_n = x_n-1 + Sum{ b(i) * dt*f(i) }
@@ -359,13 +357,6 @@ getDefaultStepperState()
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
     rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
-}
-
-
-template<class Scalar>
-std::string StepperExplicitRK<Scalar>::description() const
-{
-  return(this->getStepperType());
 }
 
 

@@ -25,7 +25,7 @@ template<class Scalar> class StepperFactory;
 template<class Scalar>
 StepperBackwardEuler<Scalar>::StepperBackwardEuler()
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Backward Euler");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -46,7 +46,7 @@ StepperBackwardEuler<Scalar>::StepperBackwardEuler(
   bool zeroInitialGuess)
 
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Backward Euler");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -248,14 +248,9 @@ StepperBackwardEuler<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
 }
-
-
-template<class Scalar>
-std::string StepperBackwardEuler<Scalar>::description() const
-{ return "Backward Euler"; }
 
 
 template<class Scalar>
@@ -263,7 +258,7 @@ void StepperBackwardEuler<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "wrapperModel_ = " << this->wrapperModel_->description() << std::endl;
 }
 
@@ -273,7 +268,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperBackwardEuler<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<std::string>("Solver Name", "Default Solver");
   pl->set<bool>       ("Zero Initial Guess", false);
   pl->set<std::string>("Predictor Stepper Type", "None");

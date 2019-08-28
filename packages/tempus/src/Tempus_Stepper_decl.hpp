@@ -133,6 +133,11 @@ public:
     virtual OrderODE getOrderODE() const = 0;
   //@}
 
+  /// \name Overridden from Teuchos::Describable
+  //@{
+    virtual std::string description() const { return stepperType_; }
+  //@}
+
   /// \name Functions for Steppers with subSteppers (e.g., OperatorSplit)
   //@{
     virtual void createSubSteppers(
@@ -153,7 +158,7 @@ private:
 //@{
   /// Provide basic parameters to Steppers.
   void getValidParametersBasic(
-    Teuchos::RCP<Teuchos::ParameterList> pl, std::string description);
+    Teuchos::RCP<Teuchos::ParameterList> pl, std::string stepperType);
 
   /// Validate that the model supports explicit ODE evaluation, f(x,t) [=xdot]
   /** Currently the convention to evaluate f(x,t) is to set xdot=null!

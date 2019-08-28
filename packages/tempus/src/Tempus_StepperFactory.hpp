@@ -85,12 +85,12 @@ public:
     Teuchos::RCP<Teuchos::ParameterList> stepperPL)
   {
     auto stepperType =
-      stepperPL->get<std::string>("Stepper Type", stepper->description());
+      stepperPL->get<std::string>("Stepper Type", stepper->getStepperType());
     TEUCHOS_TEST_FOR_EXCEPTION(
-      stepperType != stepper->description() ,std::runtime_error,
+      stepperType != stepper->getStepperType() ,std::runtime_error,
       "  ParameterList 'Stepper Type' (='" + stepperType +"')\n"
       "  does not match type for stepper Stepper (='"
-      + stepper->description() + "').");
+      + stepper->getStepperType() + "').");
     stepper->setStepperType(stepperType);
 
     stepper->setUseFSAL(
@@ -1354,7 +1354,7 @@ private:
           Teuchos::VerboseObjectBase::getDefaultOStream();
         Teuchos::OSTab ostab(out,1,"StepperFactory::createSubSteppers()");
         *out << "Warning -- subStepper = '"
-             << subStepper->description() << "' has \n"
+             << subStepper->getStepperType() << "' has \n"
              << "  subStepper->getUseFSAL() = " << useFSAL << ".\n"
              << "  subSteppers usually can not use the FSAL priniciple with\n"
              << "  operator splitting.  Proceeding with it set to true.\n"

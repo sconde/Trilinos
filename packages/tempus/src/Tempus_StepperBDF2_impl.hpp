@@ -25,7 +25,7 @@ template<class Scalar> class StepperFactory;
 template<class Scalar>
 StepperBDF2<Scalar>::StepperBDF2()
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "BDF2");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -47,7 +47,7 @@ StepperBDF2<Scalar>::StepperBDF2(
   bool zeroInitialGuess)
 
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "BDF2");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -235,7 +235,7 @@ void StepperBDF2<Scalar>::computeStartUp(
   Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
   Teuchos::OSTab ostab(out,1,"StepperBDF2::computeStartUp()");
   *out << "Warning -- Taking a startup step for BDF2 using '"
-       << startUpStepper_->description()<<"'!" << std::endl;
+       << startUpStepper_->getStepperType()<<"'!" << std::endl;
 
   //Take one step using startUpStepper_
   startUpStepper_->takeStep(solutionHistory);
@@ -255,13 +255,9 @@ StepperBDF2<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
 }
-
-
-template<class Scalar>
-std::string StepperBDF2<Scalar>::description() const { return "BDF2"; }
 
 
 template<class Scalar>
@@ -269,7 +265,7 @@ void StepperBDF2<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "wrapperModel_ = " << this->wrapperModel_->description() << std::endl;
 }
 
@@ -279,7 +275,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperBDF2<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<bool>("Initial Condition Consistency Check",
                 this->getICConsistencyCheckDefault());
   pl->set<std::string>("Solver Name", "Default Solver");

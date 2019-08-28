@@ -25,7 +25,7 @@ template<class Scalar> class StepperFactory;
 template<class Scalar>
 StepperTrapezoidal<Scalar>::StepperTrapezoidal()
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Trapezoidal Method");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -46,7 +46,7 @@ StepperTrapezoidal<Scalar>::StepperTrapezoidal(
   bool zeroInitialGuess)
 
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Trapezoidal Method");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -199,14 +199,9 @@ StepperTrapezoidal<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
 }
-
-
-template<class Scalar>
-std::string StepperTrapezoidal<Scalar>::description() const
-{ return "Trapezoidal Method"; }
 
 
 template<class Scalar>
@@ -214,7 +209,7 @@ void StepperTrapezoidal<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "wrapperModel_ = " << this->wrapperModel_->description() << std::endl;
 }
 
@@ -224,7 +219,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperTrapezoidal<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<bool>       ("Use FSAL", this->getUseFSALDefault());
   pl->set<std::string>("Initial Condition Consistency",
                        this->getICConsistencyDefault());

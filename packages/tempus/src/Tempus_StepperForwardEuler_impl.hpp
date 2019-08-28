@@ -19,7 +19,7 @@ namespace Tempus {
 template<class Scalar>
 StepperForwardEuler<Scalar>::StepperForwardEuler()
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Forward Euler");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -36,7 +36,7 @@ StepperForwardEuler<Scalar>::StepperForwardEuler(
   std::string ICConsistency,
   bool ICConsistencyCheck)
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Forward Euler");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -175,14 +175,9 @@ Teuchos::RCP<Tempus::StepperState<Scalar> > StepperForwardEuler<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
 }
-
-
-template<class Scalar>
-std::string StepperForwardEuler<Scalar>::description() const
-{ return "Forward Euler"; }
 
 
 template<class Scalar>
@@ -190,7 +185,7 @@ void StepperForwardEuler<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "appModel_ = " << this->appModel_->description() << std::endl;
 }
 
@@ -200,7 +195,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperForwardEuler<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<bool>("Use FSAL", true);
   pl->set<std::string>("Initial Condition Consistency", "Consistent");
   return pl;

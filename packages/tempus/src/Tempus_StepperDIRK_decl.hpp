@@ -148,7 +148,6 @@ public:
 
   /// \name Overridden from Teuchos::Describable
   //@{
-    virtual std::string description() const;
     virtual void describe(Teuchos::FancyOStream        & out,
                           const Teuchos::EVerbosityLevel verbLevel) const;
   //@}

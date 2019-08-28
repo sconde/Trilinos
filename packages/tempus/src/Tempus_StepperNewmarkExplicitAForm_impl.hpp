@@ -61,7 +61,7 @@ template<class Scalar>
 StepperNewmarkExplicitAForm<Scalar>::StepperNewmarkExplicitAForm()
   : gammaDefault_(Scalar(0.5)), gamma_(Scalar(0.5))
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Newmark Explicit a-Form");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -80,7 +80,7 @@ StepperNewmarkExplicitAForm<Scalar>::StepperNewmarkExplicitAForm(
   Scalar gamma)
   : gammaDefault_(Scalar(0.5)), gamma_(Scalar(0.5))
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Newmark Explicit a-Form");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -314,14 +314,9 @@ Teuchos::RCP<Tempus::StepperState<Scalar> > StepperNewmarkExplicitAForm<Scalar>:
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
 }
-
-
-template<class Scalar>
-std::string StepperNewmarkExplicitAForm<Scalar>::description() const
-{ return "Newmark Explicit a-Form"; }
 
 
 template<class Scalar>
@@ -329,7 +324,7 @@ void StepperNewmarkExplicitAForm<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "appModel_ = " << this->appModel_->description() << std::endl;
 }
 
@@ -339,7 +334,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperNewmarkExplicitAForm<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<bool>("Use FSAL", this->getUseFSALDefault());
   pl->set<std::string>("Initial Condition Consistency",
                        this->getICConsistencyDefault());

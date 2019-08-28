@@ -43,6 +43,7 @@ class StepperERK_ForwardEuler :
   public:
   StepperERK_ForwardEuler()
   {
+    this->setStepperType("RK Forward Euler");
     this->setupTableau();
     this->setupDefault();
   }
@@ -55,17 +56,16 @@ class StepperERK_ForwardEuler :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Forward Euler");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const { return "RK Forward Euler"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "c = [ 0 ]'\n"
                 << "A = [ 0 ]\n"
                 << "b = [ 1 ]'";
@@ -86,7 +86,7 @@ protected:
     int order = 1;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -115,6 +115,7 @@ class StepperERK_4Stage4thOrder :
   public:
   StepperERK_4Stage4thOrder()
   {
+    this->setStepperType("RK Explicit 4 Stage");
     this->setupTableau();
     this->setupDefault();
   }
@@ -127,17 +128,16 @@ class StepperERK_4Stage4thOrder :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit 4 Stage");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const { return "RK Explicit 4 Stage"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "\"The\" Runge-Kutta Method (explicit):\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
@@ -181,7 +181,7 @@ class StepperERK_4Stage4thOrder :
     int order = 4;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -215,6 +215,7 @@ class StepperERK_BogackiShampine32 :
   public:
   StepperERK_BogackiShampine32()
   {
+    this->setStepperType("Bogacki-Shampine 3(2) Pair");
     this->setupTableau();
     this->setupDefault();
   }
@@ -227,17 +228,16 @@ class StepperERK_BogackiShampine32 :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("Bogacki-Shampine 3(2) Pair");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const {return "Bogacki-Shampine 3(2) Pair";}
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "P. Bogacki and L.F. Shampine.\n"
                 << "A 3(2) pair of Runge–Kutta formulas.\n"
                 << "Applied Mathematics Letters, 2(4):321 – 325, 1989.\n"
@@ -291,7 +291,7 @@ protected:
     int order = 3;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order,bstar));
+      this->getStepperType(),A,b,c,order,order,order,bstar));
   }
 };
 
@@ -328,6 +328,7 @@ class StepperERK_Merson45 :
   public:
   StepperERK_Merson45()
   {
+    this->setStepperType("Merson 4(5) Pair");
     this->setupTableau();
     this->setupDefault();
   }
@@ -340,17 +341,16 @@ class StepperERK_Merson45 :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("Merson 4(5) Pair");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const { return "Merson 4(5) Pair"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
                 << "E. Hairer, S.P. Norsett, G. Wanner\n"
@@ -415,7 +415,7 @@ protected:
     int order = 4;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order,bstar));
+      this->getStepperType(),A,b,c,order,order,order,bstar));
   }
 };
 
@@ -449,6 +449,7 @@ public:
 
   StepperERK_3_8Rule()
   {
+    this->setStepperType("RK Explicit 3/8 Rule");
     this->setupTableau();
     this->setupDefault();
   }
@@ -461,17 +462,16 @@ public:
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit 3/8 Rule");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const { return "RK Explicit 3/8 Rule"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
                 << "E. Hairer, S.P. Norsett, G. Wanner\n"
@@ -519,7 +519,7 @@ protected:
     int order = 4;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -552,6 +552,7 @@ class StepperERK_4Stage3rdOrderRunge :
   public:
   StepperERK_4Stage3rdOrderRunge()
   {
+    this->setStepperType("RK Explicit 4 Stage 3rd order by Runge");
     this->setupTableau();
     this->setupDefault();
   }
@@ -564,18 +565,16 @@ class StepperERK_4Stage3rdOrderRunge :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit 4 Stage 3rd order by Runge");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const
-    { return "RK Explicit 4 Stage 3rd order by Runge"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
                 << "E. Hairer, S.P. Norsett, G. Wanner\n"
@@ -619,7 +618,7 @@ protected:
     int order = 3;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -651,6 +650,7 @@ class StepperERK_5Stage3rdOrderKandG :
   public:
   StepperERK_5Stage3rdOrderKandG()
   {
+    this->setStepperType("RK Explicit 5 Stage 3rd order by Kinnmark and Gray");
     this->setupTableau();
     this->setupDefault();
   }
@@ -663,18 +663,16 @@ class StepperERK_5Stage3rdOrderKandG :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit 5 Stage 3rd order by Kinnmark and Gray");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const
-    { return "RK Explicit 5 Stage 3rd order by Kinnmark and Gray"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Kinnmark & Gray 5 stage, 3rd order scheme \n"
                 << "Modified by P. Ullrich.  From the prim_advance_mod.F90 \n"
                 << "routine in the HOMME atmosphere model code.\n"
@@ -722,7 +720,7 @@ protected:
     int order = 3;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -750,6 +748,7 @@ class StepperERK_3Stage3rdOrder :
   public:
   StepperERK_3Stage3rdOrder()
   {
+    this->setStepperType("RK Explicit 3 Stage 3rd order");
     this->setupTableau();
     this->setupDefault();
   }
@@ -762,18 +761,16 @@ class StepperERK_3Stage3rdOrder :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit 3 Stage 3rd order");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const
-    { return "RK Explicit 3 Stage 3rd order"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "c = [  0  1/2  1  ]'\n"
                 << "A = [  0          ]\n"
                 << "    [ 1/2  0      ]\n"
@@ -813,7 +810,7 @@ protected:
     int order = 3;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -852,6 +849,7 @@ class StepperERK_3Stage3rdOrderTVD :
   public:
   StepperERK_3Stage3rdOrderTVD()
   {
+    this->setStepperType("RK Explicit 3 Stage 3rd order TVD");
     this->setupTableau();
     this->setupDefault();
   }
@@ -864,19 +862,16 @@ class StepperERK_3Stage3rdOrderTVD :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit 3 Stage 3rd order TVD");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-
-  virtual std::string description() const
-    { return "RK Explicit 3 Stage 3rd order TVD"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                   << "Sigal Gottlieb and Chi-Wang Shu\n"
                   << "`Total Variation Diminishing Runge-Kutta Schemes'\n"
                   << "Mathematics of Computation\n"
@@ -924,7 +919,7 @@ protected:
     int order = 3;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -956,6 +951,7 @@ class StepperERK_3Stage3rdOrderHeun :
   public:
   StepperERK_3Stage3rdOrderHeun()
   {
+    this->setStepperType("RK Explicit 3 Stage 3rd order by Heun");
     this->setupTableau();
     this->setupDefault();
   }
@@ -968,18 +964,16 @@ class StepperERK_3Stage3rdOrderHeun :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit 3 Stage 3rd order by Heun");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const
-    { return "RK Explicit 3 Stage 3rd order by Heun"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
                 << "E. Hairer, S.P. Norsett, G. Wanner\n"
@@ -1023,7 +1017,7 @@ protected:
     int order = 3;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -1054,6 +1048,7 @@ class StepperERK_Midpoint :
   public:
   StepperERK_Midpoint()
   {
+    this->setStepperType("RK Explicit Midpoint");
     this->setupTableau();
     this->setupDefault();
   }
@@ -1066,17 +1061,16 @@ class StepperERK_Midpoint :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit Midpoint");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const { return "RK Explicit Midpoint"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
                 << "E. Hairer, S.P. Norsett, G. Wanner\n"
@@ -1115,7 +1109,7 @@ protected:
     int order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -1142,6 +1136,7 @@ class StepperERK_Trapezoidal :
   public:
   StepperERK_Trapezoidal()
   {
+    this->setStepperType("RK Explicit Trapezoidal");
     this->setupTableau();
     this->setupDefault();
   }
@@ -1154,32 +1149,16 @@ class StepperERK_Trapezoidal :
     bool ICConsistencyCheck,
     bool useEmbedded)
   {
+    this->setStepperType("RK Explicit Trapezoidal");
     this->setupTableau();
     this->setup(appModel, obs, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const
-  {
-    std::string stepperType = this->getStepperType();
-    if ( stepperType == "" ) stepperType = "RK Explicit Trapezoidal";
-
-    TEUCHOS_TEST_FOR_EXCEPTION(
-      !( stepperType == "RK Explicit Trapezoidal" or
-         stepperType == "Heuns Method")
-      ,std::logic_error,
-      "  ParameterList 'Stepper Type' (='" + stepperType + "')\n"
-      "  does not match any name for this Stepper:\n"
-      "    'RK Explicit Trapezoidal'\n"
-      "    'Heuns Method'");
-
-    return stepperType;
-  }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "This Stepper is known as 'RK Explicit Trapezoidal' or 'Heuns Method'.\n"
                 << "c = [  0   1  ]'\n"
                 << "A = [  0      ]\n"
@@ -1215,7 +1194,7 @@ protected:
     int order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -1255,6 +1234,7 @@ class StepperERK_General :
 public:
   StepperERK_General()
   {
+    this->setStepperType("General ERK");
     this->setupTableau();
     this->setupDefault();
   }
@@ -1274,6 +1254,7 @@ public:
     const int orderMax,
     const Teuchos::SerialDenseVector<int,Scalar>& bstar)
   {
+    this->setStepperType("General ERK");
     this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
 
     TEUCHOS_TEST_FOR_EXCEPTION(
@@ -1284,12 +1265,10 @@ public:
                 ICConsistencyCheck, useEmbedded);
   }
 
-  virtual std::string description() const { return "General ERK"; }
-
   virtual std::string getDescription() const
   {
     std::stringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
       << "The format of the Butcher Tableau parameter list is\n"
       << "  <Parameter name=\"A\" type=\"string\" value=\"# # # ;\n"
       << "                                           # # # ;\n"
@@ -1316,7 +1295,7 @@ public:
       auto stepper = Teuchos::rcp(new StepperERK_4Stage4thOrder<Scalar>());
       auto t = stepper->getTableau();
       this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-                                 this->description(),
+                                 this->getStepperType(),
                                  t->A(),t->b(),t->c(),
                                  t->order(),t->orderMin(),t->orderMax(),
                                  t->bstar()));
@@ -1333,7 +1312,7 @@ public:
                     bstar = Teuchos::SerialDenseVector<int,Scalar>())
   {
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,orderMin,orderMax,bstar));
+      this->getStepperType(),A,b,c,order,orderMin,orderMax,bstar));
   }
 
   virtual std::string getDefaultICConsistency() const { return "Consistent"; }
@@ -1383,6 +1362,7 @@ class StepperDIRK_BackwardEuler :
   public:
   StepperDIRK_BackwardEuler()
   {
+    this->setStepperType("RK Backward Euler");
     this->setupTableau();
     this->setupDefault();
   }
@@ -1397,17 +1377,16 @@ class StepperDIRK_BackwardEuler :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("RK Backward Euler");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  std::string description() const { return "RK Backward Euler"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "c = [ 1 ]'\n"
                 << "A = [ 1 ]\n"
                 << "b = [ 1 ]'";
@@ -1448,7 +1427,7 @@ protected:
     int order = 1;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -1487,6 +1466,7 @@ class StepperSDIRK_2Stage2ndOrder :
     const Scalar one = ST::one();
     gammaDefault_ = Teuchos::as<Scalar>((2*one-ST::squareroot(2*one))/(2*one));
 
+    this->setStepperType("SDIRK 2 Stage 2nd order");
     this->setGamma(gammaDefault_);
     this->setupTableau();
     this->setupDefault();
@@ -1507,6 +1487,7 @@ class StepperSDIRK_2Stage2ndOrder :
     const Scalar one = ST::one();
     gammaDefault_ = Teuchos::as<Scalar>((2*one-ST::squareroot(2*one))/(2*one));
 
+    this->setStepperType("SDIRK 2 Stage 2nd order");
     this->setGamma(gamma);
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
@@ -1515,12 +1496,10 @@ class StepperSDIRK_2Stage2ndOrder :
 
   void setGamma(Scalar gamma) { gamma_ = gamma; this->setupTableau(); }
 
-  virtual std::string description() const { return "SDIRK 2 Stage 2nd order"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Computer Methods for ODEs and DAEs\n"
                 << "U. M. Ascher and L. R. Petzold\n"
                 << "p. 106\n"
@@ -1577,7 +1556,7 @@ protected:
     if ( std::abs((gamma_-gammaDefault_)/gamma_) < 1.0e-08 ) order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 
   private:
@@ -1626,6 +1605,7 @@ class StepperSDIRK_2Stage3rdOrder :
     gammaDefault_ = as<Scalar>((3*one+ST::squareroot(3*one))/(6*one));
     gammaTypeDefault_ = "3rd Order A-stable";
 
+    this->setStepperType("SDIRK 2 Stage 3rd order");
     this->setGammaType(gammaTypeDefault_);
     this->setGamma(gammaDefault_);
     this->setupTableau();
@@ -1650,6 +1630,7 @@ class StepperSDIRK_2Stage3rdOrder :
     gammaDefault_ = as<Scalar>((3*one+ST::squareroot(3*one))/(6*one));
     gammaTypeDefault_ = "3rd Order A-stable";
 
+    this->setStepperType("SDIRK 2 Stage 3rd order");
     this->setGammaType(gammaType);
     this->setGamma(gamma);
     this->setupTableau();
@@ -1677,12 +1658,10 @@ class StepperSDIRK_2Stage3rdOrder :
     }
   }
 
-  virtual std::string description() const { return "SDIRK 2 Stage 3rd order"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
                 << "E. Hairer, S. P. Norsett, and G. Wanner\n"
@@ -1752,7 +1731,7 @@ protected:
     c(0) = gamma_; c(1) = as<Scalar>( one - gamma_ );
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,2,3));
+      this->getStepperType(),A,b,c,order,2,3));
   }
 
   private:
@@ -1789,6 +1768,7 @@ class StepperEDIRK_2Stage3rdOrder :
   public:
   StepperEDIRK_2Stage3rdOrder()
   {
+    this->setStepperType("EDIRK 2 Stage 3rd order");
     this->setupTableau();
     this->setupDefault();
   }
@@ -1803,17 +1783,16 @@ class StepperEDIRK_2Stage3rdOrder :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("EDIRK 2 Stage 3rd order");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "EDIRK 2 Stage 3rd order"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Hammer & Hollingsworth method\n"
                 << "Solving Ordinary Differential Equations I:\n"
                 << "Nonstiff Problems, 2nd Revised Edition\n"
@@ -1863,7 +1842,7 @@ protected:
     int order = 3;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -1904,6 +1883,7 @@ class StepperDIRK_1StageTheta :
     typedef Teuchos::ScalarTraits<Scalar> ST;
     thetaDefault_ = ST::one()/(2*ST::one());
 
+    this->setStepperType("DIRK 1 Stage Theta Method");
     this->setTheta(thetaDefault_);
     this->setupTableau();
     this->setupDefault();
@@ -1923,6 +1903,7 @@ class StepperDIRK_1StageTheta :
     typedef Teuchos::ScalarTraits<Scalar> ST;
     thetaDefault_ = ST::one()/(2*ST::one());
 
+    this->setStepperType("DIRK 1 Stage Theta Method");
     this->setTheta(theta);
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
@@ -1939,12 +1920,10 @@ class StepperDIRK_1StageTheta :
     this->setupTableau();
   }
 
-  virtual std::string description() const {return "DIRK 1 Stage Theta Method";}
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Non-standard finite-difference methods\n"
                 << "in dynamical systems, P. Kama,\n"
                 << "Dissertation, University of Pretoria, pg. 49.\n"
@@ -1993,7 +1972,7 @@ protected:
     if ( std::abs((theta_-thetaDefault_)/theta_) < 1.0e-08 ) order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,1,2));
+      this->getStepperType(),A,b,c,order,1,2));
   }
 
   private:
@@ -2037,6 +2016,7 @@ class StepperEDIRK_2StageTheta :
     typedef Teuchos::ScalarTraits<Scalar> ST;
     thetaDefault_ = ST::one()/(2*ST::one());
 
+    this->setStepperType("EDIRK 2 Stage Theta Method");
     this->setTheta(thetaDefault_);
     this->setupTableau();
     this->setupDefault();
@@ -2056,6 +2036,7 @@ class StepperEDIRK_2StageTheta :
     typedef Teuchos::ScalarTraits<Scalar> ST;
     thetaDefault_ = ST::one()/(2*ST::one());
 
+    this->setStepperType("EDIRK 2 Stage Theta Method");
     this->setTheta(theta);
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
@@ -2072,12 +2053,10 @@ class StepperEDIRK_2StageTheta :
     this->setupTableau();
   }
 
-  virtual std::string description() const {return "EDIRK 2 Stage Theta Method";}
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Computer Methods for ODEs and DAEs\n"
                 << "U. M. Ascher and L. R. Petzold\n"
                 << "p. 113\n"
@@ -2137,7 +2116,7 @@ protected:
     if ( std::abs((theta_-thetaDefault_)/theta_) < 1.0e-08 ) order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,1,2));
+      this->getStepperType(),A,b,c,order,1,2));
   }
 
   private:
@@ -2172,6 +2151,7 @@ class StepperEDIRK_TrapezoidalRule :
   public:
   StepperEDIRK_TrapezoidalRule()
   {
+    this->setStepperType("RK Trapezoidal Rule");
     this->setupTableau();
     this->setupDefault();
   }
@@ -2186,17 +2166,16 @@ class StepperEDIRK_TrapezoidalRule :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("RK Trapezoidal Rule");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "RK Trapezoidal Rule"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "Also known as Crank-Nicolson Method.\n"
                 << "c = [  0   1   ]'\n"
                 << "A = [  0   0   ]\n"
@@ -2246,7 +2225,7 @@ protected:
     int order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -2283,6 +2262,7 @@ class StepperSDIRK_ImplicitMidpoint :
   public:
   StepperSDIRK_ImplicitMidpoint()
   {
+    this->setStepperType("RK Implicit Midpoint");
     this->setupTableau();
     this->setupDefault();
   }
@@ -2297,17 +2277,16 @@ class StepperSDIRK_ImplicitMidpoint :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("RK Implicit Midpoint");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "RK Implicit Midpoint"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "A-stable\n"
                 << "Solving Ordinary Differential Equations II:\n"
                 << "Stiff and Differential-Algebraic Problems,\n"
@@ -2360,7 +2339,7 @@ protected:
     int order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -2391,6 +2370,7 @@ class StepperDIRK_1Stage1stOrderRadauIA :
   public:
   StepperDIRK_1Stage1stOrderRadauIA()
   {
+    this->setStepperType("RK Implicit 1 Stage 1st order Radau IA");
     this->setupTableau();
     this->setupDefault();
   }
@@ -2405,18 +2385,16 @@ class StepperDIRK_1Stage1stOrderRadauIA :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("RK Implicit 1 Stage 1st order Radau IA");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const
-    { return "RK Implicit 1 Stage 1st order Radau IA"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "A-stable\n"
                 << "Solving Ordinary Differential Equations II:\n"
                 << "Stiff and Differential-Algebraic Problems,\n"
@@ -2459,7 +2437,7 @@ protected:
 
     auto emptyBStar = Teuchos::SerialDenseVector<int,Scalar>();
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order,emptyBStar,false));
+      this->getStepperType(),A,b,c,order,order,order,emptyBStar,false));
   }
 };
 
@@ -2492,6 +2470,7 @@ class StepperDIRK_2Stage2ndOrderLobattoIIIB :
   public:
   StepperDIRK_2Stage2ndOrderLobattoIIIB()
   {
+    this->setStepperType("RK Implicit 2 Stage 2nd order Lobatto IIIB");
     this->setupTableau();
     this->setupDefault();
   }
@@ -2506,18 +2485,16 @@ class StepperDIRK_2Stage2ndOrderLobattoIIIB :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("RK Implicit 2 Stage 2nd order Lobatto IIIB");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const
-    { return "RK Implicit 2 Stage 2nd order Lobatto IIIB"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "A-stable\n"
                 << "Solving Ordinary Differential Equations II:\n"
                 << "Stiff and Differential-Algebraic Problems,\n"
@@ -2573,7 +2550,7 @@ protected:
 
     auto emptyBStar = Teuchos::SerialDenseVector<int,Scalar>();
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order,emptyBStar,false));
+      this->getStepperType(),A,b,c,order,order,order,emptyBStar,false));
   }
 
 };
@@ -2610,6 +2587,7 @@ class StepperSDIRK_5Stage4thOrder :
   public:
   StepperSDIRK_5Stage4thOrder()
   {
+    this->setStepperType("SDIRK 5 Stage 4th order");
     this->setupTableau();
     this->setupDefault();
   }
@@ -2624,17 +2602,16 @@ class StepperSDIRK_5Stage4thOrder :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("SDIRK 5 Stage 4th order");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "SDIRK 5 Stage 4th order"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
       << "L-stable\n"
       << "Solving Ordinary Differential Equations II:\n"
       << "Stiff and Differential-Algebraic Problems,\n"
@@ -2735,7 +2712,7 @@ protected:
     int order = 4;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -2770,6 +2747,7 @@ class StepperSDIRK_3Stage4thOrder :
   public:
   StepperSDIRK_3Stage4thOrder()
   {
+    this->setStepperType("SDIRK 3 Stage 4th order");
     this->setupTableau();
     this->setupDefault();
   }
@@ -2784,17 +2762,16 @@ class StepperSDIRK_3Stage4thOrder :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("SDIRK 3 Stage 4th order");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "SDIRK 3 Stage 4th order"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "A-stable\n"
                 << "Solving Ordinary Differential Equations II:\n"
                 << "Stiff and Differential-Algebraic Problems,\n"
@@ -2865,7 +2842,7 @@ protected:
     int order = 4;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -2901,6 +2878,7 @@ class StepperSDIRK_5Stage5thOrder :
   public:
   StepperSDIRK_5Stage5thOrder()
   {
+    this->setStepperType("SDIRK 5 Stage 5th order");
     this->setupTableau();
     this->setupDefault();
   }
@@ -2915,17 +2893,16 @@ class StepperSDIRK_5Stage5thOrder :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("SDIRK 5 Stage 5th order");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "SDIRK 5 Stage 5th order"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
       << "Solving Ordinary Differential Equations II:\n"
       << "Stiff and Differential-Algebraic Problems,\n"
       << "2nd Revised Edition\n"
@@ -3045,7 +3022,7 @@ protected:
     int order = 5;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order));
+      this->getStepperType(),A,b,c,order,order,order));
   }
 };
 
@@ -3074,6 +3051,7 @@ class StepperSDIRK_21Pair :
   public:
   StepperSDIRK_21Pair()
   {
+    this->setStepperType("SDIRK 2(1) Pair");
     this->setupTableau();
     this->setupDefault();
   }
@@ -3088,17 +3066,16 @@ class StepperSDIRK_21Pair :
     bool useEmbedded,
     bool zeroInitialGuess)
   {
+    this->setStepperType("SDIRK 2(1) Pair");
     this->setupTableau();
     this->setup(appModel, obs, solver, useFSAL, ICConsistency,
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "SDIRK 2(1) Pair"; }
-
   std::string getDescription() const
   {
     std::ostringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
                 << "c =     [  1  0   ]'\n"
                 << "A =     [  1      ]\n"
                 << "        [ -1  1   ]\n"
@@ -3152,7 +3129,7 @@ protected:
     int order = 2;
 
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,order,order,bstar));
+      this->getStepperType(),A,b,c,order,order,order,bstar));
   }
 };
 
@@ -3195,6 +3172,7 @@ class StepperDIRK_General :
   public:
   StepperDIRK_General()
   {
+    this->setStepperType("General DIRK");
     this->setupTableau();
     this->setupDefault();
   }
@@ -3216,6 +3194,7 @@ class StepperDIRK_General :
     const int orderMax,
     const Teuchos::SerialDenseVector<int,Scalar>& bstar)
   {
+    this->setStepperType("General DIRK");
     this->setTableau(A,b,c,order,orderMin,orderMax,bstar);
 
     TEUCHOS_TEST_FOR_EXCEPTION(
@@ -3226,12 +3205,10 @@ class StepperDIRK_General :
                 ICConsistencyCheck, useEmbedded, zeroInitialGuess);
   }
 
-  virtual std::string description() const { return "General DIRK"; }
-
   std::string getDescription() const
   {
     std::stringstream Description;
-    Description << this->description() << "\n"
+    Description << this->getStepperType() << "\n"
       << "The format of the Butcher Tableau parameter list is\n"
       << "  <Parameter name=\"A\" type=\"string\" value=\"# # # ;\n"
       << "                                           # # # ;\n"
@@ -3262,7 +3239,7 @@ class StepperDIRK_General :
       auto stepper = Teuchos::rcp(new StepperSDIRK_2Stage2ndOrder<Scalar>());
       auto t = stepper->getTableau();
       this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-                                 this->description(),
+                                 this->getStepperType(),
                                  t->A(),t->b(),t->c(),
                                  t->order(),t->orderMin(),t->orderMax(),
                                  t->bstar()));
@@ -3279,7 +3256,7 @@ class StepperDIRK_General :
                     bstar = Teuchos::SerialDenseVector<int,Scalar>())
   {
     this->tableau_ = Teuchos::rcp(new RKButcherTableau<Scalar>(
-      this->description(),A,b,c,order,orderMin,orderMax,bstar));
+      this->getStepperType(),A,b,c,order,orderMin,orderMax,bstar));
   }
 
   Teuchos::RCP<const Teuchos::ParameterList>

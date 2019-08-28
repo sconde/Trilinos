@@ -25,7 +25,6 @@ template<class Scalar> class StepperFactory;
 template<class Scalar>
 void StepperDIRK<Scalar>::setupDefault()
 {
-  this->setStepperType(        this->description());
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -47,7 +46,6 @@ void StepperDIRK<Scalar>::setup(
   bool useEmbedded,
   bool zeroInitialGuess)
 {
-  this->setStepperType(        this->description());
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -194,8 +192,8 @@ void StepperDIRK<Scalar>::takeStep(
     bool pass = true;
     Thyra::SolveStatus<Scalar> sStatus;
     for (int i=0; i < numStages; ++i) {
-//////if (!Teuchos::is_null(stepperDIRKObserver_))
-//////  stepperDIRKObserver_->observeBeginStage(solutionHistory, *this);
+      if (!Teuchos::is_null(stepperDIRKObserver_))
+        stepperDIRKObserver_->observeBeginStage(solutionHistory, *this);
 
       if ( i == 0 && this->getUseFSAL() &&
            workingState->getNConsecutiveFailures() == 0 ) {
@@ -232,8 +230,8 @@ void StepperDIRK<Scalar>::takeStep(
               inArgs.set_x_dot(Teuchos::null);
             outArgs.set_f(stageXDot_[i]);
 
-//////      if (!Teuchos::is_null(stepperDIRKObserver_))
-//////        stepperDIRKObserver_->observeBeforeExplicit(solutionHistory,*this);
+            if (!Teuchos::is_null(stepperDIRKObserver_))
+              stepperDIRKObserver_->observeBeforeExplicit(solutionHistory,*this);
             this->wrapperModel_->getAppModel()->evalModel(inArgs,outArgs);
           }
         } else {
@@ -251,22 +249,22 @@ void StepperDIRK<Scalar>::takeStep(
               timeDer, dt, alpha, beta));
           p->stageNumber_ = i;
 
-//////    if (!Teuchos::is_null(stepperDIRKObserver_))
-//////      stepperDIRKObserver_->observeBeforeSolve(solutionHistory, *this);
+          if (!Teuchos::is_null(stepperDIRKObserver_))
+            stepperDIRKObserver_->observeBeforeSolve(solutionHistory, *this);
 
           sStatus = this->solveImplicitODE(stageX_, stageXDot_[i], ts, p);
 
           if (sStatus.solveStatus != Thyra::SOLVE_STATUS_CONVERGED) pass=false;
 
-//////    if (!Teuchos::is_null(stepperDIRKObserver_))
-//////      stepperDIRKObserver_->observeAfterSolve(solutionHistory, *this);
+          if (!Teuchos::is_null(stepperDIRKObserver_))
+            stepperDIRKObserver_->observeAfterSolve(solutionHistory, *this);
 
           timeDer->compute(stageX_, stageXDot_[i]);
         }
       }
 
-//////if (!Teuchos::is_null(stepperDIRKObserver_))
-//////  stepperDIRKObserver_->observeEndStage(solutionHistory, *this);
+      if (!Teuchos::is_null(stepperDIRKObserver_))
+        stepperDIRKObserver_->observeEndStage(solutionHistory, *this);
     }
 
     // Sum for solution: x_n = x_n-1 + Sum{ dt*b(i) * f(i) }
@@ -336,13 +334,6 @@ getDefaultStepperState()
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
     rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
-}
-
-
-template<class Scalar>
-std::string StepperDIRK<Scalar>::description() const
-{
-  return(this->getStepperType());
 }
 
 

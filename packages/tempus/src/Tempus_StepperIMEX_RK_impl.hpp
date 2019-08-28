@@ -102,7 +102,8 @@ void StepperIMEX_RK<Scalar>::setTableaus(std::string stepperType,
       int order = 1;
 
       auto explicitTableau = Teuchos::rcp(new RKButcherTableau<Scalar>(
-        this->description(),A,b,c,order,order,order));
+        "Explicit Tableau - IMEX RK 1st order",
+        A,b,c,order,order,order));
 
       this->setExplicitTableau(explicitTableau);
     }
@@ -129,7 +130,8 @@ void StepperIMEX_RK<Scalar>::setTableaus(std::string stepperType,
       int order = 1;
 
       auto implicitTableau = Teuchos::rcp(new RKButcherTableau<Scalar>(
-        this->description(),A,b,c,order,order,order));
+        "Implicit Tableau - IMEX RK 1st order",
+        A,b,c,order,order,order));
 
       this->setImplicitTableau(implicitTableau);
     }
@@ -622,15 +624,8 @@ StepperIMEX_RK<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
-}
-
-
-template<class Scalar>
-std::string StepperIMEX_RK<Scalar>::description() const
-{
-  return this->getStepperType();
 }
 
 
@@ -642,7 +637,7 @@ void StepperIMEX_RK<Scalar>::describe(
   Teuchos::RCP<WrapperModelEvaluatorPairIMEX<Scalar> > wrapperModelPairIMEX =
     Teuchos::rcp_dynamic_cast<WrapperModelEvaluatorPairIMEX<Scalar> >(
       this->wrapperModel_);
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "wrapperModelPairIMEX = " << wrapperModelPairIMEX->description()
       << std::endl;
 }
@@ -653,7 +648,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperIMEX_RK<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<bool>("Initial Condition Consistency Check",
                 this->getICConsistencyCheckDefault());
   pl->set<std::string>("Solver Name", "Default Solver");

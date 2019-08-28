@@ -19,7 +19,7 @@ namespace Tempus {
 template<class Scalar>
 StepperLeapfrog<Scalar>::StepperLeapfrog()
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Leapfrog");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -36,7 +36,7 @@ StepperLeapfrog<Scalar>::StepperLeapfrog(
   std::string ICConsistency,
   bool ICConsistencyCheck)
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "Leapfrog");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -187,14 +187,9 @@ Teuchos::RCP<Tempus::StepperState<Scalar> > StepperLeapfrog<Scalar>::
 getDefaultStepperState()
 {
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
 }
-
-
-template<class Scalar>
-std::string StepperLeapfrog<Scalar>::description() const
-{ return "Leapfrog"; }
 
 
 template<class Scalar>
@@ -202,7 +197,7 @@ void StepperLeapfrog<Scalar>::describe(
    Teuchos::FancyOStream               &out,
    const Teuchos::EVerbosityLevel      /* verbLevel */) const
 {
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "appModel_ = " << this->appModel_->description() << std::endl;
 }
 
@@ -212,7 +207,7 @@ Teuchos::RCP<const Teuchos::ParameterList>
 StepperLeapfrog<Scalar>::getValidParameters() const
 {
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<std::string>("Initial Condition Consistency",
                        this->getICConsistencyDefault());
   return pl;

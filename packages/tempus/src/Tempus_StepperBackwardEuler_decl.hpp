@@ -56,7 +56,6 @@ public:
     bool ICConsistencyCheck,
     bool zeroInitialGuess);
 
-
   /// \name Basic stepper methods
   //@{
     virtual void setObserver(
@@ -106,7 +105,6 @@ public:
 
   /// \name Overridden from Teuchos::Describable
   //@{
-    virtual std::string description() const;
     virtual void describe(Teuchos::FancyOStream        & out,
                           const Teuchos::EVerbosityLevel verbLevel) const;
   //@}

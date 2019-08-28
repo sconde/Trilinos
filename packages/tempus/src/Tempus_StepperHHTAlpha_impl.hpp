@@ -237,7 +237,7 @@ StepperHHTAlpha<Scalar>::StepperHHTAlpha() :
   *out_ << "DEBUG: " << __PRETTY_FUNCTION__ << "\n";
 #endif
 
-  this->setStepperType(        this->description());
+  this->setStepperType(        "HHT-Alpha");
   this->setUseFSAL(            this->getUseFSALDefault());
   this->setICConsistency(      this->getICConsistencyDefault());
   this->setICConsistencyCheck( this->getICConsistencyCheckDefault());
@@ -266,7 +266,7 @@ StepperHHTAlpha<Scalar>::StepperHHTAlpha(
   Scalar alpha_m)
   : out_(Teuchos::VerboseObjectBase::getDefaultOStream())
 {
-  this->setStepperType(        this->description());
+  this->setStepperType(        "HHT-Alpha");
   this->setUseFSAL(            useFSAL);
   this->setICConsistency(      ICConsistency);
   this->setICConsistencyCheck( ICConsistencyCheck);
@@ -447,18 +447,8 @@ getDefaultStepperState()
   *out_ << "DEBUG: " << __PRETTY_FUNCTION__ << "\n";
 #endif
   Teuchos::RCP<Tempus::StepperState<Scalar> > stepperState =
-    rcp(new StepperState<Scalar>(description()));
+    rcp(new StepperState<Scalar>(this->getStepperType()));
   return stepperState;
-}
-
-
-template<class Scalar>
-std::string StepperHHTAlpha<Scalar>::description() const
-{
-#ifdef VERBOSE_DEBUG_OUTPUT
-  *out_ << "DEBUG: " << __PRETTY_FUNCTION__ << "\n";
-#endif
-  return "HHT-Alpha";
 }
 
 
@@ -470,7 +460,7 @@ void StepperHHTAlpha<Scalar>::describe(
 #ifdef VERBOSE_DEBUG_OUTPUT
   *out_ << "DEBUG: " << __PRETTY_FUNCTION__ << "\n";
 #endif
-  out << description() << "::describe:" << std::endl
+  out << this->getStepperType() << "::describe:" << std::endl
       << "wrapperModel_ = " << this->wrapperModel_->description() << std::endl;
 }
 
@@ -483,7 +473,7 @@ StepperHHTAlpha<Scalar>::getValidParameters() const
   *out_ << "DEBUG: " << __PRETTY_FUNCTION__ << "\n";
 #endif
   Teuchos::RCP<Teuchos::ParameterList> pl = Teuchos::parameterList();
-  getValidParametersBasic(pl, this->description());
+  getValidParametersBasic(pl, this->getStepperType());
   pl->set<std::string>("Scheme Name", "Newmark Beta Average Acceleration");
   pl->set<double>     ("Beta",    0.25);
   pl->set<double>     ("Gamma",   0.5 );
