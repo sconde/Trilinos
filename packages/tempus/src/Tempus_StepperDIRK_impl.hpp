@@ -188,6 +188,10 @@ void StepperDIRK<Scalar>::takeStep(
     Teuchos::SerialDenseVector<int,Scalar> b = tableau_->b();
     Teuchos::SerialDenseVector<int,Scalar> c = tableau_->c();
 
+    // Reset non-zero initial guess.
+    if ( this->getResetInitialGuess() && (!this->getZeroInitialGuess()) )
+      Thyra::assign(stageX_.ptr(), *(currentState->getX()));
+
     // Compute stage solutions
     bool pass = true;
     Thyra::SolveStatus<Scalar> sStatus;
