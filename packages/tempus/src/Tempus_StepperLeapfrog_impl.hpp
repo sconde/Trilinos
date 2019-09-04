@@ -120,7 +120,7 @@ void StepperLeapfrog<Scalar>::takeStep(
       "Try setting in \"Solution History\" \"Storage Type\" = \"Undo\"\n"
       "  or \"Storage Type\" = \"Static\" and \"Storage Limit\" = \"2\"\n");
 
-    this->stepperObserver_->observeBeginTakeStep(solutionHistory, *this);
+    //this->stepperObserver_->observeBeginTakeStep(solutionHistory, *this);
     RCP<SolutionState<Scalar> > currentState=solutionHistory->getCurrentState();
     RCP<SolutionState<Scalar> > workingState=solutionHistory->getWorkingState();
     const Scalar time = currentState->getTime();
@@ -167,7 +167,7 @@ void StepperLeapfrog<Scalar>::takeStep(
 
     workingState->setSolutionStatus(Status::PASSED);
     workingState->setOrder(this->getOrder());
-    this->stepperObserver_->observeEndTakeStep(solutionHistory, *this);
+    //this->stepperObserver_->observeEndTakeStep(solutionHistory, *this);
   }
   return;
 }
