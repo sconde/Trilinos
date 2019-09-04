@@ -181,7 +181,7 @@ void StepperBDF2<Scalar>::takeStep(
     //IKT, FIXME: add error checking regarding states being consecutive and
     //whether interpolated states are OK to use.
 
-    this->stepperObserver_->observeBeginTakeStep(solutionHistory, *this);
+    //this->stepperObserver_->observeBeginTakeStep(solutionHistory, *this);
 
     RCP<SolutionState<Scalar> > workingState=solutionHistory->getWorkingState();
     RCP<SolutionState<Scalar> > currentState=solutionHistory->getCurrentState();
@@ -220,7 +220,7 @@ void StepperBDF2<Scalar>::takeStep(
 
     workingState->setSolutionStatus(sStatus);  // Converged --> pass.
     workingState->setOrder(getOrder());
-    this->stepperObserver_->observeEndTakeStep(solutionHistory, *this);
+    //this->stepperObserver_->observeEndTakeStep(solutionHistory, *this);
   }
   return;
 }
