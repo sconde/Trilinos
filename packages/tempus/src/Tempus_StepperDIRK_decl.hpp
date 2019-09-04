@@ -106,11 +106,13 @@ public:
     virtual void setInitialConditions (
       const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory);
 
+    //TODO: need to resolve the conflict with Trilinos/develop after M.Crocatt's
+    //changes went in
     /// Set parameter so that the initial guess is reset at the beginning of each timestep.
-    virtual void setResetInitialGuess(bool reset_guess)
-      { this->stepperPL_->template set<bool>("Reset Initial Guess", reset_guess); }
-    virtual bool getResetInitialGuess() const
-      { return this->stepperPL_->template get<bool>("Reset Initial Guess", true); }
+    //virtual void setResetInitialGuess(bool reset_guess)
+      //{ this->stepperPL_->template set<bool>("Reset Initial Guess", reset_guess); }
+    //virtual bool getResetInitialGuess() const
+      //{ return this->stepperPL_->template get<bool>("Reset Initial Guess", true); }
 
     /// Take the specified timestep, dt, and return true if successful.
     virtual void takeStep(
@@ -178,7 +180,7 @@ protected:
   /// Setup for constructor.
   virtual void setup(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& wrapperModel,
-    const Teuchos::RCP<StepperDIRKObserver<Scalar> >& obs,
+    const Teuchos::RCP<StepperRKObserver<Scalar> >& obs,
     const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
     bool useFSAL,
     std::string ICConsistency,

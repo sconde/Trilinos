@@ -31,14 +31,14 @@ void StepperDIRK<Scalar>::setupDefault()
   this->setUseEmbedded(        this->getUseEmbeddedDefault());
   this->setZeroInitialGuess(   false);
 
-  stepperDIRKObserver_ = Teuchos::rcp(new StepperDIRKObserver<Scalar>());
+  stepperObserver_ = Teuchos::rcp(new StepperRKObserverComposite<Scalar>());
 }
 
 
 template<class Scalar>
 void StepperDIRK<Scalar>::setup(
   const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-  const Teuchos::RCP<StepperDIRKObserver<Scalar> >& obs,
+  const Teuchos::RCP<StepperRKObserver<Scalar> >& obs,
   const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
   bool useFSAL,
   std::string ICConsistency,
@@ -52,7 +52,7 @@ void StepperDIRK<Scalar>::setup(
   this->setUseEmbedded(        useEmbedded);
   this->setZeroInitialGuess(   zeroInitialGuess);
 
-  stepperDIRKObserver_ = Teuchos::rcp(new StepperDIRKObserver<Scalar>());
+  stepperObserver_ = Teuchos::rcp(new StepperRKObserverComposite<Scalar>());
   this->setObserver(obs);
 
   if (appModel != Teuchos::null) {
@@ -118,9 +118,9 @@ void StepperDIRK<Scalar>::initialize()
 
   this->setObserver();
 
-  TEUCHOS_TEST_FOR_EXCEPTION( this->stepperDIRKObserver_ == Teuchos::null,
+  TEUCHOS_TEST_FOR_EXCEPTION( this->stepperObserver_ == Teuchos::null,
     std::logic_error,
-    "Error - stepperDIRKObserver is null!\n");
+    "Error - StepperRKObserver is null!\n");
 
   // Initialize the stage vectors
   const int numStages = tableau_->numStages();
@@ -181,12 +181,13 @@ void StepperDIRK<Scalar>::takeStep(
     const Scalar time = currentState->getTime();
 
     const int numStages = tableau_->numStages();
-    Teuchos::SerialDenseMatrix<int,Scalar> A = tableau_->A();
-    Teuchos::SerialDenseVector<int,Scalar> b = tableau_->b();
-    Teuchos::SerialDenseVector<int,Scalar> c = tableau_->c();
+    const Teuchos::SerialDenseMatrix<int,Scalar> A = tableau_->A();
+    const Teuchos::SerialDenseVector<int,Scalar> b = tableau_->b();
+    const Teuchos::SerialDenseVector<int,Scalar> c = tableau_->c();
 
+    //TODO: resolve the conflict
     // Reset non-zero initial guess.
-    if ( this->getResetInitialGuess() && (!this->getZeroInitialGuess()) )
+    if ( /*this->getResetInitialGuess() && */(!this->getZeroInitialGuess()) )
       Thyra::assign(stageX_.ptr(), *(currentState->getX()));
 
     // Compute stage solutions

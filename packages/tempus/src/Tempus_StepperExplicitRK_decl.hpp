@@ -163,7 +163,7 @@ protected:
   /// Setup for constructor.
   virtual void setup(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+    const Teuchos::RCP<StepperRKObserverComposite<Scalar> >& obs,
     bool useFSAL,
     std::string ICConsistency,
     bool ICConsistencyCheck,
@@ -185,8 +185,6 @@ protected:
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               abs_u0;
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               abs_u;
   Teuchos::RCP<Thyra::VectorBase<Scalar> >               sc;
-
-};
 
 };
 

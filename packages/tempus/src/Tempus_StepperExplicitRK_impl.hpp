@@ -26,16 +26,14 @@ void StepperExplicitRK<Scalar>::setupDefault()
   this->setUseEmbedded(        this->getUseEmbeddedDefault());
 
   this->stepperObserver_ =
-    Teuchos::rcp(new StepperObserverComposite<Scalar>());
-  this->stepperExplicitRKObserver_ =
-    Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
+    Teuchos::rcp(new StepperRKObserverComposite<Scalar>());
 }
 
 
 template<class Scalar>
 void StepperExplicitRK<Scalar>::setup(
   const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-  const Teuchos::RCP<StepperExplicitRKObserverComposite<Scalar> >& obs,
+  const Teuchos::RCP<StepperRKObserverComposite<Scalar> >& obs,
   bool useFSAL,
   std::string ICConsistency,
   bool ICConsistencyCheck,
@@ -47,9 +45,7 @@ void StepperExplicitRK<Scalar>::setup(
   this->setUseEmbedded(        useEmbedded);
 
   this->stepperObserver_ =
-    Teuchos::rcp(new StepperObserverComposite<Scalar>());
-  this->stepperExplicitRKObserver_ =
-    Teuchos::rcp(new StepperExplicitRKObserverComposite<Scalar>());
+    Teuchos::rcp(new StepperRKObserverComposite<Scalar>());
   this->setObserver(obs);
 
   if (appModel != Teuchos::null) {
@@ -187,8 +183,8 @@ void StepperExplicitRK<Scalar>::initialize()
 
   this->setObserver();
 
-  TEUCHOS_TEST_FOR_EXCEPTION( this->stepperObserver_->empty() ||
-    this->stepperExplicitRKObserver_->empty(), std::logic_error,
+  TEUCHOS_TEST_FOR_EXCEPTION( this->stepperObserver_->getSize() < 1 
+    , std::logic_error,
     "Error - Composite Observer is empty!\n");
 
   // Initialize the stage vectors
