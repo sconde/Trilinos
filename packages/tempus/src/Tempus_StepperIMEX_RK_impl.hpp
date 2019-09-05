@@ -204,6 +204,11 @@ void StepperIMEX_RK<Scalar>::setTableaus(std::string stepperType,
     this->setOrder(3);
 
   } else if (stepperType == "General IMEX RK") {
+    }
+    this->setStepperType("IMEX RK ARS 233");
+    this->setOrder(3);
+
+  } else if (stepperType == "General IMEX RK") {
     this->setExplicitTableau(explicitTableau);
     this->setImplicitTableau(implicitTableau);
     this->setStepperType("General IMEX RK");

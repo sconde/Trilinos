@@ -63,6 +63,15 @@ StepperIMEX_RK_Partition<Scalar>::StepperIMEX_RK_Partition(
 
   if (appModel != Teuchos::null) {
 
+=======
+
+  this->setExplicitTableau(explicitTableau);
+  this->setImplicitTableau(implicitTableau);
+  this->setObserver(obs);
+
+  if (appModel != Teuchos::null) {
+
+>>>>>>> Tempus-Bug-Setting-Tableau-and-Initializing-4965
     this->setModel(appModel);
     this->setSolver(solver);
     this->initialize();
@@ -196,10 +205,6 @@ void StepperIMEX_RK_Partition<Scalar>::setTableaus(
       c(0) = zero; c(1) = gamma; c(2) = one-gamma;
 
       int order = 3;
-
-      auto implicitTableau = Teuchos::rcp(new RKButcherTableau<Scalar>(
-        "Implicit Tableau - Partitioned IMEX RK ARS 233",
-        A,b,c,order,order,order));
 
       this->setImplicitTableau(implicitTableau);
     }
