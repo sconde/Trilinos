@@ -76,6 +76,7 @@ void StepperDIRK<Scalar>::getValidParametersBasicDIRK(
   pl->set<std::string>("Solver Name", "Default Solver",
     "Name of ParameterList containing the solver specifications.");
   pl->set<bool>("Zero Initial Guess", false);
+  pl->set<bool>("Reset Initial Guess", true);
   Teuchos::RCP<Teuchos::ParameterList> solverPL = defaultSolverParameters();
   pl->set("Default Solver", *solverPL);
 }
@@ -96,42 +97,6 @@ void StepperDIRK<Scalar>::setObserver(
   this->stepperObserver_->addObserver(
        Teuchos::rcp_dynamic_cast<StepperRKObserver<Scalar> > (obs, true) );
 
-=======
-{
-  getValidParametersBasic(pl, this->getStepperType());
-  pl->set<bool>("Use Embedded", false,
-    "'Whether to use Embedded Stepper (if available) or not\n"
-    "  'true' - Stepper will compute embedded solution and is adaptive.\n"
-    "  'false' - Stepper is not embedded(adaptive).\n");
-  pl->set<std::string>("Description", this->getDescription());
-  pl->set<std::string>("Solver Name", "Default Solver",
-    "Name of ParameterList containing the solver specifications.");
-  pl->set<bool>("Zero Initial Guess", false);
-  pl->set<bool>("Reset Initial Guess", true);
-  Teuchos::RCP<Teuchos::ParameterList> solverPL = defaultSolverParameters();
-  pl->set("Default Solver", *solverPL);
-}
-
-
-template<class Scalar>
-void StepperDIRK<Scalar>::setObserver(
-  Teuchos::RCP<StepperObserver<Scalar> > obs)
-{
-  if (obs == Teuchos::null) {
-    // Create default observer, otherwise keep current observer.
-    if (this->stepperObserver_ == Teuchos::null) {
-      stepperDIRKObserver_ =
-        Teuchos::rcp(new StepperDIRKObserver<Scalar>());
-      this->stepperObserver_ =
-        Teuchos::rcp_dynamic_cast<StepperObserver<Scalar> >
-          (stepperDIRKObserver_);
-     }
-  } else {
-    this->stepperObserver_ = obs;
-    stepperDIRKObserver_ =
-      Teuchos::rcp_dynamic_cast<StepperDIRKObserver<Scalar> >(this->stepperObserver_);
-  }
->>>>>>> Tempus-Bug-Setting-Tableau-and-Initializing-4965
 }
 
 
