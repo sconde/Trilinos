@@ -42,23 +42,17 @@ class StepperNewmarkImplicitDForm : virtual public Tempus::StepperImplicit<Scala
 
   /** \brief Default constructor.
    *
-   *  Requires subsequent setModel(), setSolver() and initialize()
-   *  calls before calling takeStep().
+   *  - Constructs with a default ParameterList.
+   *  - Can reset ParameterList with setParameterList().
+   *  - Requires subsequent setModel() and initialize() calls before calling
+   *    takeStep().
   */
   StepperNewmarkImplicitDForm();
 
   /// Constructor
   StepperNewmarkImplicitDForm(
-    const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar>>& appModel,
-    const Teuchos::RCP<StepperObserver<Scalar> >& obs,
-    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
-    bool useFSAL,
-    std::string ICConsistency,
-    bool ICConsistencyCheck,
-    bool zeroInitialGuess,
-    std::string schemeName,
-    Scalar beta,
-    Scalar gamma);
+      const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar>>& appModel,
+      Teuchos::RCP<Teuchos::ParameterList> pList = Teuchos::null);
 
   /// \name Basic stepper methods
   //@{
@@ -116,12 +110,27 @@ class StepperNewmarkImplicitDForm : virtual public Tempus::StepperImplicit<Scala
   /// Return beta  = d(x)/d(x).
   virtual Scalar getBeta (const Scalar ) const { return Scalar(1.0); }
 
-  Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
+  /// \name ParameterList methods
+  //@{
+  void
+  setParameterList(const Teuchos::RCP<Teuchos::ParameterList>& pl);
+  Teuchos::RCP<Teuchos::ParameterList>
+  getNonconstParameterList();
+  Teuchos::RCP<Teuchos::ParameterList>
+  unsetParameterList();
+  Teuchos::RCP<const Teuchos::ParameterList>
+  getValidParameters() const;
+  Teuchos::RCP<Teuchos::ParameterList>
+  getDefaultParameters() const;
+  //@}
 
   /// \name Overridden from Teuchos::Describable
   //@{
-    virtual void describe(Teuchos::FancyOStream& out,
-                          const Teuchos::EVerbosityLevel verbLevel) const;
+  virtual std::string
+  description() const;
+  virtual void
+  describe(Teuchos::FancyOStream& out, const Teuchos::EVerbosityLevel verbLevel)
+      const;
   //@}
 
   void
@@ -150,17 +159,11 @@ class StepperNewmarkImplicitDForm : virtual public Tempus::StepperImplicit<Scala
       Thyra::VectorBase<Scalar>& a, const Thyra::VectorBase<Scalar>& dPred,
       const Thyra::VectorBase<Scalar>& d, const Scalar dt) const;
 
-
-  void setSchemeName(std::string schemeName);
-  void setBeta(Scalar beta);
-  void setGamma(Scalar gamma);
-
  protected:
 
   Thyra::ModelEvaluatorBase::InArgs<Scalar> inArgs_;
   Thyra::ModelEvaluatorBase::OutArgs<Scalar> outArgs_;
 
-  std::string schemeName_;
   Scalar beta_;
   Scalar gamma_;
 

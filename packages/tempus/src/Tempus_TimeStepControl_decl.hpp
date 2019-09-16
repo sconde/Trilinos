@@ -175,11 +175,9 @@ public:
     virtual void setOutputTimes(std::vector<Scalar> OutputTimes)
       { outputTimes_ = OutputTimes;
         std::ostringstream ss;
-        if (!outputTimes_.empty())
-          { std::copy(OutputTimes.begin(), OutputTimes.end()-1,
+        std::copy(OutputTimes.begin(), OutputTimes.end()-1,
                   std::ostream_iterator<Scalar>(ss, ","));
-            ss << OutputTimes.back();
-	  }
+        ss << OutputTimes.back();
         tscPL_->set<std::string>("Output Time List", ss.str());
       }
     virtual void setMaxFailures(int MaxFailures)

@@ -42,22 +42,17 @@ public:
 
   /** \brief Default constructor.
    *
-   *  Requires subsequent setModel(), setSolver() and initialize()
-   *  calls before calling takeStep().
+   *  - Constructs with a default ParameterList.
+   *  - Can reset ParameterList with setParameterList().
+   *  - Requires subsequent addStepper() and initialize() calls before calling
+   *    takeStep().
   */
   StepperOperatorSplit();
 
   /// Constructor
   StepperOperatorSplit(
     std::vector<Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > > appModels,
-    std::vector<Teuchos::RCP<Stepper<Scalar> > > subStepperList,
-    const Teuchos::RCP<StepperObserver<Scalar> >& obs,
-    bool useFSAL,
-    std::string ICConsistency,
-    bool ICConsistencyCheck,
-    int order,
-    int orderMin,
-    int orderMax);
+    Teuchos::RCP<Teuchos::ParameterList> pList);
 
   /// \name Basic stepper methods
   //@{
@@ -68,6 +63,9 @@ public:
     virtual Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >
       getModel();
 
+    virtual void setSolver(std::string solverName);
+    virtual void setSolver(
+      Teuchos::RCP<Teuchos::ParameterList> solverPL=Teuchos::null);
     virtual void setSolver(
         Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > solver);
     virtual Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> > getSolver() const
@@ -92,18 +90,26 @@ public:
     virtual void setInitialGuess(
       Teuchos::RCP<const Thyra::VectorBase<Scalar> > /* initial_guess */){}
 
+   virtual std::string getStepperType() const
+     { return stepperPL_->get<std::string>("Stepper Type"); }
+
     /// Get a default (initial) StepperState
     virtual Teuchos::RCP<Tempus::StepperState<Scalar> > getDefaultStepperState();
-    virtual Scalar getOrder()    const {return order_;}
-    virtual Scalar getOrderMin() const {return orderMin_;}
-    virtual Scalar getOrderMax() const {return orderMax_;}
-
+    virtual Scalar getOrder()    const
+      {return stepperPL_->get<int>("Order");}
+    virtual Scalar getOrderMin() const
+      {return stepperPL_->get<int>("Minimum Order");}
+    virtual Scalar getOrderMax() const
+      {return stepperPL_->get<int>("Maximum Order");}
     virtual Scalar getInitTimeStep(
         const Teuchos::RCP<SolutionHistory<Scalar> >& /* solutionHistory */) const
       {return Scalar(1.0e+99);}
-    virtual void setOrder   (Scalar o) { order_ = o;}
-    virtual void setOrderMin(Scalar o) { orderMin_ = o;}
-    virtual void setOrderMax(Scalar o) { orderMax_ = o;}
+    virtual void setOrder   (Scalar ord)
+      {stepperPL_->set<int>("Order", ord);}
+    virtual void setOrderMin(Scalar ord)
+      {stepperPL_->set<int>("Minimum Order", ord);}
+    virtual void setOrderMax(Scalar ord)
+      {stepperPL_->set<int>("Maximum Order", ord);}
 
     virtual bool isExplicit() const
     {
@@ -140,12 +146,36 @@ public:
     virtual bool isMultiStepMethod() const {return !isOneStepMethod();}
 
     virtual OrderODE getOrderODE()   const {return FIRST_ORDER_ODE;}
+
+    virtual void setUseFSAL(bool a) {stepperPL_->set<bool>("Use FSAL", a);}
+    virtual bool getUseFSAL() const
+      {return stepperPL_->get<bool>("Use FSAL", false);}
+
+    virtual void setICConsistency(std::string s)
+      {stepperPL_->set<std::string>("Initial Condition Consistency", s);}
+    virtual std::string getICConsistency() const
+      {return stepperPL_->get<std::string>("Initial Condition Consistency",
+                                           "None");}
+
+    virtual void setICConsistencyCheck(bool c)
+      {stepperPL_->set<bool>("Initial Condition Consistency Check", c);}
+    virtual bool getICConsistencyCheck() const
+      {return stepperPL_->get<bool>("Initial Condition Consistency Check",
+                                    false);}
    //@}
 
-  Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
+  /// \name ParameterList methods
+  //@{
+    void setParameterList(const Teuchos::RCP<Teuchos::ParameterList> & pl);
+    Teuchos::RCP<Teuchos::ParameterList> getNonconstParameterList();
+    Teuchos::RCP<Teuchos::ParameterList> unsetParameterList();
+    Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
+    Teuchos::RCP<Teuchos::ParameterList> getDefaultParameters() const;
+  //@}
 
   /// \name Overridden from Teuchos::Describable
   //@{
+    virtual std::string description() const;
     virtual void describe(Teuchos::FancyOStream        & out,
                           const Teuchos::EVerbosityLevel verbLevel) const;
   //@}
@@ -165,25 +195,19 @@ public:
     stepper->setUseFSAL(useFSAL);
     subStepperList_.push_back(stepper);
   }
-
-  virtual void setSubStepperList(
-    std::vector<Teuchos::RCP<Stepper<Scalar> > > subStepperList);
-
-  virtual void clearSubStepperList() { subStepperList_.clear(); }
-
-  virtual void setModels(
+  virtual void clearStepperList() { subStepperList_.clear(); }
+  /// Take models and ParameterList and create subSteppers
+  virtual void createSubSteppers(
     std::vector<Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> > > appModels);
 
 protected:
 
-  Scalar order_;
-  Scalar orderMin_;
-  Scalar orderMax_;
-
+  Teuchos::RCP<Teuchos::ParameterList>                stepperPL_;
   std::vector<Teuchos::RCP<Stepper<Scalar> > >        subStepperList_;
   Teuchos::RCP<SolutionHistory<Scalar> >              OpSpSolnHistory_;
   Teuchos::RCP<SolutionState<Scalar> >                tempState_;
   Teuchos::RCP<StepperOperatorSplitObserver<Scalar> > stepperOSObserver_;
+
 };
 
 } // namespace Tempus

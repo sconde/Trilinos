@@ -11,6 +11,7 @@
 
 #include "Tempus_StepperImplicit.hpp"
 #include "Tempus_WrapperModelEvaluator.hpp"
+#include "Tempus_StepperObserverComposite.hpp"
 #include "Tempus_StepperBDF2Observer.hpp"
 
 
@@ -53,24 +54,17 @@ public:
 
   /** \brief Default constructor.
    *
-   *  - Requires the following calls before takeStep():
-   *    setModel(), setSolver(), setStartUpStepper() and initialize().
+   *  - Constructs with a default ParameterList.
+   *  - Can reset ParameterList with setParameterList().
+   *  - Requires subsequent setModel() and initialize() calls before calling
+   *    takeStep().
   */
   StepperBDF2();
 
-  /** \brief Constructor.
-   *
-   *  Constructs a fully initialized stepper.
-   */
+  /// Constructor
   StepperBDF2(
     const Teuchos::RCP<const Thyra::ModelEvaluator<Scalar> >& appModel,
-    const Teuchos::RCP<StepperObserver<Scalar> >& obs,
-    const Teuchos::RCP<Thyra::NonlinearSolverBase<Scalar> >& solver,
-    const Teuchos::RCP<Stepper<Scalar> >& startUpStepper,
-    bool useFSAL,
-    std::string ICConsistency,
-    bool ICConsistencyCheck,
-    bool zeroInitialGuess);
+    Teuchos::RCP<Teuchos::ParameterList> pList = Teuchos::null);
 
   /// \name Basic stepper methods
   //@{
@@ -78,9 +72,8 @@ public:
       Teuchos::RCP<StepperObserver<Scalar> > obs = Teuchos::null);
 
     /// Set the stepper to use in first step
-    void setStartUpStepper(std::string startupStepperType =
-                           "DIRK 1 Stage Theta Method");
-    void setStartUpStepper(Teuchos::RCP<Stepper<Scalar> > startupStepper);
+    void setStartUpStepper(std::string startupStepperName);
+    void setStartUpStepper(Teuchos::RCP<Teuchos::ParameterList>startUpStepperPL=Teuchos::null);
 
     /// Initialize during construction and after changing input parameters.
     virtual void initialize();
@@ -120,11 +113,18 @@ public:
   virtual void computeStartUp(
     const Teuchos::RCP<SolutionHistory<Scalar> >& solutionHistory);
 
-  virtual bool getICConsistencyCheckDefault() const { return false; }
-  Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
+  /// \name ParameterList methods
+  //@{
+    void setParameterList(const Teuchos::RCP<Teuchos::ParameterList> & pl);
+    Teuchos::RCP<Teuchos::ParameterList> getNonconstParameterList();
+    Teuchos::RCP<Teuchos::ParameterList> unsetParameterList();
+    Teuchos::RCP<const Teuchos::ParameterList> getValidParameters() const;
+    Teuchos::RCP<Teuchos::ParameterList> getDefaultParameters() const;
+  //@}
 
   /// \name Overridden from Teuchos::Describable
   //@{
+    virtual std::string description() const;
     virtual void describe(Teuchos::FancyOStream        & out,
                           const Teuchos::EVerbosityLevel verbLevel) const;
   //@}
@@ -132,6 +132,7 @@ public:
 private:
 
   Teuchos::RCP<Stepper<Scalar> >             startUpStepper_;
+  Teuchos::RCP<StepperObserverComposite<Scalar> >        stepperObserver_;
   Teuchos::RCP<StepperBDF2Observer<Scalar> > stepperBDF2Observer_;
   Scalar                                     order_;
 };

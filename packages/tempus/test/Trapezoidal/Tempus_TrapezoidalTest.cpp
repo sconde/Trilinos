@@ -75,8 +75,8 @@ TEUCHOS_UNIT_TEST(Trapezoidal, ParameterList)
 
     RCP<ParameterList> stepperPL = sublist(tempusPL, "Default Stepper", true);
 
-    RCP<const ParameterList> defaultPL =
-      integrator->getStepper()->getValidParameters();
+    RCP<ParameterList> defaultPL =
+      integrator->getStepper()->getDefaultParameters();
     bool pass = haveSameValues(*stepperPL, *defaultPL, true);
     if (!pass) {
       std::cout << std::endl;
@@ -92,8 +92,8 @@ TEUCHOS_UNIT_TEST(Trapezoidal, ParameterList)
       Tempus::integratorBasic<double>(model, "Trapezoidal Method");
 
     RCP<ParameterList> stepperPL = sublist(tempusPL, "Default Stepper", true);
-    RCP<const ParameterList> defaultPL =
-      integrator->getStepper()->getValidParameters();
+    RCP<ParameterList> defaultPL =
+      integrator->getStepper()->getDefaultParameters();
 
     bool pass = haveSameValues(*stepperPL, *defaultPL, true);
     if (!pass) {
@@ -140,7 +140,6 @@ TEUCHOS_UNIT_TEST(Trapezoidal, ConstructingFromDefaults)
   //  stepper->setSolver(solverPL);
   //}
   stepper->setModel(model);
-  stepper->setSolver();
   stepper->initialize();
 
   // Setup TimeStepControl ------------------------------------
