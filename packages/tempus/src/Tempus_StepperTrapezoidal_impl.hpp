@@ -62,6 +62,7 @@ StepperTrapezoidal<Scalar>::StepperTrapezoidal(
   }
 }
 
+#ifndef TEMPUS_HIDE_DEPRECATED_CODE
 
 template<class Scalar>
 void StepperTrapezoidal<Scalar>::setObserver(
@@ -77,6 +78,22 @@ void StepperTrapezoidal<Scalar>::setObserver(
 
   this->isInitialized_ = false;
 }
+
+#else
+
+template<class Scalar>
+void StepperTrapezoidal<Scalar>::setObserver(
+  Teuchos::RCP<StepperTrapezoidalObserver<Scalar> > obs)
+{
+  if (obs != Teuchos::null) 
+    stepperTrapObserver_ = obs;
+
+  if (stepperTrapObserver_ == Teuchos::null)
+    stepperTrapObserver_ = Teuchos::rcp(new StepperTrapezoidalObserver<Scalar>());
+
+  this->isInitialized_ = false;
+}
+#endif
 
 
 template<class Scalar>

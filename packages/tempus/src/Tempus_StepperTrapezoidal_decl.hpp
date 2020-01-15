@@ -61,17 +61,19 @@ public:
 
   /// \name Basic stepper methods
   //@{
-    //virtual void setObserver(Teuchos::RCP<StepperTrapezoidalObserver<Scalar> > obs);
-
-    //virtual Teuchos::RCP<StepperTrapezoidalObserver<Scalar> > getObserver() const
-    //{ return stepperTrapObserver_; }
-    
-    // deprecated
+#ifndef TEMPUS_HIDE_DEPRECATED_CODE 
     virtual void setObserver(
       Teuchos::RCP<StepperObserver<Scalar> > obs = Teuchos::null);
-
+    
     virtual Teuchos::RCP<StepperObserver<Scalar> > getObserver() const
     { return this->stepperTrapObserver_; }
+
+#else
+    virtual void setObserver(Teuchos::RCP<StepperTrapezoidalObserver<Scalar> > obs);
+
+    virtual Teuchos::RCP<StepperTrapezoidalObserver<Scalar> > getObserver() const
+    { return stepperTrapObserver_; }
+#endif 
 
     /// Set the initial conditions and make them consistent.
     virtual void setInitialConditions (

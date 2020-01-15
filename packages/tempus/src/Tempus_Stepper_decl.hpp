@@ -90,14 +90,11 @@ public:
       getSolver() const = 0;
 
 #ifndef TEMPUS_HIDE_DEPRECATED_CODE
-    /// deprecated
     /// set Observer
     virtual void setObserver(
         Teuchos::RCP<StepperObserver<Scalar> > obs = Teuchos::null) = 0;
 
-    /// deprecated
     /// set Observer
-
     virtual Teuchos::RCP<StepperObserver<Scalar> >  getObserver() const = 0;
 #endif
     /// Initialize after construction and changing input parameters.
