@@ -78,6 +78,9 @@ public:
      Scalar k2 = Teuchos::as<Scalar>(k2_ / order);
      Scalar k3 = Teuchos::as<Scalar>(-k3_ / order);
 
+     asm("int $3");
+     std::cout << "SIDAFA: got here!!" << std::endl;
+
      k1 = std::pow(errN_, k1);
      k2 = std::pow(errNm1_, k2);
      k3 = std::pow(errNm2_, k3);
@@ -91,7 +94,7 @@ public:
      if (workingState->getSolutionStatus() == Status::PASSED or
          workingState->getSolutionStatus() == Status::WORKING) {
         if(lastStepRejected_){
-           dt = std::min(dt, workingState->getTimestep());
+           dt = std::min(dt, workingState->getTimeStep());
         } else {
            facMax_ = tscsPL_->get<Scalar>("Maximum Safety Factor");
         }
@@ -103,6 +106,7 @@ public:
 
      // update dt
      workingState->setTimeStep(dt);
+     std::cout << "SIDAFA: Tempus::TimeStepControlStrategyPID:: dt = " << dt << std::endl;
   }
 
   /// \name Overridden from Teuchos::ParameterListAcceptor

@@ -46,6 +46,10 @@ void TimeStepControl<Scalar>::getNextTimeStep(
 {
   using Teuchos::RCP;
 
+
+  asm("int $3");
+  std::cout << "SIDAFA: got here!!" << std::endl;
+
   TEMPUS_FUNC_TIME_MONITOR("Tempus::TimeStepControl::getNextTimeStep()");
   {
     RCP<Teuchos::FancyOStream> out = this->getOStream();
@@ -82,6 +86,10 @@ void TimeStepControl<Scalar>::getNextTimeStep(
         outputAdjustedDt_ = false;
         dtAfterOutput_ = 0.0;
       }
+
+
+      asm("int $3");
+      std::cout << "SIDAFA: got here!!" << std::endl;
 
       if (dt <= 0.0) {
         if (printDtChanges_) *out << changeDT(iStep, dt, getInitTimeStep(),

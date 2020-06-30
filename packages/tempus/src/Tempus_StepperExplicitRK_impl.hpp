@@ -14,6 +14,8 @@
 #include "Teuchos_VerboseObjectParameterListHelpers.hpp"
 #include "Thyra_VectorStdOps.hpp"
 
+#include <fstream>
+
 
 namespace Tempus {
 
@@ -96,14 +98,18 @@ Scalar StepperExplicitRK<Scalar>::getInitTimeStep(
   const Teuchos::RCP<SolutionHistory<Scalar> >& sh) const
 {
 
+
+  //asm("int $3");
+  //std::cout << "SIDAFA: got here!!" << std::endl;
+
    Scalar dt = Scalar(1.0e+99);
    if (!this->getUseEmbedded()) return dt;
 
    Teuchos::RCP<SolutionState<Scalar> > currentState=sh->getCurrentState();
    const int order = currentState->getOrder();
    const Scalar time = currentState->getTime();
-   const Scalar errorRel = currentState->getTolRel();
-   const Scalar errorAbs = currentState->getTolAbs();
+   const Scalar errorRel = 1e-4; //currentState->getTolRel();
+   const Scalar errorAbs = 1e-3; //currentState->getTolAbs();
 
    Teuchos::RCP<Thyra::VectorBase<Scalar> > stageX, scratchX;
    stageX = Thyra::createMember(this->appModel_->get_f_space());
@@ -170,7 +176,9 @@ Scalar StepperExplicitRK<Scalar>::getInitTimeStep(
 
    // f) propose starting step size
    dt = std::min(100*dt, h1);
+   std::cout << "SIDAFA: Embedded init dt = " << dt << std::endl;
    return dt;
+
 }
 
 
@@ -292,8 +300,13 @@ void StepperExplicitRK<Scalar>::takeStep(
 
     RCP<SolutionState<Scalar> > currentState=solutionHistory->getCurrentState();
     RCP<SolutionState<Scalar> > workingState=solutionHistory->getWorkingState();
-    const Scalar dt = workingState->getTimeStep();
+    Scalar dt = workingState->getTimeStep();
+    dt = 0.0228752;
     const Scalar time = currentState->getTime();
+
+    asm("int $3");
+    std::cout << "SIDAFA: got here!!" << std::endl;
+
 
     const int numStages = tableau_->numStages();
     Teuchos::SerialDenseMatrix<int,Scalar> A = tableau_->A();
@@ -406,6 +419,8 @@ void StepperExplicitRK<Scalar>::takeStep(
       Thyra::ele_wise_divide(Teuchos::as<Scalar>(1.0), *ee_, *abs_u, sc.ptr());
       Scalar err = std::abs(Thyra::norm_inf(*sc));
       workingState->setErrorRel(err);
+      
+      std::cout << "SIDAFA: ERK:: error = " << err << std::endl;
 
       // test if step should be rejected
       if (std::isinf(err) || std::isnan(err) || err > Teuchos::as<Scalar>(1.0))
@@ -513,3 +528,5 @@ StepperExplicitRK<Scalar>::getValidParameters() const
 
 } // namespace Tempus
 #endif // Tempus_StepperExplicitRK_impl_hpp
+
+
