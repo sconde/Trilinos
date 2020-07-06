@@ -78,8 +78,8 @@ public:
      Scalar k2 = Teuchos::as<Scalar>(k2_ / order);
      Scalar k3 = Teuchos::as<Scalar>(-k3_ / order);
 
-     asm("int $3");
-     std::cout << "SIDAFA: got here!!" << std::endl;
+     //asm("int $3");
+     //std::cout << "SIDAFA: got here!!" << std::endl;
 
      k1 = std::pow(errN_, k1);
      k2 = std::pow(errNm1_, k2);
@@ -106,7 +106,11 @@ public:
 
      // update dt
      workingState->setTimeStep(dt);
-     std::cout << "SIDAFA: Tempus::TimeStepControlStrategyPID:: dt = " << dt << std::endl;
+
+     //asm("int $3");
+     //std::cout << "SIDAFA: got here!!" << std::endl;
+
+     //std::cout << "SIDAFA: Tempus::TimeStepControlStrategyPID:: dt = " << dt << std::endl;
   }
 
   /// \name Overridden from Teuchos::ParameterListAcceptor

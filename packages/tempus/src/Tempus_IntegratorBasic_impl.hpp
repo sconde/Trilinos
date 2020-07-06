@@ -413,18 +413,24 @@ void IntegratorBasic<Scalar>::startIntegrator()
     integratorStatus_ = Status::FAILED;
     return;
   }
+
+  auto ws = solutionHistory_->getCurrentState();
+  //set the Abs/Rel tolerance
+  ws->setTolRel(timeStepControl_->getMaxRelError());
+  ws->setTolAbs(timeStepControl_->getMaxAbsError());
+
   integratorTimer_->start();
 
   const double v_initDt = timeStepControl_->getInitTimeStep();
   // get optimal initial time step
   const Scalar initDt =
-     std::min(timeStepControl_->getInitTimeStep(),
+     std::min(v_initDt,
               stepper_->getInitTimeStep(solutionHistory_));
   // update initial time step
-  timeStepControl_->setInitTimeStep(initDt);
+  this->timeStepControl_->setInitTimeStep(initDt);
 
   //asm("int $3");
-  std::cout << "SIDAFA: got here!!" << v_initDt << " " << initDt << std::endl;
+  //std::cout << "SIDAFA: got here!!" << v_initDt << " " << initDt << std::endl;
 
   integratorStatus_ = WORKING;
 }
@@ -449,8 +455,8 @@ bool IntegratorBasic<Scalar>::advanceTime()
       startTimeStep();
       integratorObserver_->observeStartTimeStep(*this);
 
-      asm("int $3");
-      std::cout << "SIDAFA: got here!!" << std::endl;
+      //asm("int $3");
+      //std::cout << "SIDAFA: got here!!" << std::endl;
 
       timeStepControl_->getNextTimeStep(solutionHistory_, integratorStatus_);
       integratorObserver_->observeNextTimeStep(*this);
@@ -485,8 +491,6 @@ void IntegratorBasic<Scalar>::startTimeStep()
 {
   auto ws = solutionHistory_->getWorkingState();
 
-  asm("int $3");
-  std::cout << "SIDAFA: got here!!" << std::endl;
 
 
   //set the Abs/Rel tolerance
