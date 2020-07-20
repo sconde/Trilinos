@@ -69,24 +69,47 @@ public:
      };
      */
 
-     // update errors
-     errNm2_ = errNm1_;
-     errNm1_ = errN_;
-     errN_ = errorRel;
-
+     Scalar beta = 1.0;
+     const std::string strategy_name = this->tscsPL_->get<std::string>("Name");
      Scalar k1 = Teuchos::as<Scalar>(-k1_ / order);
      Scalar k2 = Teuchos::as<Scalar>(k2_ / order);
      Scalar k3 = Teuchos::as<Scalar>(-k3_ / order);
 
+
+     if (strategy_name == "PID")
+     {
+       // update errors
+       errNm2_ = errNm1_;
+       errNm1_ = errN_;
+       errN_ = errorRel;
+
+       k1 = std::pow(errN_, k1);
+       k2 = std::pow(errNm1_, k2);
+       k3 = std::pow(errNm2_, k3);
+       beta = safetyFactor_*k1*k2*k3;
+     }
+     else if (strategy_name == "PI")
+     {
+       // update errors
+       errNm1_ = errN_;
+       errN_ = errorRel;
+       k1 = std::pow(errN_, k1);
+       k2 = std::pow(errNm1_, k2);
+       beta = safetyFactor_*k1*k2;
+     }
+     else if (strategy_name == "I")
+     {
+       // update errors
+       errN_ = errorRel;
+       k1 = std::pow(errN_, k1);
+       beta = safetyFactor_*k1;
+     }
+
      //asm("int $3");
      //std::cout << "SIDAFA: got here!!" << std::endl;
 
-     k1 = std::pow(errN_, k1);
-     k2 = std::pow(errNm1_, k2);
-     k3 = std::pow(errNm2_, k3);
-     Scalar beta = safetyFactor_*k1*k2*k3;
-     beta = std::max(facMin_, beta);
-     beta = std::min(facMax_, beta);
+     //beta = std::max(facMin_, beta);
+     //beta = std::min(facMax_, beta);
 
      // new (optimal) suggested time step
      dt = beta * dt;
@@ -159,8 +182,8 @@ public:
      pl->set<Scalar>("K1" , 0.58, "");
      pl->set<Scalar>("K2" , 0.21, "");
      pl->set<Scalar>("K3" , 0.10, "");
-     pl->set<Scalar>("Safety Factor" , 0.90, "Safety Factor");
-     pl->set<Scalar>("Maximum Safety Factor" , 5.0, "Maximum Safety Factor");
+     pl->set<Scalar>("Safety Factor" , 0.95, "Safety Factor");
+     pl->set<Scalar>("Maximum Safety Factor" , 10.0, "Maximum Safety Factor");
      pl->set<Scalar>("Minimum Safety Factor" , 0.5, "Minimum Safety Factor");
      return pl;
   }
@@ -189,6 +212,8 @@ private:
     Scalar facMin_;
     bool firstSuccessfulStep_ = false;
     bool lastStepRejected_ = false;
+
+    enum class StrategyName { PID, PI, I };
 
 };
 } // namespace Tempus
