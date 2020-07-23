@@ -14,6 +14,7 @@
 #include "Teuchos_VerboseObjectParameterListHelpers.hpp"
 #include "Thyra_VectorStdOps.hpp"
 
+
 #include <fstream>
 
 
@@ -144,7 +145,10 @@ Scalar StepperExplicitRK<Scalar>::getInitTimeStep(
       Thyra::Vt_S(absU.ptr(), rtol); // absU *= Rtol
       Thyra::Vp_S(absU.ptr(), atol); // absU += Atol
       Thyra::ele_wise_divide(Teuchos::as<Scalar>(1.0), *U, *absU, absU.ptr());
-      Scalar err = Thyra::norm_inf(*absU);
+      const auto space_dim = absU->space()->dim();
+      //Scalar err = std::abs(Thyra::norm_inf(*sc));
+      Scalar err = std::abs(Thyra::norm(*absU)) / space_dim ;
+      //Scalar err = Thyra::norm_inf(*absU);
       return err;
    };
 
@@ -412,11 +416,14 @@ void StepperExplicitRK<Scalar>::takeStep(
       // compute: Atol + max(|u^n|, |u^{n+1}| ) * Rtol
       Thyra::abs( *(currentState->getX()), abs_u0.ptr());
       Thyra::abs( *(workingState->getX()), abs_u.ptr());
-      Thyra::pair_wise_max_update(tolRel, *abs_u0, abs_u.ptr());
-      Thyra::add_scalar(tolAbs, abs_u.ptr());
+      Thyra::Vt_S( abs_u.ptr(), tolRel );
+      Thyra::Vp_S( abs_u.ptr(), tolAbs );
+      //Thyra::pair_wise_max_update(tolRel, *abs_u0, abs_u.ptr());
+      //Thyra::add_scalar(tolAbs, abs_u.ptr());
 
       //compute: || ee / sc ||
       assign(sc.ptr(), Teuchos::ScalarTraits<Scalar>::zero());
+      //Thyra::reciprocal( abs_u, sc.ptr() );
       Thyra::ele_wise_divide(Teuchos::as<Scalar>(1.0), *ee_, *abs_u, sc.ptr());
 
       //{
@@ -425,7 +432,11 @@ void StepperExplicitRK<Scalar>::takeStep(
         //ftmp.close();
       //}
 
-      Scalar err = std::abs(Thyra::norm_inf(*sc));
+      const auto space_dim = ee_->space()->dim();
+      //Scalar err = std::abs(Thyra::norm_inf(*sc));
+      Scalar err = std::abs(Thyra::norm(*sc)) / space_dim ;
+      //Scalar err = Thyra::norm_2( sc, ee_ ) / space_dim / space_dim ;
+      //Scalar err = std::abs(Thyra::norm_2(*sc));
       workingState->setErrorRel(err);
       
       //std::cout << "SIDAFA: ERK:: tolAbs = " << tolAbs << std::endl;
