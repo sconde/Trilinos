@@ -145,10 +145,7 @@ Scalar StepperExplicitRK<Scalar>::getInitTimeStep(
       Thyra::Vt_S(absU.ptr(), rtol); // absU *= Rtol
       Thyra::Vp_S(absU.ptr(), atol); // absU += Atol
       Thyra::ele_wise_divide(Teuchos::as<Scalar>(1.0), *U, *absU, absU.ptr());
-      const auto space_dim = absU->space()->dim();
-      //Scalar err = std::abs(Thyra::norm_inf(*sc));
-      Scalar err = std::abs(Thyra::norm(*absU)) / space_dim ;
-      //Scalar err = Thyra::norm_inf(*absU);
+      Scalar err = Thyra::norm_inf(*absU);
       return err;
    };
 
@@ -182,11 +179,6 @@ Scalar StepperExplicitRK<Scalar>::getInitTimeStep(
 
    // f) propose starting step size
    dt = std::min(100*dt, h1);
-   //std::cout << "SIDAFA: Embedded init dt = " << dt << std::endl;
-
-   //asm("int $3");
-   //std::cout << "SIDAFA: got here!!" << std::endl;
-
    return dt;
 
 }
