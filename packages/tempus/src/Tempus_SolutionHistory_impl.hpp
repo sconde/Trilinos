@@ -312,6 +312,10 @@ void SolutionHistory<Scalar>::promoteWorkingState()
     ws->setIsInterpolated(false);
     workingState_ = Teuchos::null;
   } else {
+
+    asm("int $3");
+    std::cout << "SIDAFA: got here!!" << std::endl;
+
     Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
     Teuchos::OSTab ostab(out,1,"SolutionHistory::promoteWorkingState()");
     *out << "Warning - WorkingState is not passing, so not promoted!\n"

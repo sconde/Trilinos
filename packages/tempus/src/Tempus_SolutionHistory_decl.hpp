@@ -272,6 +272,10 @@ public:
 
     /// Get the state with timestep index equal to "index"
     Teuchos::RCP<SolutionState<Scalar> > getStateTimeIndex(int index) const;
+
+    void setLastStatus(const bool a) { lastStatus_ = a; }
+
+    bool getLastStatus() const { return lastStatus_; }
   //@}
 
   /// \name Overridden from Teuchos::ParameterListAcceptor
@@ -336,6 +340,7 @@ protected:
   int                                       storageLimit_;
 
   Teuchos::RCP<SolutionState<Scalar> > workingState_; ///< The state being worked on
+  bool lastStatus_; // last status                  
 };
 
 

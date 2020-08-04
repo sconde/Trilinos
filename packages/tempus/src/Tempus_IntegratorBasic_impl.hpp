@@ -129,6 +129,7 @@ initializeSolutionHistory(Teuchos::RCP<SolutionState<Scalar> > state)
   RCP<ParameterList> shPL =
     Teuchos::sublist(integratorPL_, "Solution History", true);
   solutionHistory_ = rcp(new SolutionHistory<Scalar>(shPL));
+  solutionHistory_->setLastStatus(true);
 
   if (state == Teuchos::null) {
     // Construct default IC from the application model
@@ -174,6 +175,7 @@ initializeSolutionHistory(Scalar t0,
   RCP<ParameterList> shPL =
     Teuchos::sublist(integratorPL_, "Solution History", true);
   solutionHistory_ = rcp(new SolutionHistory<Scalar>(shPL));
+  solutionHistory_->setLastStatus(true);
 
   // Create and set xdot and xdotdot.
   RCP<Thyra::VectorBase<Scalar> > xdot    = x0->clone_v();
@@ -415,6 +417,7 @@ void IntegratorBasic<Scalar>::startIntegrator()
   }
 
   auto ws = solutionHistory_->getCurrentState();
+  solutionHistory_->setLastStatus(true);
   //set the Abs/Rel tolerance
   ws->setTolRel(timeStepControl_->getMaxRelError());
   ws->setTolAbs(timeStepControl_->getMaxAbsError());
