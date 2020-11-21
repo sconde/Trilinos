@@ -17,7 +17,7 @@ namespace Tempus {
 
 template<class Scalar> class TimeStepControl;
 
-/** \brief TimeStepControlStrategyComposite loops over a vector of TimeStepControlStrategy.
+/** \brief TimeStepControlStrategyComposite loops over a vector of TimeStepControlStrategies.
  *
  *
  * Essentially, this is an <b>and</b> case if each strategies do a `min`
@@ -32,11 +32,13 @@ template<class Scalar> class TimeStepControl;
  *   - TimeStepControlStrategyBasicVS
  *   - TimeStepControlStrategyIntegralController
  *
- * <b>Note:<b> The ordering in the TimeStepControlStrategyComposite list is very important.
- * The final TimeStepControlStrategy from the composite could negate all previous step size updates.
+ * <b>Note:</b> The ordering in the TimeStepControlStrategyComposite
+ * list is very important.  The final TimeStepControlStrategy from
+ * the composite could negate all previous step size updates.
  */
 template<class Scalar>
-class TimeStepControlStrategyComposite : virtual public TimeStepControlStrategy<Scalar>
+class TimeStepControlStrategyComposite
+  : virtual public TimeStepControlStrategy<Scalar>
 {
 public:
 
@@ -47,10 +49,12 @@ public:
   virtual ~TimeStepControlStrategyComposite(){}
 
   /** \brief Determine the time step size.*/
-  virtual void getNextTimeStep(const TimeStepControl<Scalar> tsc, Teuchos::RCP<SolutionHistory<Scalar> > sh ,
-        Status & integratorStatus) override {
-     for(auto& s : strategies_)
-        s->getNextTimeStep(tsc, sh, integratorStatus);
+  virtual void setNextTimeStep(const TimeStepControl<Scalar> & tsc,
+                               Teuchos::RCP<SolutionHistory<Scalar> > sh,
+                               Status & integratorStatus) override
+  {
+    for(auto& s : strategies_)
+      s->setNextTimeStep(tsc, sh, integratorStatus);
   }
 
   /// \name Overridden from Teuchos::Describable
@@ -69,19 +73,45 @@ public:
   //@}
 
   /** \brief Append strategy to the composite list.*/
-  void addStrategy(const Teuchos::RCP<TimeStepControlStrategy<Scalar> > &strategy){
-     if (Teuchos::nonnull(strategy))
-        strategies_.push_back(strategy);
+  void addStrategy(
+    const Teuchos::RCP<TimeStepControlStrategy<Scalar> > &strategy)
+  {
+    if (Teuchos::nonnull(strategy))
+      strategies_.push_back(strategy);
   }
 
   /** \brief Clear the composite list.*/
-  void clearStrategies(){
-     strategies_.clear();
+  void clearStrategies() { strategies_.clear(); }
+
+  virtual void initialize() const override
+  {
+    for(auto& s : strategies_)
+      s->initialize();
+
+    if (strategies_.size() > 0) {
+      auto strategy0 = strategies_[0];
+      for (auto& s : strategies_) {
+        if (strategy0->getStepType() != s->getStepType()) {
+          std::ostringstream msg;
+          msg << "Error - All the Strategy Step Types must match.\n";
+          for(std::size_t i = 0; i < strategies_.size(); ++i) {
+            msg << "  Strategy[" << i << "] = "
+                << strategies_[i]->getStepType() << "\n";
+          }
+          TEUCHOS_TEST_FOR_EXCEPTION( true, std::logic_error, msg.str());
+        }
+      }
+    }
+
+    this->isInitialized_ = true;   // Only place where this is set to true!
   }
 
 private:
+
   std::vector<Teuchos::RCP<TimeStepControlStrategy<Scalar > > > strategies_;
 
 };
+
+
 } // namespace Tempus
 #endif // Tempus_TimeStepControlStrategy_hpp

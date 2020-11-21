@@ -410,7 +410,7 @@ bool IntegratorBasic<Scalar>::advanceTime()
       startTimeStep();
       integratorObserver_->observeStartTimeStep(*this);
 
-      timeStepControl_->getNextTimeStep(solutionHistory_, integratorStatus_);
+      timeStepControl_->setNextTimeStep(solutionHistory_, integratorStatus_);
       integratorObserver_->observeNextTimeStep(*this);
 
       if (integratorStatus_ == Status::FAILED) break;

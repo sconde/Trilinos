@@ -27,58 +27,78 @@ class TimeStepControlStrategyConstant
 {
 public:
 
-  /// Constructor
-  TimeStepControlStrategyConstant(){}
+  /// Default Constructor
+  TimeStepControlStrategyConstant()
+  {
+    this->setStepType("Constant");
+    this->initialize();
+  }
 
   /// Destructor
   virtual ~TimeStepControlStrategyConstant(){}
 
   /** \brief Determine the time step size.*/
-  virtual void getNextTimeStep(const TimeStepControl<Scalar> tsc,
+  virtual void setNextTimeStep(const TimeStepControl<Scalar> & tsc,
     Teuchos::RCP<SolutionHistory<Scalar> > solutionHistory,
     Status & integratorStatus) override
   {
-     using Teuchos::RCP;
-     RCP<SolutionState<Scalar> >workingState=solutionHistory->getWorkingState();
-     const Scalar errorAbs = workingState->getErrorAbs();
-     const Scalar errorRel = workingState->getErrorRel();
-     Scalar dt = workingState->getTimeStep();
+    using Teuchos::RCP;
 
-     dt = tsc.getInitTimeStep();
+    this->checkInitialized();
 
-     RCP<Teuchos::FancyOStream> out = tsc.getOStream();
-     Teuchos::OSTab ostab(out,1,"getNextTimeStep");
+    RCP<SolutionState<Scalar> >workingState=solutionHistory->getWorkingState();
+    const Scalar errorAbs = workingState->getErrorAbs();
+    const Scalar errorRel = workingState->getErrorRel();
+    Scalar dt = workingState->getTimeStep();
 
-     // Stepper failure
-     if (workingState->getSolutionStatus() == Status::FAILED) {
-       *out << "Failure - Stepper failed and can not change time step size!\n"
-            << "    Time step type == CONSTANT_STEP_SIZE\n" << std::endl;
-       integratorStatus = FAILED;
-       return;
-     }
+    RCP<Teuchos::FancyOStream> out = tsc.getOStream();
+    Teuchos::OSTab ostab(out,1,"setNextTimeStep");
 
-     // Absolute error failure
-     if (errorAbs > tsc.getMaxAbsError()) {
-       *out << "Failure - Absolute error failed and can not change time step!\n"
-            << "  Time step type == CONSTANT_STEP_SIZE\n"
-            << "  (errorAbs ="<<errorAbs<<") > (errorMaxAbs ="
-            << tsc.getMaxAbsError() << ")" << std::endl;
-       integratorStatus = FAILED;
-       return;
-     }
 
-     // Relative error failure
-     if (errorRel > tsc.getMaxRelError()) {
-       *out << "Failure - Relative error failed and can not change time step!\n"
-          << "  Time step type == CONSTANT_STEP_SIZE\n"
-          << "  (errorRel ="<<errorRel<<") > (errorMaxRel ="
-          << tsc.getMaxRelError() << ")" << std::endl;
-       integratorStatus = FAILED;
-       return;
-     }
+    // Check constant time step
+    if ( dt != tsc.getInitTimeStep() ) {
+      tsc.printDtChanges(workingState->getIndex(), dt, tsc.getInitTimeStep(),
+                         "Resetting constant dt.");
+      dt = tsc.getInitTimeStep();
+    }
 
-     // update dt
-     workingState->setTimeStep(dt);
+    // Stepper failure
+    if (workingState->getSolutionStatus() == Status::FAILED) {
+      *out << "Failure - Stepper failed and can not change time step size!\n"
+           << "    Time step type == CONSTANT_STEP_SIZE\n" << std::endl;
+      integratorStatus = FAILED;
+      return;
+    }
+
+    // Absolute error failure
+    if (errorAbs > tsc.getMaxAbsError()) {
+      *out << "Failure - Absolute error failed and can not change time step!\n"
+           << "  Time step type == CONSTANT_STEP_SIZE\n"
+           << "  (errorAbs ="<<errorAbs<<") > (errorMaxAbs ="
+           << tsc.getMaxAbsError() << ")" << std::endl;
+      integratorStatus = FAILED;
+      return;
+    }
+
+    // Relative error failure
+    if (errorRel > tsc.getMaxRelError()) {
+      *out << "Failure - Relative error failed and can not change time step!\n"
+         << "  Time step type == CONSTANT_STEP_SIZE\n"
+         << "  (errorRel ="<<errorRel<<") > (errorMaxRel ="
+         << tsc.getMaxRelError() << ")" << std::endl;
+      integratorStatus = FAILED;
+      return;
+    }
+
+    // update dt
+    workingState->setTimeStep(dt);
+
+    // Set time from initial time, dt, and index to avoid numerical roundoff.
+    const Scalar initTime = tsc.getInitTime();
+    const int initIndex   = tsc.getInitIndex();
+    const int index       = workingState->getIndex();
+    const Scalar time     = (index-initIndex)*dt + initTime;
+    workingState->setTime(time);
   }
 
 
@@ -94,6 +114,11 @@ public:
       out << description() << std::endl;
     }
   //@}
+
+  virtual void initialize() const override
+  {
+    this->isInitialized_ = true;   // Only place where this is set to true!
+  }
 
 };
 
