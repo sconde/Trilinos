@@ -36,14 +36,22 @@ class TimeStepControlStrategy
 {
 public:
 
+  /// Constructor
+  TimeStepControlStrategy()
+   : stepType_("Variable"), isInitialized_(false)
+  {}
+
+  /// Destructor
+  virtual ~TimeStepControlStrategy(){}
+
   virtual std::string getStepType() const { return stepType_; }
 
 #ifndef TEMPUS_HIDE_DEPRECATED_CODE
   /// Deprecated get the time step size.
   virtual void getNextTimeStep(
-    const TimeStepControl<Scalar> & tsc,
+    const TimeStepControl<Scalar> tsc,
     Teuchos::RCP<SolutionHistory<Scalar> > sh,
-    Status & /* integratorStatus */)
+    Status & integratorStatus)
   {
     this->setNextTimeStep(tsc, sh, integratorStatus);
   };
@@ -53,9 +61,9 @@ public:
   virtual void setNextTimeStep(
     const TimeStepControl<Scalar> & /* tsc */,
     Teuchos::RCP<SolutionHistory<Scalar> > /* sh */,
-    Status & /* integratorStatus */) = 0;
+    Status & /* integratorStatus */) {}
 
-  virtual void initialize() const = 0;
+  virtual void initialize() const { isInitialized_ = true; }
   virtual bool isInitialized() { return isInitialized_; }
   virtual void checkInitialized()
   {

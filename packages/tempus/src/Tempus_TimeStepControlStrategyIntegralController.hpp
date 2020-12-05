@@ -248,7 +248,7 @@ public:
   virtual Scalar getFacMax() const { return facMax_; }
   virtual Scalar getFacMin() const { return facMin_; }
 
-  virtual void setname(std::string n) { name_ = n; this->isInitialized_ = false; }
+  virtual void setName(std::string n) { name_ = n; this->isInitialized_ = false; }
   virtual void setController(std::string c) { controller_ = c; this->isInitialized_ = false; }
   virtual void setKI(Scalar k) { KI_ = k; this->isInitialized_ = false; }
   virtual void setKP(Scalar k) { KP_ = k; this->isInitialized_ = false; }

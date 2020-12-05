@@ -160,7 +160,7 @@ void TimeStepControl<Scalar>::initialize() const
   TEUCHOS_TEST_FOR_EXCEPTION(
     (getStepType() != "Constant" and getStepType() != "Variable"),
     std::out_of_range,
-      "Error - 'Integrator Step Type' does not equal none of these:\n"
+      "Error - 'Integrator Step Type' does not equal one of these:\n"
     << "  'Constant' - Integrator will take constant time step sizes.\n"
     << "  'Variable' - Integrator will allow changes to the time step size.\n"
     << "  stepType = " << getStepType()  << "\n");
