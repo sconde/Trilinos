@@ -231,7 +231,8 @@ Epetra_MultiVector::~Epetra_MultiVector(){
 
   if (!Allocated_) return;
 
-  delete [] Pointers_;
+  //delete [] Pointers_;
+  if (Pointers_!=0) delete [] Pointers_;
   if (!UserAllocated_ && Values_!=0) delete [] Values_;
 
   if (Vectors_!=0) {

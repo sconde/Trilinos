@@ -182,7 +182,8 @@ void SolutionHistory<Scalar>::addWorkingState(
   ws->setSolutionStatus(Status::WORKING);
   ws->setIndex(cs->getIndex()+1);
   if (updateTime) {
-    ws->setTime(cs->getTime() + cs->getTimeStep());
+    //ws->setTime(cs->getTime() + cs->getTimeStep());
+    ws->setTime(cs->getTime() );
     ws->setTimeStep(cs->getTimeStep());
   }
 }
