@@ -13,7 +13,16 @@
 #include "Tempus_Stepper_impl.hpp"
 
 namespace Tempus {
+
   TEMPUS_INSTANTIATE_TEMPLATE_CLASS(Stepper)
+
+  // Provide basic parameters to Steppers.
+  void getValidParametersBasic(
+    Teuchos::RCP<Teuchos::ParameterList> pl, std::string stepperType);
+
+  // Returns the default solver ParameterList for implicit Steppers.
+  Teuchos::RCP<Teuchos::ParameterList> defaultSolverParameters();
+
 }
 
 #endif
