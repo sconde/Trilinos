@@ -62,6 +62,7 @@ SolutionHistory<Scalar>::SolutionHistory()
   if (Teuchos::as<int>(this->getVerbLevel()) >=
       Teuchos::as<int>(Teuchos::VERB_HIGH)) {
     RCP<Teuchos::FancyOStream> out = this->getOStream();
+    out->setOutputToRootOnly(0);
     Teuchos::OSTab ostab(out,1,"SolutionHistory::SolutionHistory");
     *out << this->description() << std::endl;
   }
@@ -86,6 +87,7 @@ SolutionHistory<Scalar>::SolutionHistory(
   if (Teuchos::as<int>(this->getVerbLevel()) >=
       Teuchos::as<int>(Teuchos::VERB_HIGH)) {
     Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
+    out->setOutputToRootOnly(0);
     Teuchos::OSTab ostab(out,1,"SolutionHistory::SolutionHistory");
     *out << this->description() << std::endl;
   }
@@ -105,6 +107,7 @@ SolutionHistory<Scalar>::SolutionHistory(
   if (Teuchos::as<int>(this->getVerbLevel()) >=
       Teuchos::as<int>(Teuchos::VERB_HIGH)) {
     RCP<Teuchos::FancyOStream> out = this->getOStream();
+    out->setOutputToRootOnly(0);
     Teuchos::OSTab ostab(out,1,"SolutionHistory::SolutionHistory");
     *out << this->description() << std::endl;
   }
@@ -133,6 +136,7 @@ void SolutionHistory<Scalar>::addState(
       } else {
         // Case:  State is younger than the youngest state in history.
         Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
+        out->setOutputToRootOnly(0);
         Teuchos::OSTab ostab(out,1,"SolutionHistory::addState");
         *out << "Warning, state is younger than youngest state in history.  "
              << "State not added!" << std::endl;
@@ -310,6 +314,7 @@ void SolutionHistory<Scalar>::promoteWorkingState()
     workingState_ = Teuchos::null;
   } else {
     Teuchos::RCP<Teuchos::FancyOStream> out = this->getOStream();
+    out->setOutputToRootOnly(0);
     Teuchos::OSTab ostab(out,1,"SolutionHistory::promoteWorkingState()");
     *out << "Warning - WorkingState is not passing, so not promoted!\n"
          << std::endl;
@@ -413,25 +418,27 @@ std::string SolutionHistory<Scalar>::description() const
 
 template<class Scalar>
 void SolutionHistory<Scalar>::describe(
-  Teuchos::FancyOStream          &out,
+  Teuchos::FancyOStream          &in_out,
   const Teuchos::EVerbosityLevel verbLevel) const
 {
+  auto out = Teuchos::fancyOStream( in_out.getOStream() );
+  out->setOutputToRootOnly(0);
   if ((Teuchos::as<int>(verbLevel)==Teuchos::as<int>(Teuchos::VERB_DEFAULT)) ||
       (Teuchos::as<int>(verbLevel)>=Teuchos::as<int>(Teuchos::VERB_LOW)    )  ){
-    out << description() << "::describe" << std::endl;
-    //out << "interpolator     = " << interpolator->description() << std::endl;
-    out << "storageLimit     = " << storageLimit_ << std::endl;
-    out << "storageType      = " << storageType_ << std::endl;
-    out << "number of states = " << history_->size() << std::endl;
-    out << "time range       = (" << history_->front()->getTime() << ", "
+    *out << description() << "::describe" << std::endl;
+    //*out << "interpolator     = " << interpolator->description() << std::endl;
+    *out << "storageLimit     = " << storageLimit_ << std::endl;
+    *out << "storageType      = " << storageType_ << std::endl;
+    *out << "number of states = " << history_->size() << std::endl;
+    *out << "time range       = (" << history_->front()->getTime() << ", "
                                   << history_->back()->getTime() << ")"
                                   << std::endl;
   } else if (Teuchos::as<int>(verbLevel) >=
              Teuchos::as<int>(Teuchos::VERB_HIGH)) {
-    out << "SolutionStates: " << std::endl;
+    *out << "SolutionStates: " << std::endl;
     for (int i=0; i<(int)history_->size() ; ++i) {
-      out << "SolutionState[" << i << "] = " << std::endl;
-      (*history_)[i]->describe(out,this->getVerbLevel());
+      *out << "SolutionState[" << i << "] = " << std::endl;
+      (*history_)[i]->describe(in_out,this->getVerbLevel());
     }
   }
 }

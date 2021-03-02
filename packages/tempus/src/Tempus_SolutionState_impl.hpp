@@ -405,30 +405,32 @@ std::string SolutionState<Scalar>::description() const
 
 template<class Scalar>
 void SolutionState<Scalar>::describe(
-   Teuchos::FancyOStream               &out,
+   Teuchos::FancyOStream               &in_out,
    const Teuchos::EVerbosityLevel      verbLevel) const
 {
+  auto out = Teuchos::fancyOStream( in_out.getOStream() );
+  out->setOutputToRootOnly(0);
   if (verbLevel == Teuchos::VERB_EXTREME) {
-    out << description() << "::describe:" << std::endl
+    *out << description() << "::describe:" << std::endl
         << "metaData = " << std::endl;
-        metaData_->describe(out,verbLevel);
-    out << "x = " << std::endl;
-    x_->describe(out,verbLevel);
+        metaData_->describe(in_out,verbLevel);
+    *out << "x = " << std::endl;
+    x_->describe(in_out,verbLevel);
     if (xdot_ != Teuchos::null) {
-      out << "xdot_ = " << std::endl;
-      xdot_->describe(out,verbLevel);
+      *out << "xdot_ = " << std::endl;
+      xdot_->describe(in_out,verbLevel);
     }
     if (xdotdot_ != Teuchos::null) {
-      out << "xdotdot = " << std::endl;
-      xdotdot_->describe(out,verbLevel);
+      *out << "xdotdot = " << std::endl;
+      xdotdot_->describe(in_out,verbLevel);
     }
     if (stepperState_ != Teuchos::null) {
-      out << "stepperState = " << std::endl;
-      stepperState_->describe(out,verbLevel);
+      *out << "stepperState = " << std::endl;
+      stepperState_->describe(in_out,verbLevel);
     }
     if (physicsState_ != Teuchos::null) {
-      out << "physicsState = " << std::endl;
-      physicsState_->describe(out,verbLevel);
+      *out << "physicsState = " << std::endl;
+      physicsState_->describe(in_out,verbLevel);
     }
   }
 }
